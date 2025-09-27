@@ -8,7 +8,7 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-[#8B6B4C]">LUXE</h3>
+                        <h3 className="text-xl font-semibold text-[#8B6B4C]">JEWELRY</h3>
                         <p className="text-gray-600">
                             Crafting timeless pieces for the modern woman.
                         </p>
@@ -50,7 +50,7 @@ export default function Footer() {
                 
                 <div className="mt-12 pt-8 border-t border-gray-200">
                     <p className="text-center text-gray-600">
-                        © 2025 LUXE. All rights reserved.
+                        © 2025 JEWELRY. All rights reserved.
                     </p>
                 </div>
             </div>

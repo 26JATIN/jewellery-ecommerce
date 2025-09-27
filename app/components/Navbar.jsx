@@ -11,7 +11,7 @@ export default function Navbar() {
                 <div className="flex justify-between h-20 items-center">
                     <div className="flex-shrink-0">
                         <Link href="/" className="text-2xl font-semibold text-[#8B6B4C]">
-                            LUXE
+                            JEWELRY
                         </Link>
                     </div>
                     
