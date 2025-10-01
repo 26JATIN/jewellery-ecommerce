@@ -84,7 +84,6 @@ export function CartProvider({ children }) {
             console.error('Failed to update quantity:', error);
         }
     };
-
     const removeFromCart = async (productId) => {
         if (!user) {
             // Handle guest cart
