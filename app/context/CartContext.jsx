@@ -50,7 +50,6 @@ export function CartProvider({ children }) {
             if (!res.ok) {
                 throw new Error('Failed to add to cart');
             }
-
             const data = await res.json();
             setCartItems(data.items);
         } catch (error) {
