@@ -6,7 +6,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const [cartItems, setCartItems] = useState([]);  // Initialize as empty array
+    const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
 
@@ -104,14 +104,32 @@ export function CartProvider({ children }) {
         }
     };
 
+    const clearCart = async () => {
+        if (user) {
+            try {
+                const res = await fetch('/api/cart/clear', {
+                    method: 'DELETE'
+                });
+                if (!res.ok) {
+                    throw new Error('Failed to clear cart');
+                }
+            } catch (error) {
+                console.error('Clear cart error:', error);
+            }
+        }
+        setCartItems([]);
+        setIsCartOpen(false);
+    };
+
     return (
         <CartContext.Provider value={{
             isCartOpen,
             setIsCartOpen,
-            cartItems: cartItems || [], // Ensure we always return an array
+            cartItems,
             addToCart,
             removeFromCart,
             updateQuantity,
+            clearCart,
             loading
         }}>
             {children}

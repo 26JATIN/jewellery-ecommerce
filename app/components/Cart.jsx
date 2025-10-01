@@ -1,12 +1,19 @@
 "use client";
 import { useCart } from '../context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function Cart() {
+    const router = useRouter();
     const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, loading } = useCart();
 
     const calculateTotal = () => {
         return (cartItems || []).reduce((total, item) => total + (item.price * item.quantity), 0);
+    };
+
+    const handleCheckout = () => {
+        setIsCartOpen(false);
+        router.push('/checkout');
     };
 
     return (
@@ -98,8 +105,11 @@ export default function Cart() {
                                         <span>Total</span>
                                         <span>${calculateTotal().toFixed(2)}</span>
                                     </div>
-                                    <button className="w-full mt-4 bg-[#8B6B4C] text-white py-3 rounded hover:bg-[#725939] transition-colors">
-                                        Checkout
+                                    <button 
+                                        onClick={handleCheckout}
+                                        className="w-full mt-4 bg-[#8B6B4C] text-white py-3 rounded hover:bg-[#725939] transition-colors"
+                                    >
+                                        Proceed to Checkout
                                     </button>
                                 </div>
                             )}

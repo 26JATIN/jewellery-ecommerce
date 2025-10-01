@@ -7,10 +7,12 @@ import Cart from './Cart';
 import Login from './Login';
 import Register from './Register';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
     const { setIsCartOpen, cartItems } = useCart();
     const { user, logout } = useAuth();
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -119,7 +121,7 @@ export default function Navbar() {
                                             </button>
                                             
                                             <button
-                                                onClick={() => {/* Add orders handler */}}
+                                                onClick={() => router.push('/orders')}
                                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                                             >
                                                 <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
