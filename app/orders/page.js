@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -16,7 +17,7 @@ export default function OrdersPage() {
         }
 
         fetchOrders();
-    }, [user]);
+    }, [user, router]);
 
     const fetchOrders = async () => {
         try {
@@ -93,11 +94,15 @@ export default function OrdersPage() {
                                     {order.items.map((item) => (
                                         <div key={item._id} className="flex justify-between items-center py-2">
                                             <div className="flex items-center">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="w-16 h-16 object-cover rounded"
-                                                />
+                                                <div className="relative w-16 h-16">
+                                                    <Image
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        fill
+                                                        className="object-cover rounded"
+                                                        sizes="(max-width: 64px) 100vw, 64px"
+                                                    />
+                                                </div>
                                                 <div className="ml-4">
                                                     <p className="font-medium">{item.name}</p>
                                                     <p className="text-sm text-gray-500">

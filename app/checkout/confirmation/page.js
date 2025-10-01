@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
     const status = searchParams.get('status');
@@ -87,5 +87,26 @@ export default function OrderConfirmationPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Wrap the main component with Suspense
+export default function OrderConfirmationPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen pt-24 bg-gray-50">
+                    <div className="max-w-3xl mx-auto px-4 py-8">
+                        <div className="animate-pulse space-y-4">
+                            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-64 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        >
+            <OrderConfirmationContent />
+        </Suspense>
     );
 }
