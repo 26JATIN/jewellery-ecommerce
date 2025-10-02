@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function Login({ isOpen, onClose, onRegisterClick }) {
     const { login } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -20,14 +21,36 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
         setLoading(true);
 
         try {
-            const userData = await login(formData);
+            // Check if there's a redirect URL from admin access attempt
+            const redirectPath = searchParams?.get('redirect');
+            console.log('Login - redirectPath:', redirectPath);
+            
+            // Pass redirect path to login to prevent automatic redirect
+            const userData = await login(formData, redirectPath);
+            console.log('Login - userData:', userData);
+            console.log('Login - isAdmin:', userData.user.isAdmin);
+            
             onClose();
             
-            // Redirect admin users to admin dashboard
-            if (userData.user.isAdmin) {
+            if (userData.user.isAdmin && redirectPath && redirectPath.startsWith('/admin')) {
+                // Admin user trying to access admin area, redirect to original admin page
+                console.log('Login - Redirecting to admin page:', redirectPath);
+                router.push(redirectPath);
+            } else if (userData.user.isAdmin) {
+                // Admin user, redirect to admin dashboard
+                console.log('Login - Redirecting to admin dashboard');
                 router.push('/admin');
+            } else if (redirectPath && redirectPath.startsWith('/admin')) {
+                // Non-admin user tried to access admin, stay on home page
+                console.log('Login - Non-admin user, redirecting to home');
+                router.push('/');
+            } else {
+                // Regular user, redirect to home
+                console.log('Login - Regular user, redirecting to home');
+                router.push('/');
             }
         } catch (err) {
+            console.error('Login error:', err);
             setError(err.message);
         } finally {
             setLoading(false);

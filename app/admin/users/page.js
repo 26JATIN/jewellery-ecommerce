@@ -1,5 +1,9 @@
+"use client";
 import Users from '../../components/Users';
+import withAdminAuth from '../../components/withAdminAuth';
 
-export default function UsersPage() {
+function UsersPage() {
     return <Users />;
 }
+
+export default withAdminAuth(UsersPage);

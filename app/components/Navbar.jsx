@@ -11,10 +11,9 @@ import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
     const { setIsCartOpen, cartItems } = useCart();
-    const { user, logout } = useAuth();
+    const { user, logout, showLoginModal, closeLoginModal, triggerLoginModal } = useAuth();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -164,7 +163,7 @@ export default function Navbar() {
                         </div>
                         ) : (
                             <button
-                                onClick={() => setIsLoginOpen(true)}
+                                onClick={() => triggerLoginModal()}
                                 className="text-gray-700 hover:text-[#8B6B4C]"
                             >
                                 Login
@@ -188,14 +187,14 @@ export default function Navbar() {
             </div>
 
             <Login 
-                isOpen={isLoginOpen} 
-                onClose={() => setIsLoginOpen(false)}
+                isOpen={showLoginModal} 
+                onClose={() => closeLoginModal()}
                 onRegisterClick={() => setIsRegisterOpen(true)}
             />
             <Register 
                 isOpen={isRegisterOpen} 
                 onClose={() => setIsRegisterOpen(false)}
-                onLoginClick={() => setIsLoginOpen(true)}
+                onLoginClick={() => triggerLoginModal()}
             />
             <Cart />
         </nav>

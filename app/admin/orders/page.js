@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import AdminLayout from '@/app/components/AdminLayout';
 
-export default function AdminOrdersPage() {
+import withAdminAuth from '@/app/components/withAdminAuth';
+
+function AdminOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
@@ -327,3 +329,5 @@ function formatStatus(status) {
     if (!status) return 'Pending';
     return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
 }
+
+export default withAdminAuth(AdminOrdersPage);

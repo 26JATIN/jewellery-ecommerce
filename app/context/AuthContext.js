@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -50,8 +51,11 @@ export function AuthProvider({ children }) {
         checkAuth();
     }, []);
 
-    const login = async (credentials) => {
+    const login = async (credentials, redirectPath = null) => {
         try {
+            console.log('AuthContext login - credentials:', credentials);
+            console.log('AuthContext login - redirectPath:', redirectPath);
+            
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
@@ -61,14 +65,25 @@ export function AuthProvider({ children }) {
             });
 
             const data = await res.json();
+            console.log('AuthContext login - response data:', data);
+            
             if (!res.ok) throw new Error(data.error);
 
             setUser(data.user);
+            console.log('AuthContext login - user set:', data.user);
 
-            if (data.user.isAdmin) {
-                router.push('/admin');
+            // Only redirect if no specific redirect path is provided by the caller
+            if (!redirectPath) {
+                console.log('AuthContext login - no redirectPath, checking isAdmin:', data.user.isAdmin);
+                if (data.user.isAdmin) {
+                    console.log('AuthContext login - redirecting to /admin');
+                    router.push('/admin');
+                } else {
+                    console.log('AuthContext login - redirecting to /');
+                    router.push('/');
+                }
             } else {
-                router.push('/');
+                console.log('AuthContext login - redirectPath provided, not redirecting from here');
             }
 
             return data;
@@ -95,6 +110,14 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const triggerLoginModal = () => {
+        setShowLoginModal(true);
+    };
+
+    const closeLoginModal = () => {
+        setShowLoginModal(false);
+    };
+
     // Prevent hydration mismatch by not rendering until mounted
     if (!mounted) {
         return (
@@ -103,6 +126,9 @@ export function AuthProvider({ children }) {
                 loading: true,
                 login: async () => {},
                 logout: async () => {},
+                showLoginModal: false,
+                triggerLoginModal: () => {},
+                closeLoginModal: () => {},
             }}>
                 {children}
             </AuthContext.Provider>
@@ -115,6 +141,9 @@ export function AuthProvider({ children }) {
             loading,
             login,
             logout,
+            showLoginModal,
+            triggerLoginModal,
+            closeLoginModal,
         }}>
             {children}
         </AuthContext.Provider>

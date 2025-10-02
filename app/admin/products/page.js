@@ -14,7 +14,9 @@ const ProductList = dynamic(() => import('../../components/admin/ProductList'), 
     loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg"></div>
 });
 
-export default function AdminProductsPage() {
+import withAdminAuth from '../../components/withAdminAuth';
+
+function AdminProductsPage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -219,3 +221,5 @@ export default function AdminProductsPage() {
         </AdminLayout>
     );
 }
+
+export default withAdminAuth(AdminProductsPage);

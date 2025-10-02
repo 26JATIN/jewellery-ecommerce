@@ -3,8 +3,8 @@ import { shiprocket } from '@/lib/shiprocket';
 
 export async function GET(req, { params }) {
     try {
-        const { shipmentId } = params;
-        const tracking = await shiprocket.trackOrder(shipmentId);
+        const { id } = params;
+        const tracking = await shiprocket.trackByShipmentId(id);
         
         return NextResponse.json(tracking);
     } catch (error) {

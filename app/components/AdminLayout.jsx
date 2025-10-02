@@ -1,18 +1,47 @@
 "use client";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children }) {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const router = useRouter();
+    const { user, logout, loading } = useAuth();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Admin access protection
+    useEffect(() => {
+        if (!loading && mounted) {
+            if (!user) {
+                const currentPath = window.location.pathname;
+                router.push(`/?login=required&redirect=${encodeURIComponent(currentPath)}`);
+                return;
+            }
+
+            if (!user.isAdmin) {
+                router.push('/');
+                return;
+            }
+        }
+    }, [user, loading, mounted, router]);
+
+    // Show loading while checking authentication
+    if (loading || !mounted || !user || !user.isAdmin) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Verifying admin access...</p>
+                </div>
+            </div>
+        );
+    }
 
     const navItems = [
         { 

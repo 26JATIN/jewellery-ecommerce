@@ -1,5 +1,9 @@
+"use client";
 import Dashboard from '../components/Dashboard';
+import withAdminAuth from '../components/withAdminAuth';
 
-export default function AdminPage() {
+function AdminPage() {
     return <Dashboard />;
 }
+
+export default withAdminAuth(AdminPage);

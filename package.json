@@ -18,6 +18,7 @@
     "dotenv": "^17.2.3",
     "esm": "^3.2.25",
     "framer-motion": "^12.23.22",
+    "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "lightningcss": "^1.30.2",
     "mongodb": "^6.20.0",

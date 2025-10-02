@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { shippingService } from '@/lib/shippingService';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
 
-// Middleware to check authentication
-async function checkAuth() {
+// Middleware to check admin authentication
+async function checkAdminAuth() {
     try {
         const cookieStore = await cookies();
         const token = await cookieStore.get('token');
@@ -18,9 +20,16 @@ async function checkAuth() {
             return { error: 'Invalid token', status: 401 };
         }
 
+        await connectDB();
+        const user = await User.findById(decoded.userId);
+
+        if (!user || !user.isAdmin) {
+            return { error: 'Admin access required', status: 403 };
+        }
+
         return { userId: decoded.userId };
     } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Admin auth error:', error);
         return { error: 'Internal server error', status: 500 };
     }
 }
@@ -28,7 +37,7 @@ async function checkAuth() {
 // Create shipment for an order
 export async function POST(req) {
     try {
-        const authResult = await checkAuth();
+        const authResult = await checkAdminAuth();
         if (authResult.error) {
             return NextResponse.json(
                 { error: authResult.error },
@@ -70,7 +79,7 @@ export async function POST(req) {
 // Process shipment (assign AWB + generate pickup)
 export async function PATCH(req) {
     try {
-        const authResult = await checkAuth();
+        const authResult = await checkAdminAuth();
         if (authResult.error) {
             return NextResponse.json(
                 { error: authResult.error },
