@@ -2,14 +2,37 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import Order from '@/models/Order';
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
 
 export async function POST(req) {
     try {
         const cookieStore = cookies();
-        const token = await cookieStore.get('token');
+        const token = cookieStore.get('token')?.value;
 
         if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const decoded = verifyToken(token);
+        if (!decoded || !decoded.userId) {
+            return NextResponse.json(
+                { error: 'Invalid token' },
+                { status: 401 }
+            );
+        }
+
+        // Check if user is admin
+        await connectDB();
+        const user = await User.findById(decoded.userId);
+        if (!user?.isAdmin) {
+            return NextResponse.json(
+                { error: 'Admin access required' },
+                { status: 403 }
+            );
         }
 
         const { orderId } = await req.json();

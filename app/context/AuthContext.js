@@ -20,22 +20,32 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (data.authenticated && data.user) {
+                    // Make sure we're setting the complete user object
+                    setUser({
+                        id: data.user.id,
+                        name: data.user.name,
+                        email: data.user.email,
+                        isAdmin: data.user.isAdmin
+                    });
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
         checkAuth();
     }, []);
-
-    const checkAuth = async () => {
-        try {
-            const res = await fetch('/api/auth/check');
-            const data = await res.json();
-            if (data.user) {
-                setUser(data.user);
-            }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const login = async (credentials) => {
         try {

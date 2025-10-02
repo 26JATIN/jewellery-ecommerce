@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import TrackingTimeline from '@/app/components/tracking/TrackingTimeline';
+import Link from 'next/link';
 
 export default function OrderDetailsPage() {
     const { orderId } = useParams();
@@ -50,7 +52,7 @@ export default function OrderDetailsPage() {
             return (
                 <button
                     onClick={createShipment}
-                    className="mt-4 bg-[#8B6B4C] text-white px-6 py-2 rounded-md hover:bg-[#725939] transition-colors"
+                    className="mt-4 bg-[#8B6L4C] text-white px-6 py-2 rounded-md hover:bg-[#725939] transition-colors"
                 >
                     Create Shipment
                 </button>
@@ -184,6 +186,15 @@ export default function OrderDetailsPage() {
                     </div>
                 )}
 
+                {/* Tracking Timeline Component */}
+                {order.shipping && (
+                    <TrackingTimeline 
+                        orderId={order._id}
+                        awbCode={order.shipping.awbCode}
+                        shipmentId={order.shipping.shipmentId}
+                    />
+                )}
+
                 {/* Order Items */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <h2 className="text-xl font-semibold mb-4">Order Items</h2>
@@ -217,6 +228,30 @@ export default function OrderDetailsPage() {
                             <span>Total</span>
                             <span>${order.totalAmount.toFixed(2)}</span>
                         </div>
+                    </div>
+
+                    {/* Add this right after the total amount display */}
+                    <div className="mt-6 flex justify-end">
+                        <Link
+                            href={`/orders/${order._id}`}
+                            className="inline-flex items-center px-4 py-2 bg-[#8B6B4C] text-white rounded-md hover:bg-[#725939] transition-colors"
+                        >
+                            <span>View Order Details</span>
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                className="h-5 w-5 ml-2" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                            >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M9 5l7 7-7 7" 
+                                />
+                            </svg>
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -73,9 +74,17 @@ export default function OrdersPage() {
                             <div key={order._id} className="bg-white p-6 rounded-lg shadow-sm">
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <h2 className="text-lg font-medium text-gray-900">
-                                            Order #{order._id.slice(-8)}
-                                        </h2>
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-lg font-medium text-gray-900">
+                                                Order #{order._id.slice(-8)}
+                                            </h2>
+                                            <Link
+                                                href={`/orders/${order._id}`}
+                                                className="text-sm text-[#8B6B4C] hover:underline"
+                                            >
+                                                View order details
+                                            </Link>
+                                        </div>
                                         <p className="text-sm text-gray-500">
                                             Placed on {formatDate(order.createdAt)}
                                         </p>

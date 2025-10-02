@@ -1,42 +1,46 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Cart from '@/models/Cart';
-import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
+import Cart from '@/models/Cart';
+import connectDB from '@/lib/mongodb';
 
-export async function GET(req) {
+export async function GET() {
     try {
         const cookieStore = cookies();
-        const token = await cookieStore.get('token');
+        const token = cookieStore.get('token')?.value;
 
         if (!token) {
-            return NextResponse.json({ items: [] });
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
         }
 
-        const decoded = verifyToken(token.value);
+        const decoded = verifyToken(token);
         if (!decoded || !decoded.userId) {
-            return NextResponse.json({ items: [] });
+            return NextResponse.json(
+                { error: 'Invalid token' },
+                { status: 401 }
+            );
         }
 
         await connectDB();
-        
-        const cart = await Cart.findOne({ user: decoded.userId })
-            .populate({
-                path: 'items.product',
-                select: 'name price image category'
-            });
+        const cart = await Cart.findOne({ user: decoded.userId });
 
-        return NextResponse.json({ items: cart?.items || [] });
+        return NextResponse.json(cart || { items: [] });
     } catch (error) {
         console.error('Cart fetch error:', error);
-        return NextResponse.json({ items: [] });
+        return NextResponse.json(
+            { error: 'Failed to fetch cart' },
+            { status: 500 }
+        );
     }
 }
 
 export async function POST(req) {
     try {
         const cookieStore = cookies();
-        const token = await cookieStore.get('token');
+        const token = cookieStore.get('token')?.value;
 
         if (!token) {
             return NextResponse.json(
@@ -45,7 +49,7 @@ export async function POST(req) {
             );
         }
 
-        const decoded = verifyToken(token.value);
+        const decoded = verifyToken(token);
         if (!decoded || !decoded.userId) {
             return NextResponse.json(
                 { error: 'Invalid token' }, 

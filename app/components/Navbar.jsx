@@ -57,6 +57,21 @@ export default function Navbar() {
         }
     };
 
+    // Debug user data
+    useEffect(() => {
+        console.log('Current user:', user);
+    }, [user]);
+
+    const getInitials = () => {
+        if (user?.name) {
+            return user.name[0].toUpperCase();
+        }
+        if (user?.email) {
+            return user.email[0].toUpperCase();
+        }
+        return 'U';
+    };
+
     return (
         <nav className="fixed top-0 left-0 right-0 bg-white z-50 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,7 +108,7 @@ export default function Navbar() {
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                                     className="w-10 h-10 rounded-full bg-[#8B6B4C] text-white flex items-center justify-center hover:bg-[#725939] transition-colors duration-200 relative z-50"
                             >
-                                {user.name[0].toUpperCase()}
+                                {getInitials()}
                             </button>
                             <AnimatePresence>
                                 {isProfileOpen && (
