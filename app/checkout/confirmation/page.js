@@ -76,6 +76,38 @@ function OrderConfirmationContent() {
                         </div>
                     )}
 
+                    {order && order.shipping && (
+                        <div className="mt-6 border-t pt-6">
+                            <h2 className="text-lg font-medium mb-4">Shipping Information</h2>
+                            <div className="space-y-2">
+                                <p className="text-sm">
+                                    <span className="font-medium">Tracking Number:</span>{' '}
+                                    {order.shipping.trackingNumber}
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Courier:</span>{' '}
+                                    {order.shipping.courier}
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Status:</span>{' '}
+                                    <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                        {order.shipping.status}
+                                    </span>
+                                </p>
+                                {order.shipping.trackingUrl && (
+                                    <a
+                                        href={order.shipping.trackingUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block mt-2 text-[#8B6B4C] hover:underline"
+                                    >
+                                        Track Package →
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="mt-8 text-center">
                         <Link
                             href="/"

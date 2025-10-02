@@ -70,6 +70,18 @@ const orderSchema = new mongoose.Schema({
             default: 'pending'
         },
         paidAt: Date
+    },
+    shipping: {
+        shipmentId: String,
+        awbCode: String,
+        courier: String,
+        trackingUrl: String,
+        status: {
+            type: String,
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+            default: 'pending'
+        },
+        createdAt: Date
     }
 }, {
     timestamps: true
