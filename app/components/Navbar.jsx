@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -186,11 +186,13 @@ export default function Navbar() {
                 </div>
             </div>
 
-            <Login 
-                isOpen={showLoginModal} 
-                onClose={() => closeLoginModal()}
-                onRegisterClick={() => setIsRegisterOpen(true)}
-            />
+            <Suspense fallback={null}>
+                <Login 
+                    isOpen={showLoginModal} 
+                    onClose={() => closeLoginModal()}
+                    onRegisterClick={() => setIsRegisterOpen(true)}
+                />
+            </Suspense>
             <Register 
                 isOpen={isRegisterOpen} 
                 onClose={() => setIsRegisterOpen(false)}

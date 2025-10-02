@@ -1,13 +1,13 @@
 "use client";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function Login({ isOpen, onClose, onRegisterClick }) {
     const { login } = useAuth();
     const router = useRouter();
-    const searchParams = useSearchParams();
+    const redirectHandlerRef = useRef(null);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
