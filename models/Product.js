@@ -13,6 +13,18 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    mrp: {
+        type: Number,
+        required: true
+    },
+    costPrice: {
+        type: Number,
+        required: true
+    },
+    sellingPrice: {
+        type: Number,
+        required: true
+    },
     category: {
         type: String,
         required: true
@@ -24,6 +36,15 @@ const productSchema = new mongoose.Schema({
     stock: {
         type: Number,
         default: 0
+    },
+    sku: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

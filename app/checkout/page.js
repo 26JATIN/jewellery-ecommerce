@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import AddressForm from '../components/checkout/AddressForm';
 import CheckoutSummary from '../components/checkout/CheckoutSummary';
+import RazorpayScript from '../components/RazorpayScript';
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -140,6 +141,7 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 pt-24">
+            <RazorpayScript />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-white p-6 rounded-lg shadow-sm">

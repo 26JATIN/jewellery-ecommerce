@@ -6,7 +6,7 @@ import connectDB from '@/lib/mongodb';
 
 export async function GET() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
 
         if (!token) {
@@ -39,7 +39,7 @@ export async function GET() {
 
 export async function POST(req) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
 
         if (!token) {
@@ -65,36 +65,41 @@ export async function POST(req) {
             );
         }
 
+        // Validate required product fields
+        const productId = product._id || product.id;
+        if (!productId || !product.name || !product.price) {
+            return NextResponse.json(
+                { error: 'Invalid product data. Missing required fields.' }, 
+                { status: 400 }
+            );
+        }
+
         await connectDB();
 
         let cart = await Cart.findOne({ user: decoded.userId });
         
+        const cartItem = {
+            product: productId.toString(),
+            name: product.name,
+            price: product.sellingPrice || product.price,
+            image: product.image,
+            quantity: 1
+        };
+        
         if (!cart) {
             cart = new Cart({
                 user: decoded.userId,
-                items: [{
-                    product: product.id.toString(),
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                }]
+                items: [cartItem]
             });
         } else {
             const existingItemIndex = cart.items.findIndex(
-                item => item.product === product.id.toString()
+                item => item.product === productId.toString()
             );
 
             if (existingItemIndex > -1) {
                 cart.items[existingItemIndex].quantity += 1;
             } else {
-                cart.items.push({
-                    product: product.id.toString(),
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                });
+                cart.items.push(cartItem);
             }
         }
 

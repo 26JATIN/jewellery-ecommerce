@@ -7,7 +7,7 @@ import User from '@/models/User';
 
 export async function POST(req) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
 
         if (!token) {

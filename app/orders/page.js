@@ -120,11 +120,61 @@ export default function OrdersPage() {
                                                 </div>
                                             </div>
                                             <p className="font-medium">
-                                                ${(item.price * item.quantity).toFixed(2)}
+                                                ₹{(item.price * item.quantity)}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Shipping Information */}
+                                {order.shipping && (
+                                    <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                                        <h4 className="font-semibold mb-2 text-blue-800">Shipping Information</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {order.shipping.awb_code && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Tracking Number</p>
+                                                    <p className="font-medium">{order.shipping.awb_code}</p>
+                                                </div>
+                                            )}
+                                            {order.shipping.courier_name && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Courier</p>
+                                                    <p className="font-medium">{order.shipping.courier_name}</p>
+                                                </div>
+                                            )}
+                                            {order.shipping.current_status && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Shipping Status</p>
+                                                    <p className="font-medium capitalize">{order.shipping.current_status.replace(/_/g, ' ')}</p>
+                                                </div>
+                                            )}
+                                            {order.shipping.expected_delivery_date && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Expected Delivery</p>
+                                                    <p className="font-medium">
+                                                        {new Date(order.shipping.expected_delivery_date).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {order.shipping.tracking_url && (
+                                            <div className="mt-3">
+                                                <a 
+                                                    href={order.shipping.tracking_url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                                                >
+                                                    Track Your Order
+                                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -147,7 +197,7 @@ export default function OrdersPage() {
                                     <div className="text-right">
                                         <p className="text-sm text-gray-500">Total Amount</p>
                                         <p className="text-xl font-semibold text-gray-900">
-                                            ${order.totalAmount.toFixed(2)}
+                                            ₹{order.totalAmount}
                                         </p>
                                     </div>
                                 </div>

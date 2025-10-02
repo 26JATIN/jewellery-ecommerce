@@ -1,77 +1,102 @@
 import { NextResponse } from 'next/server';
-import { shiprocket } from '@/lib/shiprocket';
-import Order from '@/models/Order';
+import { shippingService } from '@/lib/shippingService';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
-export async function POST(req) {
+// Middleware to check authentication
+async function checkAuth() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = await cookieStore.get('token');
 
         if (!token) {
+            return { error: 'Unauthorized', status: 401 };
+        }
+
+        const decoded = verifyToken(token.value);
+        if (!decoded) {
+            return { error: 'Invalid token', status: 401 };
+        }
+
+        return { userId: decoded.userId };
+    } catch (error) {
+        console.error('Auth error:', error);
+        return { error: 'Internal server error', status: 500 };
+    }
+}
+
+// Create shipment for an order
+export async function POST(req) {
+    try {
+        const authResult = await checkAuth();
+        if (authResult.error) {
             return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
+                { error: authResult.error },
+                { status: authResult.status }
+            );
+        }
+
+        const { orderId, automate = true } = await req.json();
+
+        if (!orderId) {
+            return NextResponse.json(
+                { error: 'Order ID is required' },
+                { status: 400 }
+            );
+        }
+
+        let result;
+        if (automate) {
+            // Complete automation: create shipment + assign AWB + generate pickup
+            result = await shippingService.automateShipping(orderId);
+        } else {
+            // Just create the shipment
+            result = await shippingService.createShipment(orderId);
+        }
+
+        return NextResponse.json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error('Create shipment error:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to create shipment' },
+            { status: 500 }
+        );
+    }
+}
+
+// Process shipment (assign AWB + generate pickup)
+export async function PATCH(req) {
+    try {
+        const authResult = await checkAuth();
+        if (authResult.error) {
+            return NextResponse.json(
+                { error: authResult.error },
+                { status: authResult.status }
             );
         }
 
         const { orderId } = await req.json();
-        const order = await Order.findById(orderId);
 
-        if (!order) {
+        if (!orderId) {
             return NextResponse.json(
-                { error: 'Order not found' },
-                { status: 404 }
+                { error: 'Order ID is required' },
+                { status: 400 }
             );
         }
 
-        // Format order data for Shiprocket
-        const shiprocketOrder = {
-            order_id: order._id,
-            order_date: order.createdAt,
-            pickup_location: "Primary",
-            billing_customer_name: order.shippingAddress.fullName,
-            billing_address: order.shippingAddress.addressLine1,
-            billing_address_2: order.shippingAddress.addressLine2,
-            billing_city: order.shippingAddress.city,
-            billing_pincode: order.shippingAddress.postalCode,
-            billing_state: order.shippingAddress.state,
-            billing_country: order.shippingAddress.country,
-            billing_phone: order.shippingAddress.phone,
-            shipping_is_billing: true,
-            order_items: order.items.map(item => ({
-                name: item.name,
-                sku: item._id,
-                units: item.quantity,
-                selling_price: item.price,
-            })),
-            payment_method: "prepaid",
-            sub_total: order.totalAmount,
-            length: 10,
-            breadth: 10,
-            height: 10,
-            weight: 0.5
-        };
+        const result = await shippingService.processShipment(orderId);
 
-        const shipment = await shiprocket.createOrder(shiprocketOrder);
-
-        // Update order with shipping details
-        order.shipping = {
-            shipmentId: shipment.shipment_id,
-            trackingNumber: shipment.awb_code,
-            courier: shipment.courier_name,
-            status: 'Processing',
-            trackingUrl: shipment.tracking_url
-        };
-
-        await order.save();
-
-        return NextResponse.json(order);
+        return NextResponse.json({
+            success: true,
+            data: result
+        });
     } catch (error) {
-        console.error('Shipping creation error:', error);
+        console.error('Process shipment error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to create shipment' },
+            { error: error.message || 'Failed to process shipment' },
             { status: 500 }
         );
     }

@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 
 export async function PATCH(req, { params }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token');
 
         if (!token) {
@@ -48,7 +48,7 @@ export async function PATCH(req, { params }) {
 
 export async function DELETE(req, { params }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token');
 
         if (!token) {

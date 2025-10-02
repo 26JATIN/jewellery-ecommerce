@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "create-admin": "node scripts/createAdmin.mjs"
+    "create-admin": "node scripts/createAdmin.mjs",
+    "migrate-products": "node scripts/migrateProducts.mjs",
+    "seed-products": "node scripts/seedProducts.mjs"
   },
   "dependencies": {
     "@tailwindcss/oxide": "^4.1.14",

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import paymentConfig from '@/lib/payment-config';
+import { orderAutomationService } from '@/lib/orderAutomationService';
 
 export async function POST(req) {
     try {
@@ -49,6 +50,15 @@ export async function POST(req) {
                 { error: 'Order not found' },
                 { status: 404 }
             );
+        }
+
+        // Trigger automatic shipping process
+        try {
+            await orderAutomationService.processNewOrder(orderId);
+            console.log(`Automatic shipping initiated for order: ${orderId}`);
+        } catch (automationError) {
+            console.error(`Automation failed for order ${orderId}:`, automationError);
+            // Don't fail the payment verification if automation fails
         }
 
         return NextResponse.json({

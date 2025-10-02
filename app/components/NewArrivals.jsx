@@ -2,14 +2,21 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import QuickViewModal from "./QuickViewModal";
-import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { useProducts } from '../hooks/useProducts';
 
 export default function NewArrivals() {
     const scrollRef = useRef(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { addToCart, setIsCartOpen } = useCart();
+    
+    const { products: allProducts, loading } = useProducts();
+    
+    // Show only first 6 products sorted by creation date (newest first)
+    const products = allProducts
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 6);
 
     const scroll = (direction) => {
         const container = scrollRef.current;
@@ -79,13 +86,18 @@ export default function NewArrivals() {
                     </div>
                 </div>
                 
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+                    </div>
+                ) : (
                 <div 
                     ref={scrollRef}
                     className="flex gap-8 overflow-x-auto scrollbar-hide py-4"
                 >
                     {products.map((product) => (
                         <motion.div
-                            key={product.id}
+                            key={product._id}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -120,11 +132,12 @@ export default function NewArrivals() {
                             <div className="mt-4 text-center px-2">
                                 <p className="text-sm text-[#8B6B4C] mb-1">{product.category}</p>
                                 <h3 className="text-gray-900 font-light text-lg mb-1">{product.name}</h3>
-                                <p className="text-gray-700">${product.price}</p>
+                                <p className="text-gray-700">₹{product.sellingPrice || product.price}</p>
                             </div>
                         </motion.div>
                     ))}
                 </div>
+                )}
             </div>
 
             <QuickViewModal 

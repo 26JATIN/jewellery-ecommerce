@@ -17,9 +17,12 @@ export const useAuth = () => {
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
+        setMounted(true);
+        
         const checkAuth = async () => {
             try {
                 const response = await fetch('/api/auth/check');
@@ -91,6 +94,20 @@ export function AuthProvider({ children }) {
             throw error;
         }
     };
+
+    // Prevent hydration mismatch by not rendering until mounted
+    if (!mounted) {
+        return (
+            <AuthContext.Provider value={{
+                user: null,
+                loading: true,
+                login: async () => {},
+                logout: async () => {},
+            }}>
+                {children}
+            </AuthContext.Provider>
+        );
+    }
 
     return (
         <AuthContext.Provider value={{

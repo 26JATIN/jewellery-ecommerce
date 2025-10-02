@@ -1,9 +1,48 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
+
+// Middleware to check admin access
+async function checkAdminAccess() {
+    try {
+        const cookieStore = await cookies();
+        const token = await cookieStore.get('token');
+
+        if (!token) {
+            return { error: 'Unauthorized', status: 401 };
+        }
+
+        const decoded = verifyToken(token.value);
+        if (!decoded) {
+            return { error: 'Invalid token', status: 401 };
+        }
+
+        await connectDB();
+        const user = await User.findById(decoded.userId);
+
+        if (!user || !user.isAdmin) {
+            return { error: 'Admin access required', status: 403 };
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Admin auth error:', error);
+        return { error: 'Internal server error', status: 500 };
+    }
+}
 
 export async function PATCH(request, { params }) {
     try {
+        const authError = await checkAdminAccess();
+        if (authError) {
+            return NextResponse.json(
+                { error: authError.error },
+                { status: authError.status }
+            );
+        }
+
         const { id } = params;
         const updates = await request.json();
 
@@ -41,6 +80,14 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
     try {
+        const authError = await checkAdminAccess();
+        if (authError) {
+            return NextResponse.json(
+                { error: authError.error },
+                { status: authError.status }
+            );
+        }
+
         const { id } = params;
 
         await connectDB();

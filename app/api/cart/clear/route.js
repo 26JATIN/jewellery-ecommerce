@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 
 export async function DELETE(req) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get('token');
 
         if (!token) {
