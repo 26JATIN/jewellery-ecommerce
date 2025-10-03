@@ -1,43 +1,136 @@
 @import "tailwindcss";
 
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #FAFAFA;
+  --foreground: #1A1A1A;
+  --primary: #2C2C2C;
+  --secondary: #D4AF76;
+  --accent: #B8956A;
+  --muted: #F5F5F5;
+  --border: #E5E5E5;
+  --mobile-navbar-height: 70px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ensure modals and overlays are always visible */
+#__next {
+  position: relative;
+  z-index: 0;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 .pt-navbar {
-    padding-top: 80px; /* Adjust this value based on your navbar height */
+  padding-top: 80px;
+}
+
+/* Mobile bottom navbar spacing */
+.pb-mobile-navbar {
+  padding-bottom: var(--mobile-navbar-height);
+}
+
+@media (min-width: 1024px) {
+  .pb-mobile-navbar {
+    padding-bottom: 0;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input {
+  transition: all 0.3s ease;
+}
+
+/* Custom gradient for hero */
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(44, 44, 44, 0.95) 0%, rgba(184, 149, 106, 0.8) 100%);
+}
+
+/* Elegant card hover effect */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Premium shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 3s infinite;
+  background: linear-gradient(to right, transparent 0%, rgba(212, 175, 118, 0.1) 50%, transparent 100%);
+  background-size: 1000px 100%;
+}
+
+/* Luxury gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #2C2C2C 0%, #D4AF76 50%, #2C2C2C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }

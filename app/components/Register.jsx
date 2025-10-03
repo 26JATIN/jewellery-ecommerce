@@ -78,43 +78,61 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110]"
                     />
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md z-50"
-                    >
-                        <div className="bg-white rounded-lg shadow-xl p-8">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-semibold text-[#8B6B4C]">Create Account</h2>
-                                <button 
-                                    onClick={onClose}
-                                    className="text-gray-500 hover:text-gray-700"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+                    <div className="fixed inset-0 z-[111] overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                transition={{ duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }}
+                                className="w-full max-w-md"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-8 md:p-10 relative border border-gray-100">
+                                    {/* Premium accent line */}
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent rounded-full" />
+                                    
+                                    <div className="flex justify-between items-center mb-8">
+                                        <div>
+                                            <h2 className="text-3xl font-light text-[#2C2C2C] tracking-tight">Create Account</h2>
+                                            <p className="text-sm text-gray-500 font-light mt-1">Join our exclusive collection</p>
+                                        </div>
+                                        <button 
+                                            onClick={onClose}
+                                            className="text-gray-400 hover:text-[#2C2C2C] transition-colors p-2 rounded-full hover:bg-gray-100"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
 
                             {success ? (
                                 <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-green-600 text-center py-8"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="text-center py-12"
                                 >
-                                    Registration successful! Redirecting...
+                                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-green-600 font-light text-lg">Registration successful!</p>
+                                    <p className="text-gray-500 text-sm mt-2 font-light">Redirecting...</p>
                                 </motion.div>
                             ) : (
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                                <form onSubmit={handleSubmit} className="space-y-5">
                                     {error && (
-                                        <p className="text-red-500 text-sm">{error}</p>
+                                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-light">
+                                            {error}
+                                        </div>
                                     )}
                                     
                                     <div>
-                                        <label className="block text-gray-700 text-sm font-medium mb-2">
+                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
                                             Full Name
                                         </label>
                                         <input
@@ -123,13 +141,14 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             required
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent outline-none"
+                                            placeholder="John Doe"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-gray-700 text-sm font-medium mb-2">
-                                            Email
+                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                            Email Address
                                         </label>
                                         <input
                                             type="email"
@@ -137,12 +156,13 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             required
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent outline-none"
+                                            placeholder="you@example.com"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-gray-700 text-sm font-medium mb-2">
+                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
                                             Password
                                         </label>
                                         <input
@@ -151,12 +171,13 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             required
                                             value={formData.password}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent outline-none"
+                                            placeholder="••••••••"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-gray-700 text-sm font-medium mb-2">
+                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
                                             Confirm Password
                                         </label>
                                         <input
@@ -165,20 +186,21 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             required
                                             value={formData.confirmPassword}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent outline-none"
+                                            placeholder="••••••••"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                         />
                                     </div>
 
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="w-full bg-[#8B6B4C] text-white py-3 rounded-lg hover:bg-[#725939] transition-colors disabled:opacity-50"
+                                        className="w-full bg-gradient-to-r from-[#2C2C2C] to-[#3a3a3a] text-white py-4 rounded-full hover:from-[#D4AF76] hover:to-[#C19A5B] transition-all duration-300 disabled:opacity-50 font-light tracking-wide shadow-lg hover:shadow-xl mt-6"
                                     >
-                                        {loading ? 'Creating Account...' : 'Sign Up'}
+                                        {loading ? 'Creating Account...' : 'Create Account'}
                                     </button>
 
-                                    <div className="text-center mt-4">
-                                        <p className="text-gray-600">
+                                    <div className="text-center mt-6">
+                                        <p className="text-gray-600 font-light">
                                             Already have an account?{' '}
                                             <button
                                                 type="button"
@@ -186,16 +208,18 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                                     onClose();
                                                     onLoginClick();
                                                 }}
-                                                className="text-[#8B6B4C] hover:underline"
+                                                className="text-[#D4AF76] hover:text-[#2C2C2C] transition-colors font-normal"
                                             >
-                                                Login
+                                                Sign in
                                             </button>
                                         </p>
                                     </div>
                                 </form>
                             )}
+                                </div>
+                            </motion.div>
                         </div>
-                    </motion.div>
+                    </div>
                 </>
             )}
         </AnimatePresence>

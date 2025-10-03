@@ -57,29 +57,29 @@ export default function NewArrivals() {
     };
 
     return (
-        <section id="new-arrivals" className="py-16 px-4 bg-white">
+        <section id="new-arrivals" className="py-20 px-4 bg-[#FAFAFA]">
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col items-center mb-12">
-                    <h2 className="text-3xl font-semibold text-[#8B6B4C] relative">
-                        New Arrivals
-                        <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-[#8B6B4C]"></span>
-                    </h2>
-                </div>
-                <div className="flex justify-end mb-8">
-                    <div className="flex gap-4">
+                <div className="flex justify-between items-end mb-12">
+                    <div>
+                        <p className="text-sm text-[#D4AF76] font-light tracking-widest uppercase mb-2">Latest Collection</p>
+                        <h2 className="text-4xl md:text-5xl font-light text-[#2C2C2C] tracking-tight">
+                            New Arrivals
+                        </h2>
+                    </div>
+                    <div className="hidden md:flex gap-3">
                         <button 
                             onClick={() => scroll('left')}
-                            className="p-2 rounded-full border border-[#8B6B4C] text-[#8B6B4C] hover:bg-[#8B6B4C] hover:text-white transition-colors"
+                            className="p-3 rounded-full border border-[#E5E5E5] text-[#2C2C2C] hover:bg-[#2C2C2C] hover:text-white hover:border-[#2C2C2C] transition-all duration-300"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                             </svg>
                         </button>
                         <button 
                             onClick={() => scroll('right')}
-                            className="p-2 rounded-full border border-[#8B6B4C] text-[#8B6B4C] hover:bg-[#8B6B4C] hover:text-white transition-colors"
+                            className="p-3 rounded-full border border-[#E5E5E5] text-[#2C2C2C] hover:bg-[#2C2C2C] hover:text-white hover:border-[#2C2C2C] transition-all duration-300"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                             </svg>
                         </button>
@@ -95,44 +95,50 @@ export default function NewArrivals() {
                     ref={scrollRef}
                     className="flex gap-8 overflow-x-auto scrollbar-hide py-4"
                 >
-                    {products.map((product) => (
+                    {products.map((product, index) => (
                         <motion.div
                             key={product._id}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="min-w-[280px] group"
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            viewport={{ once: true }}
+                            className="min-w-[300px] md:min-w-[320px] group card-hover"
                         >
-                            <div className="relative overflow-hidden bg-white rounded-lg shadow-sm">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-[350px] object-cover transform group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300">
-                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                                        <button 
-                                            onClick={() => {
-                                                setSelectedProduct(product);
-                                                setIsModalOpen(true);
-                                            }}
-                                            className="bg-white text-[#8B6B4C] px-6 py-2 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#8B6B4C] hover:text-white rounded"
-                                        >
-                                            Quick View
-                                        </button>
-                                        <button 
-                                            onClick={() => handleAddToCart(product)}
-                                            className="bg-white text-[#8B6B4C] px-6 py-2 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#8B6B4C] hover:text-white rounded"
-                                        >
-                                            Add to Cart
-                                        </button>
+                            <div className="relative overflow-hidden bg-white rounded-3xl">
+                                <div className="relative aspect-[3/4] overflow-hidden">
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    
+                                    {/* Hover Actions */}
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedProduct(product);
+                                                    setIsModalOpen(true);
+                                                }}
+                                                className="flex-1 bg-white/95 backdrop-blur-sm text-[#2C2C2C] px-4 py-3 rounded-full hover:bg-[#D4AF76] hover:text-white transition-all duration-300 text-sm font-light"
+                                            >
+                                                Quick View
+                                            </button>
+                                            <button 
+                                                onClick={() => handleAddToCart(product)}
+                                                className="flex-1 bg-[#2C2C2C] text-white px-4 py-3 rounded-full hover:bg-[#D4AF76] transition-all duration-300 text-sm font-light"
+                                            >
+                                                Add to Cart
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-4 text-center px-2">
-                                <p className="text-sm text-[#8B6B4C] mb-1">{product.category}</p>
-                                <h3 className="text-gray-900 font-light text-lg mb-1">{product.name}</h3>
-                                <p className="text-gray-700">₹{product.sellingPrice || product.price}</p>
+                            <div className="mt-5 text-center">
+                                <p className="text-xs text-[#D4AF76] font-light tracking-widest uppercase mb-2">{product.category}</p>
+                                <h3 className="text-[#2C2C2C] font-light text-lg mb-2">{product.name}</h3>
+                                <p className="text-[#2C2C2C] font-normal">₹{product.sellingPrice || product.price}</p>
                             </div>
                         </motion.div>
                     ))}

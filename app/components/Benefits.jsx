@@ -46,24 +46,25 @@ export default function Benefits() {
     ];
 
     return (
-        <section className="py-16 bg-[#f8f5f2]">
+        <section className="py-20 bg-white border-y border-gray-100">
             <div className="max-w-7xl mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {benefits.map((benefit) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    {benefits.map((benefit, index) => (
                         <motion.div
                             key={benefit.id}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            viewport={{ once: true }}
+                            className="flex flex-col items-center text-center"
                         >
-                            <div className="text-[#8B6B4C] mb-4">
+                            <div className="w-16 h-16 rounded-full bg-[#D4AF76]/10 flex items-center justify-center text-[#D4AF76] mb-6 group-hover:bg-[#D4AF76] group-hover:text-white transition-all">
                                 {benefit.icon}
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <h3 className="text-lg font-light text-[#2C2C2C] mb-2">
                                 {benefit.title}
                             </h3>
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-gray-600 text-sm font-light">
                                 {benefit.description}
                             </p>
                         </motion.div>

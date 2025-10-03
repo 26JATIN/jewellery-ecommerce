@@ -25,13 +25,13 @@ export default function Cart() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsCartOpen(false)}
-                        className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40"
+                        className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[100]"
                     />
                     <motion.aside
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-[101]"
                     >
                         <div className="p-6 h-full flex flex-col">
                             <div className="flex justify-between items-center mb-6">
