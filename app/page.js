@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
@@ -8,6 +8,7 @@ import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import LoginModalHandler from './components/LoginModalHandler';
 import { useProductFilter } from './hooks/useProducts';
+import NewArrivals from './components/NewArrivals';
 
 // Force dynamic rendering to avoid SSG issues with useSearchParams
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,7 @@ function ProductsSection() {
   } = useProductFilter('', selectedCategory, sortBy);
 
   return (
-    <section id="products-section" className="py-20 px-4 bg-[#FAFAFA]">
+    <section id="products-section" className="py-20 px-4 bg-[#FAFAFA] pt-32 lg:pt-20">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -32,7 +33,7 @@ function ProductsSection() {
             Our Collection
           </p>
           <h2 className="text-4xl md:text-5xl font-light text-[#2C2C2C] tracking-tight mb-4">
-            All Products
+            Featured Products
           </h2>
           <p className="text-gray-600 font-light">
             Discover timeless pieces crafted for elegance
@@ -74,7 +75,7 @@ function ProductsSection() {
           products={sortedProducts}
           loading={loading}
           error={error}
-          emptyMessage="No products found in this category."
+          emptyMessage={searchTerm ? `No products found for "${searchTerm}"` : "No products found in this category."}
         />
       </div>
     </section>
@@ -89,7 +90,7 @@ export default function Home() {
         <LoginModalHandler />
       </Suspense>
       <Hero />
-      <ProductsSection />
+      <NewArrivals />
       <Benefits />
       <Testimonials />
       <Footer />

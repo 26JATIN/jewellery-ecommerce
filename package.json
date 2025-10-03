@@ -15,6 +15,7 @@
     "@tailwindcss/oxide": "^4.1.14",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
+    "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "esm": "^3.2.25",
     "framer-motion": "^12.23.22",
@@ -28,7 +29,8 @@
     "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shiprocket-api": "^1.1.4"
+    "shiprocket-api": "^1.1.4",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
