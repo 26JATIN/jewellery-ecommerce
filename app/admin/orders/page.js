@@ -257,7 +257,7 @@ function AdminOrdersPage() {
                                                     </a>
                                                 )}
                                                 <a
-                                                    href={`/orders/${order._id}`}
+                                                    href={`/admin/orders/${order._id}`}
                                                     className="text-gray-600 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded text-xs"
                                                 >
                                                     View Details
