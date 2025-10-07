@@ -71,12 +71,26 @@ export async function POST(request) {
           goldWeight: product.goldWeight,
           goldPurity: product.goldPurity || 22, // Default to 22K
           makingChargePercent: product.makingChargePercent || 15, // Default 15%
+          gstPercent: product.gstPercent || 3, // Default 3% GST for jewelry in India
           currency: 'INR'
         });
 
         if (priceCalculation.success) {
-          const newPrice = priceCalculation.data.totalPrice;
+          const newPrice = priceCalculation.breakdown.finalPrice;
           const oldPrice = product.price;
+
+          // Validate the new price
+          if (!newPrice || newPrice <= 0) {
+            console.error(`Invalid price calculated for product ${product._id}: ${newPrice}`);
+            updateResults.push({
+              productId: product._id.toString(),
+              name: product.name,
+              error: `Invalid price calculated: ${newPrice}`,
+              success: false
+            });
+            errorCount++;
+            continue;
+          }
 
           // Update product price
           await Product.findByIdAndUpdate(product._id, {
@@ -84,6 +98,8 @@ export async function POST(request) {
             lastPriceUpdate: new Date(),
             goldPriceAtUpdate: currentGoldPrice
           });
+
+          console.log(`Updated ${product.name}: ₹${oldPrice} → ₹${newPrice}`);
 
           updateResults.push({
             productId: product._id.toString(),
@@ -97,10 +113,11 @@ export async function POST(request) {
 
           successCount++;
         } else {
+          console.error(`Price calculation failed for product ${product._id}:`, priceCalculation.error);
           updateResults.push({
             productId: product._id.toString(),
             name: product.name,
-            error: priceCalculation.error,
+            error: priceCalculation.error || 'Price calculation failed',
             success: false
           });
           errorCount++;
