@@ -30,13 +30,32 @@ export async function POST(request) {
     });
 
     console.log(`Found ${dynamicProducts.length} products with dynamic pricing`);
+    
+    // Log details of found products for debugging
+    if (dynamicProducts.length > 0) {
+      console.log('Products found for update:');
+      dynamicProducts.forEach(product => {
+        console.log(`- ${product.name}: ${product.goldWeight}g, ${product.goldPurity}K, current price: ₹${product.price}`);
+      });
+    }
 
     if (dynamicProducts.length === 0) {
+      // Check what products exist in database for debugging
+      const totalProducts = await Product.countDocuments();
+      const productsWithDynamicPricing = await Product.countDocuments({ isDynamicPricing: true });
+      const productsWithGoldWeight = await Product.countDocuments({ goldWeight: { $exists: true, $gt: 0 } });
+      
       return NextResponse.json({
         success: true,
         message: 'No products with dynamic pricing found',
         updated: 0,
-        details: []
+        details: [],
+        debug: {
+          totalProducts,
+          productsWithDynamicPricing,
+          productsWithGoldWeight,
+          suggestion: 'Run scripts/addDynamicProducts.mjs to add sample products with dynamic pricing'
+        }
       });
     }
 

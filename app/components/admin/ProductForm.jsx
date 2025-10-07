@@ -253,6 +253,20 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 return;
             }
 
+            // Validate image URL if provided
+            if (formData.image && !imageFile) {
+                const isValidPath = formData.image.startsWith('/') || 
+                                   formData.image.startsWith('./') || 
+                                   formData.image.startsWith('../') ||
+                                   formData.image.match(/^https?:\/\/.+/);
+                
+                if (!isValidPath) {
+                    alert('Please enter a valid image URL (starting with http/https) or relative path (starting with /)');
+                    setLoading(false);
+                    return;
+                }
+            }
+
             // Validate prices
             const mrp = parseFloat(formData.mrp);
             const costPrice = parseFloat(formData.costPrice);
@@ -486,7 +500,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                     Or enter image URL manually:
                                 </label>
                                 <input
-                                    type="url"
+                                    type="text"
                                     name="image"
                                     value={formData.image}
                                     onChange={(e) => {
@@ -494,8 +508,11 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                         setImagePreview(e.target.value);
                                     }}
                                     className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                    placeholder="https://example.com/image.jpg"
+                                    placeholder="/product1.jpg or https://example.com/image.jpg"
                                 />
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Enter a full URL (https://...) or relative path (/product1.jpg)
+                                </p>
                             </div>
                         </div>
                     </div>
