@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import AddressForm from '../components/checkout/AddressForm';
 import CheckoutSummary from '../components/checkout/CheckoutSummary';
+import CouponCode from '../components/CouponCode';
 import RazorpayScript from '../components/RazorpayScript';
 
 export default function CheckoutPage() {
@@ -13,6 +14,21 @@ export default function CheckoutPage() {
     const { user, triggerLoginModal } = useAuth();
     const [loading, setLoading] = useState(false);
     const [shippingData, setShippingData] = useState(null);
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    const [originalTotal, setOriginalTotal] = useState(0);
+    const [finalTotal, setFinalTotal] = useState(0);
+
+    // Calculate totals
+    useEffect(() => {
+        const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        setOriginalTotal(total);
+        
+        if (appliedCoupon) {
+            setFinalTotal(appliedCoupon.finalTotal);
+        } else {
+            setFinalTotal(total);
+        }
+    }, [cartItems, appliedCoupon]);
 
     // Redirect to home if user not authenticated
     useEffect(() => {
@@ -22,14 +38,20 @@ export default function CheckoutPage() {
         }
     }, [user, router, triggerLoginModal]);
 
+    const handleCouponApplied = (couponData) => {
+        setAppliedCoupon(couponData);
+    };
+
+    const handleCouponRemoved = () => {
+        setAppliedCoupon(null);
+    };
+
     const handleCheckout = async (shippingAddress) => {
         try {
             setShippingData(shippingAddress); // Store shipping data
             setLoading(true);
 
-            const totalAmount = cartItems.reduce((total, item) => 
-                total + item.price * item.quantity, 0
-            );
+            const totalAmount = finalTotal; // Use final total after coupon discount
 
             // Create order first
             const orderRes = await fetch('/api/orders', {
@@ -41,7 +63,12 @@ export default function CheckoutPage() {
                     items: cartItems,
                     shippingAddress,
                     paymentMethod: 'razorpay',
-                    totalAmount
+                    totalAmount,
+                    coupon: appliedCoupon ? {
+                        code: appliedCoupon.couponCode,
+                        discountAmount: appliedCoupon.discountAmount,
+                        originalTotal: appliedCoupon.originalTotal
+                    } : null
                 }),
             });
 
@@ -166,12 +193,32 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-gray-50 pt-24">
             <RazorpayScript />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <AddressForm onSubmit={handleCheckout} />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white p-6 rounded-lg shadow-sm">
+                            <AddressForm onSubmit={handleCheckout} />
+                        </div>
                     </div>
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <CheckoutSummary />
+                    <div className="space-y-6">
+                        <CouponCode 
+                            cartItems={cartItems.map(item => ({
+                                productId: item.id,
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity,
+                                category: item.category
+                            }))}
+                            onCouponApplied={handleCouponApplied}
+                            onCouponRemoved={handleCouponRemoved}
+                            appliedCoupon={appliedCoupon}
+                        />
+                        <div className="bg-white p-6 rounded-lg shadow-sm">
+                            <CheckoutSummary 
+                                appliedCoupon={appliedCoupon}
+                                originalTotal={originalTotal}
+                                finalTotal={finalTotal}
+                            />
+                        </div>
                     </div>
                 </div>
                 {loading && (
