@@ -54,7 +54,7 @@ const GoldPriceDashboard = () => {
 
   const formatPrice = (price, currencyCode = currency) => {
     const currencyInfo = currencies.find(c => c.code === currencyCode);
-    const symbol = currencyInfo?.symbol || '$';
+    const symbol = currencyInfo?.symbol || '₹';
     
     return `${symbol}${price.toLocaleString(undefined, {
       minimumFractionDigits: 2,

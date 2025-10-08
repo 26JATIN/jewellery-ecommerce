@@ -20,7 +20,9 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         goldPurity: '22',
         makingChargePercent: '15',
         stoneValue: '',
-        isDynamicPricing: false
+        isDynamicPricing: false,
+        // Enhanced stone specifications
+        stones: []
     });
 
     const [loading, setLoading] = useState(false);
@@ -49,6 +51,25 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         { value: '10', label: '10K (41.7% Pure)' }
     ];
 
+    const stoneTypes = [
+        'Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Pearl', 
+        'Amethyst', 'Topaz', 'Garnet', 'Opal', 'Turquoise', 'Other'
+    ];
+
+    const stoneQualities = [
+        'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 
+        'AAA', 'AA', 'A', 'B', 'Natural', 'Synthetic'
+    ];
+
+    const stoneCuts = [
+        'Round', 'Princess', 'Emerald', 'Asscher', 'Oval', 'Marquise', 
+        'Pear', 'Heart', 'Cushion', 'Radiant', 'Cabochon', 'Other'
+    ];
+
+    const stoneSettings = [
+        'Prong', 'Bezel', 'Channel', 'Pave', 'Halo', 'Tension', 'Cluster', 'Other'
+    ];
+
     useEffect(() => {
         if (product) {
             setFormData({
@@ -69,11 +90,69 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 goldPurity: product.goldPurity || '22',
                 makingChargePercent: product.makingChargePercent || '15',
                 stoneValue: product.stoneValue || '',
-                isDynamicPricing: product.isDynamicPricing || false
+                isDynamicPricing: product.isDynamicPricing || false,
+                // Enhanced stone specifications
+                stones: product.stones || []
             });
             setImagePreview(product.image || '');
         }
     }, [product]);
+
+    // Stone management functions
+    const addStone = () => {
+        const newStone = {
+            type: 'Diamond',
+            quality: 'VS1',
+            weight: 0,
+            pricePerUnit: 0,
+            totalValue: 0,
+            color: 'Colorless',
+            cut: 'Round',
+            setting: 'Prong'
+        };
+        setFormData(prev => ({
+            ...prev,
+            stones: [...prev.stones, newStone]
+        }));
+    };
+
+    const removeStone = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            stones: prev.stones.filter((_, i) => i !== index)
+        }));
+        updateTotalStoneValue();
+    };
+
+    const updateStone = (index, field, value) => {
+        const updatedStones = [...formData.stones];
+        updatedStones[index] = {
+            ...updatedStones[index],
+            [field]: value
+        };
+
+        // Auto-calculate total value when weight or price changes
+        if (field === 'weight' || field === 'pricePerUnit') {
+            const weight = field === 'weight' ? parseFloat(value) || 0 : updatedStones[index].weight;
+            const pricePerUnit = field === 'pricePerUnit' ? parseFloat(value) || 0 : updatedStones[index].pricePerUnit;
+            updatedStones[index].totalValue = weight * pricePerUnit;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            stones: updatedStones
+        }));
+
+        updateTotalStoneValue(updatedStones);
+    };
+
+    const updateTotalStoneValue = (stones = formData.stones) => {
+        const totalStoneValue = stones.reduce((sum, stone) => sum + (stone.totalValue || 0), 0);
+        setFormData(prev => ({
+            ...prev,
+            stoneValue: totalStoneValue.toFixed(2)
+        }));
+    };
 
     const calculateDynamicPrice = async () => {
         if (!formData.goldWeight || parseFloat(formData.goldWeight) <= 0) {
@@ -178,6 +257,11 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             }, 500); // Debounce
         }
     };
+
+    // Update total stone value when stones change
+    useEffect(() => {
+        updateTotalStoneValue();
+    }, [formData.stones]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -310,7 +394,18 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 stoneValue: parseFloat(formData.stoneValue) || 0,
                 isDynamicPricing: formData.isDynamicPricing,
                 pricingMethod: formData.pricingMethod,
-                lastPriceUpdate: formData.isDynamicPricing ? new Date() : undefined
+                lastPriceUpdate: formData.isDynamicPricing ? new Date() : undefined,
+                // Enhanced stone specifications
+                stones: formData.stones.map(stone => ({
+                    type: stone.type,
+                    quality: stone.quality,
+                    weight: parseFloat(stone.weight) || 0,
+                    pricePerUnit: parseFloat(stone.pricePerUnit) || 0,
+                    totalValue: parseFloat(stone.totalValue) || 0,
+                    color: stone.color || 'Colorless',
+                    cut: stone.cut,
+                    setting: stone.setting
+                }))
             };
 
             await onSubmit(submitData);
@@ -625,7 +720,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Stone/Diamond Value (₹ INR)
+                                        Total Stone/Diamond Value (₹ INR)
                                     </label>
                                     <input
                                         type="number"
@@ -634,9 +729,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                         onChange={handleInputChange}
                                         min="0"
                                         step="0.01"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent bg-gray-50"
                                         placeholder="0"
+                                        readOnly
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Calculated automatically from individual stones below
+                                    </p>
                                 </div>
                             </div>
 
@@ -696,6 +795,218 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                             )}
                         </div>
                     )}
+
+                    {/* Enhanced Stone/Gem Management */}
+                    <div className="border-t border-gray-200 pt-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 text-[#8B6B4C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
+                                </svg>
+                                <h3 className="text-lg font-medium text-gray-900">Stone & Gem Specifications</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addStone}
+                                className="px-4 py-2 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#7A5D42] transition-colors flex items-center space-x-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>Add Stone</span>
+                            </button>
+                        </div>
+
+                        {formData.stones.length === 0 ? (
+                            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
+                                </svg>
+                                <p className="text-gray-500 text-sm mb-2">No stones added yet</p>
+                                <p className="text-gray-400 text-xs">Click "Add Stone" to specify diamonds, rubies, emeralds, and other gems</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {formData.stones.map((stone, index) => (
+                                    <div key={index} className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-md font-medium text-gray-900">
+                                                Stone #{index + 1} - {stone.type}
+                                            </h4>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeStone(index)}
+                                                className="text-red-600 hover:text-red-800 p-1"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {/* Stone Type */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Stone Type
+                                                </label>
+                                                <select
+                                                    value={stone.type}
+                                                    onChange={(e) => updateStone(index, 'type', e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                >
+                                                    {stoneTypes.map((type) => (
+                                                        <option key={type} value={type}>{type}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Quality */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Quality/Grade
+                                                </label>
+                                                <select
+                                                    value={stone.quality}
+                                                    onChange={(e) => updateStone(index, 'quality', e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                >
+                                                    {stoneQualities.map((quality) => (
+                                                        <option key={quality} value={quality}>{quality}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Weight */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Weight (Carats/Pieces)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={stone.weight}
+                                                    onChange={(e) => updateStone(index, 'weight', e.target.value)}
+                                                    step="0.01"
+                                                    min="0"
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    placeholder="0.50"
+                                                />
+                                            </div>
+
+                                            {/* Price per Unit */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Price per Unit (₹)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={stone.pricePerUnit}
+                                                    onChange={(e) => updateStone(index, 'pricePerUnit', e.target.value)}
+                                                    step="0.01"
+                                                    min="0"
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    placeholder="50000"
+                                                />
+                                            </div>
+
+                                            {/* Color */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Color
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={stone.color}
+                                                    onChange={(e) => updateStone(index, 'color', e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    placeholder="Colorless, Red, Blue..."
+                                                />
+                                            </div>
+
+                                            {/* Cut */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Cut
+                                                </label>
+                                                <select
+                                                    value={stone.cut}
+                                                    onChange={(e) => updateStone(index, 'cut', e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                >
+                                                    {stoneCuts.map((cut) => (
+                                                        <option key={cut} value={cut}>{cut}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Setting */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Setting
+                                                </label>
+                                                <select
+                                                    value={stone.setting}
+                                                    onChange={(e) => updateStone(index, 'setting', e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                >
+                                                    {stoneSettings.map((setting) => (
+                                                        <option key={setting} value={setting}>{setting}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Total Value Display */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Total Value (₹)
+                                                </label>
+                                                <div className="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-green-700">
+                                                    ₹{stone.totalValue?.toFixed(2) || '0.00'}
+                                                </div>
+                                            </div>
+
+                                            {/* Quick Actions */}
+                                            <div className="md:col-span-3 pt-2">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                        {stone.type} - {stone.quality}
+                                                    </span>
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                                        {stone.weight} {stone.type === 'Pearl' ? 'pieces' : 'carats'}
+                                                    </span>
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                        {stone.cut} Cut
+                                                    </span>
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                                        {stone.setting} Setting
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {/* Total Summary */}
+                                {formData.stones.length > 0 && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <svg className="w-5 h-5 text-[#8B6B4C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span className="text-sm font-medium text-gray-900">
+                                                    Total Stones: {formData.stones.length}
+                                                </span>
+                                            </div>
+                                            <div className="text-lg font-bold text-[#8B6B4C]">
+                                                Total Value: ₹{formData.stoneValue || '0.00'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div>

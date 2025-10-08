@@ -2,6 +2,7 @@
 import { useCart } from '../context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { formatPrice } from '@/lib/utils';
 
 export default function Cart() {
     const router = useRouter();
@@ -70,7 +71,7 @@ export default function Cart() {
                                                 />
                                                 <div className="flex-1">
                                                     <h3 className="text-sm font-medium">{item.name}</h3>
-                                                    <p className="text-sm text-gray-500">${item.price}</p>
+                                                    <p className="text-sm text-gray-500">{formatPrice(item.price)}</p>
                                                     <div className="flex items-center mt-2">
                                                         <button
                                                             onClick={() => updateQuantity(item.product, Math.max(1, item.quantity - 1))}
@@ -103,7 +104,7 @@ export default function Cart() {
                                 <div className="mt-6 pt-6 border-t">
                                     <div className="flex justify-between text-lg font-semibold">
                                         <span>Total</span>
-                                        <span>${calculateTotal().toFixed(2)}</span>
+                                        <span>{formatPrice(calculateTotal())}</span>
                                     </div>
                                     <button 
                                         onClick={handleCheckout}

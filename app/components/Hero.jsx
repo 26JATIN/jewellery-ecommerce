@@ -59,11 +59,8 @@ export default function Hero() {
         setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     };
 
-    const scrollToProducts = () => {
-        const productsSection = document.getElementById('products-section');
-        if (productsSection) {
-            productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    const navigateToCollections = () => {
+        router.push('/collections');
     };
 
     return (
@@ -161,7 +158,7 @@ export default function Hero() {
                                 initial={{ opacity: 0.7 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.3 }}
-                                onClick={scrollToProducts}
+                                onClick={navigateToCollections}
                                 className="px-8 py-3 bg-white text-black rounded hover:bg-white/90 transition-colors font-medium"
                             >
                                 {slides[currentSlide].cta}

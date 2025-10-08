@@ -72,6 +72,45 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0 // Value of diamonds/stones (not affected by gold price)
     },
+    // Enhanced stone/gem specifications
+    stones: [{
+        type: {
+            type: String,
+            enum: ['Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Pearl', 'Amethyst', 'Topaz', 'Garnet', 'Opal', 'Turquoise', 'Other'],
+            default: 'Diamond'
+        },
+        quality: {
+            type: String,
+            enum: ['VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 'AAA', 'AA', 'A', 'B', 'Natural', 'Synthetic'],
+            default: 'VS1'
+        },
+        weight: {
+            type: Number,
+            default: 0 // Weight in carats for diamonds/gems, pieces for pearls
+        },
+        pricePerUnit: {
+            type: Number,
+            default: 0 // Price per carat/piece
+        },
+        totalValue: {
+            type: Number,
+            default: 0 // Calculated value (weight * pricePerUnit)
+        },
+        color: {
+            type: String,
+            default: 'Colorless' // Diamond: Colorless, Near Colorless, etc. Ruby: Red, etc.
+        },
+        cut: {
+            type: String,
+            enum: ['Round', 'Princess', 'Emerald', 'Asscher', 'Oval', 'Marquise', 'Pear', 'Heart', 'Cushion', 'Radiant', 'Cabochon', 'Other'],
+            default: 'Round'
+        },
+        setting: {
+            type: String,
+            enum: ['Prong', 'Bezel', 'Channel', 'Pave', 'Halo', 'Tension', 'Cluster', 'Other'],
+            default: 'Prong'
+        }
+    }],
     pricingMethod: {
         type: String,
         enum: ['fixed', 'dynamic'],

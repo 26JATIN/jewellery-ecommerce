@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import LoginModalHandler from './components/LoginModalHandler';
 import { useProductFilter } from './hooks/useProducts';
 import NewArrivals from './components/NewArrivals';
+import CouponShowcase from './components/CouponShowcase';
 
 // Force dynamic rendering to avoid SSG issues with useSearchParams
 export const dynamic = 'force-dynamic';
@@ -91,6 +92,7 @@ export default function Home() {
       </Suspense>
       <Hero />
       <NewArrivals />
+      <CouponShowcase />
       <Benefits />
       <Testimonials />
       <Footer />
