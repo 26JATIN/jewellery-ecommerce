@@ -56,13 +56,33 @@ const productSchema = new mongoose.Schema({
         default: 22, // 22K, 18K, etc.
         enum: [10, 14, 18, 22, 24]
     },
+    // Silver specifications
+    silverWeight: {
+        type: Number,
+        default: 0 // Weight in grams
+    },
+    silverPurity: {
+        type: Number,
+        default: 925, // 925 for sterling silver, 999 for pure silver
+        enum: [800, 835, 900, 925, 950, 999]
+    },
+    // Platinum specifications
+    platinumWeight: {
+        type: Number,
+        default: 0 // Weight in grams
+    },
+    platinumPurity: {
+        type: Number,
+        default: 950, // 950 for jewelry grade platinum, 999 for pure platinum
+        enum: [850, 900, 950, 999]
+    },
     makingChargePercent: {
         type: Number,
         default: 15 // Making charge percentage
     },
     isDynamicPricing: {
         type: Boolean,
-        default: false // Enable dynamic pricing based on live gold rates
+        default: false // Enable dynamic pricing based on live metal rates
     },
     fixedMakingCharge: {
         type: Number,
@@ -70,7 +90,13 @@ const productSchema = new mongoose.Schema({
     },
     stoneValue: {
         type: Number,
-        default: 0 // Value of diamonds/stones (not affected by gold price)
+        default: 0 // Value of diamonds/stones (not affected by metal price)
+    },
+    // Metal type specification
+    metalType: {
+        type: String,
+        enum: ['gold', 'silver', 'platinum', 'mixed'],
+        default: 'gold'
     },
     // Enhanced stone/gem specifications
     stones: [{

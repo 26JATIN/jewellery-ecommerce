@@ -16,8 +16,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         isActive: true,
         // Dynamic pricing fields
         pricingMethod: 'fixed',
+        metalType: 'gold',
         goldWeight: '',
         goldPurity: '22',
+        silverWeight: '',
+        silverPurity: '925',
+        platinumWeight: '',
+        platinumPurity: '950',
         makingChargePercent: '15',
         stoneValue: '',
         isDynamicPricing: false,
@@ -40,6 +45,29 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         { value: '18', label: '18K (75% Pure)' },
         { value: '14', label: '14K (58.3% Pure)' },
         { value: '10', label: '10K (41.7% Pure)' }
+    ];
+
+    const silverPurities = [
+        { value: '999', label: '999 (99.9% Pure Silver)' },
+        { value: '950', label: '950 (95% Pure Silver)' },
+        { value: '925', label: '925 (Sterling Silver - 92.5%)' },
+        { value: '900', label: '900 (90% Pure Silver)' },
+        { value: '835', label: '835 (83.5% Pure Silver)' },
+        { value: '800', label: '800 (80% Pure Silver)' }
+    ];
+
+    const platinumPurities = [
+        { value: '999', label: '999 (99.9% Pure Platinum)' },
+        { value: '950', label: '950 (95% Pure Platinum - Jewelry Grade)' },
+        { value: '900', label: '900 (90% Pure Platinum)' },
+        { value: '850', label: '850 (85% Pure Platinum)' }
+    ];
+
+    const metalTypes = [
+        { value: 'gold', label: 'Gold' },
+        { value: 'silver', label: 'Silver' },
+        { value: 'platinum', label: 'Platinum' },
+        { value: 'mixed', label: 'Mixed Metals' }
     ];
 
     const stoneTypes = [
@@ -120,8 +148,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 isActive: product.isActive !== undefined ? product.isActive : true,
                 // Dynamic pricing fields
                 pricingMethod: product.pricingMethod || 'fixed',
+                metalType: product.metalType || 'gold',
                 goldWeight: product.goldWeight || '',
                 goldPurity: product.goldPurity || '22',
+                silverWeight: product.silverWeight || '',
+                silverPurity: product.silverPurity || '925',
+                platinumWeight: product.platinumWeight || '',
+                platinumPurity: product.platinumPurity || '950',
                 makingChargePercent: product.makingChargePercent || '15',
                 stoneValue: product.stoneValue || '',
                 isDynamicPricing: product.isDynamicPricing || false,
@@ -189,25 +222,105 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
     };
 
     const calculateDynamicPrice = async () => {
-        if (!formData.goldWeight || parseFloat(formData.goldWeight) <= 0) {
+        // Check selected metal type
+        const selectedMetal = formData.metalType;
+        const isGold = selectedMetal === 'gold';
+        const isSilver = selectedMetal === 'silver';
+        const isPlatinum = selectedMetal === 'platinum';
+        const isMixed = selectedMetal === 'mixed';
+        
+        // Validate only the selected metal type
+        switch (formData.metalType) {
+            case 'gold':
+                const goldWeight = parseFloat(formData.goldWeight);
+                if (!formData.goldWeight || isNaN(goldWeight) || goldWeight <= 0) {
+                    alert('Gold weight is required for pricing calculation. Please enter a value like 10.5 grams.');
+                    return;
+                }
+                break;
+                
+            case 'silver':
+                const silverWeight = parseFloat(formData.silverWeight);
+                if (!formData.silverWeight || isNaN(silverWeight) || silverWeight <= 0) {
+                    alert('Silver weight is required for pricing calculation. Please enter a value like 15.0 grams.');
+                    return;
+                }
+                break;
+                
+            case 'platinum':
+                const platinumWeight = parseFloat(formData.platinumWeight);
+                if (!formData.platinumWeight || isNaN(platinumWeight) || platinumWeight <= 0) {
+                    alert('Platinum weight is required for pricing calculation. Please enter a value like 5.5 grams.');
+                    return;
+                }
+                break;
+                
+            default:
+                alert('Please select a valid metal type (Gold, Silver, or Platinum).');
+                return;
+        }
+
+        if (isMixed) {
+            alert('Mixed metal pricing calculation is not yet implemented. Please select a single metal type for dynamic pricing.');
             return;
         }
 
         setCalculatingPrice(true);
         try {
-            const response = await fetch('/api/gold-price', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    goldWeight: parseFloat(formData.goldWeight),
-                    goldPurity: parseFloat(formData.goldPurity),
-                    makingChargePercent: parseFloat(formData.makingChargePercent),
-                    gstPercent: 3,
-                    currency: 'INR'
-                })
-            });
+            let response;
+            
+            if (isGold) {
+                response = await fetch('/api/gold-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        goldWeight: parseFloat(formData.goldWeight),
+                        goldPurity: parseFloat(formData.goldPurity),
+                        makingChargePercent: parseFloat(formData.makingChargePercent),
+                        gstPercent: 3,
+                        currency: 'INR'
+                    })
+                });
+            } else if (isSilver) {
+                response = await fetch('/api/silver-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        silverWeight: parseFloat(formData.silverWeight),
+                        silverPurity: parseFloat(formData.silverPurity),
+                        makingChargePercent: parseFloat(formData.makingChargePercent),
+                        gstPercent: 3,
+                        currency: 'INR'
+                    })
+                });
+            } else if (isPlatinum) {
+                response = await fetch('/api/platinum-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        platinumWeight: parseFloat(formData.platinumWeight),
+                        platinumPurity: parseFloat(formData.platinumPurity),
+                        makingChargePercent: parseFloat(formData.makingChargePercent),
+                        gstPercent: 3,
+                        currency: 'INR'
+                    })
+                });
+            }
+
+            // Check if response is valid
+            if (!response) {
+                throw new Error('No valid pricing method available for the selected metal type.');
+            }
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
 
             const result = await response.json();
 
@@ -265,6 +378,22 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             }));
         }
 
+        // Handle metal type change - adjust default making charges
+        if (name === 'metalType') {
+            let defaultMakingCharge = '15';
+            if (newValue === 'silver') {
+                defaultMakingCharge = '20'; // Silver typically has higher making charges
+            } else if (newValue === 'platinum') {
+                defaultMakingCharge = '10'; // Platinum typically has lower making charges
+            }
+            
+            setFormData(prev => ({
+                ...prev,
+                [name]: newValue,
+                makingChargePercent: defaultMakingCharge
+            }));
+        }
+
         // Handle dynamic pricing toggle
         if (name === 'isDynamicPricing') {
             setFormData(prev => ({
@@ -284,7 +413,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         }
 
         // Trigger price calculation for dynamic pricing fields
-        if (['goldWeight', 'goldPurity', 'makingChargePercent', 'stoneValue'].includes(name) && 
+        if (['goldWeight', 'goldPurity', 'silverWeight', 'silverPurity', 'makingChargePercent', 'stoneValue', 'metalType'].includes(name) && 
             formData.isDynamicPricing) {
             setTimeout(() => {
                 calculateDynamicPrice();
@@ -422,8 +551,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 price: parseFloat(formData.sellingPrice),
                 stock: parseInt(formData.stock) || 0,
                 // Dynamic pricing fields
+                metalType: formData.metalType,
                 goldWeight: parseFloat(formData.goldWeight) || 0,
                 goldPurity: parseFloat(formData.goldPurity) || 22,
+                silverWeight: parseFloat(formData.silverWeight) || 0,
+                silverPurity: parseFloat(formData.silverPurity) || 925,
+                platinumWeight: parseFloat(formData.platinumWeight) || 0,
+                platinumPurity: parseFloat(formData.platinumPurity) || 950,
                 makingChargePercent: parseFloat(formData.makingChargePercent) || 15,
                 stoneValue: parseFloat(formData.stoneValue) || 0,
                 isDynamicPricing: formData.isDynamicPricing,
@@ -533,6 +667,342 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                             min="0"
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
                         />
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Pricing Method
+                        </label>
+                        <div className="grid grid-cols-1 gap-2">
+                            <div className="flex items-center p-3 border border-gray-300 rounded-lg">
+                                <input
+                                    type="radio"
+                                    name="pricingMethod"
+                                    value="fixed"
+                                    checked={formData.pricingMethod === 'fixed'}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
+                                />
+                                <div className="ml-3">
+                                    <label className="block text-sm font-medium text-gray-900">
+                                        Fixed Pricing
+                                    </label>
+                                    <p className="text-xs text-gray-500">Set manual prices</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center p-3 border border-gray-300 rounded-lg">
+                                <input
+                                    type="radio"
+                                    name="pricingMethod"
+                                    value="dynamic"
+                                    checked={formData.pricingMethod === 'dynamic'}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
+                                />
+                                <div className="ml-3">
+                                    <label className="block text-sm font-medium text-gray-900">
+                                        Dynamic Pricing
+                                    </label>
+                                    <p className="text-xs text-gray-500">Based on live gold rates</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Dynamic Pricing Fields - Show immediately below when selected */}
+                        {formData.pricingMethod === 'dynamic' && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 space-y-4 mt-4">
+                                <div className="flex items-center mb-4">
+                                    <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <h3 className="text-lg font-medium text-yellow-800">Metal Specifications</h3>
+                                </div>
+
+                                {/* Metal Type Selection */}
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Metal Type *
+                                    </label>
+                                    <select
+                                        name="metalType"
+                                        value={formData.metalType}
+                                        onChange={handleInputChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                        required={formData.pricingMethod === 'dynamic'}
+                                    >
+                                        {metalTypes.map((metal) => (
+                                            <option key={metal.value} value={metal.value}>
+                                                {metal.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {(formData.metalType === 'platinum' || formData.metalType === 'mixed') && (
+                                        <p className="text-xs text-amber-600 mt-1 flex items-center">
+                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                            Dynamic pricing not yet available for {formData.metalType}. Use fixed pricing method.
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Gold Fields - Show only for gold or mixed metals */}
+                                    {(formData.metalType === 'gold' || formData.metalType === 'mixed') && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Gold Weight (grams) {formData.metalType === 'gold' ? '*' : ''}
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="goldWeight"
+                                                    value={formData.goldWeight}
+                                                    onChange={handleInputChange}
+                                                    step="0.1"
+                                                    min="0"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    placeholder="e.g., 5.5"
+                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'gold'}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of gold in the jewelry</p>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Gold Purity
+                                                </label>
+                                                <select
+                                                    name="goldPurity"
+                                                    value={formData.goldPurity}
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                >
+                                                    {goldPurities.map((purity) => (
+                                                        <option key={purity.value} value={purity.value}>
+                                                            {purity.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Silver Fields - Show only for silver or mixed metals */}
+                                    {(formData.metalType === 'silver' || formData.metalType === 'mixed') && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Silver Weight (grams) {formData.metalType === 'silver' ? '*' : ''}
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="silverWeight"
+                                                    value={formData.silverWeight}
+                                                    onChange={handleInputChange}
+                                                    step="0.1"
+                                                    min="0"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    placeholder="e.g., 10.5"
+                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'silver'}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of silver in the jewelry</p>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Silver Purity
+                                                </label>
+                                                <select
+                                                    name="silverPurity"
+                                                    value={formData.silverPurity}
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                >
+                                                    {silverPurities.map((purity) => (
+                                                        <option key={purity.value} value={purity.value}>
+                                                            {purity.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Platinum Fields - Show only for platinum or mixed metals */}
+                                    {(formData.metalType === 'platinum' || formData.metalType === 'mixed') && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Platinum Weight (grams) {formData.metalType === 'platinum' ? '*' : ''}
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="platinumWeight"
+                                                    value={formData.platinumWeight}
+                                                    onChange={handleInputChange}
+                                                    step="0.1"
+                                                    min="0"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    placeholder="e.g., 5.5"
+                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'platinum'}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of platinum in the jewelry</p>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Platinum Purity
+                                                </label>
+                                                <select
+                                                    name="platinumPurity"
+                                                    value={formData.platinumPurity}
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                >
+                                                    {platinumPurities.map((purity) => (
+                                                        <option key={purity.value} value={purity.value}>
+                                                            {purity.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Making Charge (%)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="makingChargePercent"
+                                            value={formData.makingChargePercent}
+                                            onChange={handleInputChange}
+                                            step="0.5"
+                                            min="0"
+                                            max="100"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Typical: Gold 10-20%, Silver 15-25%
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Total Stone/Diamond Value (₹ INR)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="stoneValue"
+                                            value={formData.stoneValue}
+                                            onChange={handleInputChange}
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent bg-gray-50"
+                                            placeholder="0"
+                                            readOnly
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Calculated automatically from individual stones below
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Price Calculator Button */}
+                                <div className="flex items-center space-x-4">
+                                    <button
+                                        type="button"
+                                        onClick={calculateDynamicPrice}
+                                        disabled={calculatingPrice || (formData.metalType === 'mixed')}
+                                        className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                                    >
+                                        {calculatingPrice && (
+                                            <svg className="animate-spin h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                        )}
+                                        <span>
+                                            {formData.metalType === 'mixed' ? 'Mixed Metal Pricing Not Available' :
+                                             `Calculate ${formData.metalType.charAt(0).toUpperCase() + formData.metalType.slice(1)} Price`}
+                                        </span>
+                                    </button>
+                                    
+                                    {calculatedPrice && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">Calculated Price: </span>
+                                            <span className="font-semibold text-green-600">
+                                                ₹{calculatedPrice.breakdown.finalPrice.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Price Breakdown */}
+                                {calculatedPrice && (
+                                    <div className="bg-white border border-gray-200 rounded-lg p-4 mt-4">
+                                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                                            {formData.metalType.charAt(0).toUpperCase() + formData.metalType.slice(1)} Price Breakdown
+                                        </h4>
+                                        <div className="space-y-1 text-xs">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                    {formData.metalType === 'gold' ? 'Gold' : 
+                                                     formData.metalType === 'silver' ? 'Silver' : 'Platinum'} Value:
+                                                </span>
+                                                <span>
+                                                    ₹{(calculatedPrice.breakdown.pureGoldValue || 
+                                                       calculatedPrice.breakdown.pureSilverValue || 
+                                                       calculatedPrice.breakdown.purePlatinumValue).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Making Charges:</span>
+                                                <span>₹{calculatedPrice.breakdown.makingCharges.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">GST (3%):</span>
+                                                <span>₹{calculatedPrice.breakdown.gstAmount.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Stone Value:</span>
+                                                <span>₹{parseFloat(formData.stoneValue || 0).toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
+                                                <span>Total:</span>
+                                                <span>₹{(calculatedPrice.breakdown.finalPrice + parseFloat(formData.stoneValue || 0)).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Live Metal Rate Display */}
+                                        <div className="mt-3 pt-2 border-t border-gray-100">
+                                            <div className="flex justify-between text-xs text-gray-500">
+                                                <span>
+                                                    Live {formData.metalType === 'gold' ? 'Gold' : 
+                                                          formData.metalType === 'silver' ? 'Silver' : 'Platinum'} Rate:
+                                                </span>
+                                                <span>
+                                                    ₹{(formData.metalType === 'gold' ? 
+                                                        calculatedPrice.breakdown.goldPricePerGram : 
+                                                        formData.metalType === 'silver' ? 
+                                                        calculatedPrice.breakdown.silverPricePerGram :
+                                                        calculatedPrice.breakdown.platinumPricePerGram
+                                                    ).toFixed(2)}/gram
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-xs text-gray-500">
+                                                <span>Data Source:</span>
+                                                <span>{calculatedPrice.goldPriceData?.source || 
+                                                       calculatedPrice.silverPriceData?.source || 
+                                                       calculatedPrice.platinumPriceData?.source}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -657,190 +1127,8 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     </div>
                 </div>
 
-                {/* Pricing Method Selection */}
+                {/* Enhanced Stone/Gem Management */}
                 <div className="border-t border-gray-200 pt-6">
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                            Pricing Method
-                        </label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center p-4 border border-gray-300 rounded-lg">
-                                <input
-                                    type="radio"
-                                    name="pricingMethod"
-                                    value="fixed"
-                                    checked={formData.pricingMethod === 'fixed'}
-                                    onChange={handleInputChange}
-                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
-                                />
-                                <div className="ml-3">
-                                    <label className="block text-sm font-medium text-gray-900">
-                                        Fixed Pricing
-                                    </label>
-                                    <p className="text-xs text-gray-500">Set manual prices</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-center p-4 border border-gray-300 rounded-lg">
-                                <input
-                                    type="radio"
-                                    name="pricingMethod"
-                                    value="dynamic"
-                                    checked={formData.pricingMethod === 'dynamic'}
-                                    onChange={handleInputChange}
-                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
-                                />
-                                <div className="ml-3">
-                                    <label className="block text-sm font-medium text-gray-900">
-                                        Dynamic Pricing
-                                    </label>
-                                    <p className="text-xs text-gray-500">Based on live gold rates</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Dynamic Pricing Fields */}
-                    {formData.pricingMethod === 'dynamic' && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 space-y-4">
-                            <div className="flex items-center mb-4">
-                                <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 className="text-lg font-medium text-yellow-800">Gold Specifications</h3>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Gold Weight (grams) *
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="goldWeight"
-                                        value={formData.goldWeight}
-                                        onChange={handleInputChange}
-                                        step="0.1"
-                                        min="0.1"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                        placeholder="e.g., 5.5"
-                                        required={formData.pricingMethod === 'dynamic'}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Gold Purity
-                                    </label>
-                                    <select
-                                        name="goldPurity"
-                                        value={formData.goldPurity}
-                                        onChange={handleInputChange}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                    >
-                                        {goldPurities.map((purity) => (
-                                            <option key={purity.value} value={purity.value}>
-                                                {purity.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Making Charge (%)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="makingChargePercent"
-                                        value={formData.makingChargePercent}
-                                        onChange={handleInputChange}
-                                        step="0.5"
-                                        min="0"
-                                        max="100"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Total Stone/Diamond Value (₹ INR)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="stoneValue"
-                                        value={formData.stoneValue}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        step="0.01"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent bg-gray-50"
-                                        placeholder="0"
-                                        readOnly
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Calculated automatically from individual stones below
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Price Calculator Button */}
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    type="button"
-                                    onClick={calculateDynamicPrice}
-                                    disabled={calculatingPrice || !formData.goldWeight}
-                                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                                >
-                                    {calculatingPrice && (
-                                        <svg className="animate-spin h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                    )}
-                                    <span>Calculate Price</span>
-                                </button>
-                                
-                                {calculatedPrice && (
-                                    <div className="text-sm">
-                                        <span className="text-gray-600">Calculated Price: </span>
-                                        <span className="font-semibold text-green-600">
-                                            ₹{calculatedPrice.breakdown.finalPrice.toFixed(2)}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Price Breakdown */}
-                            {calculatedPrice && (
-                                <div className="bg-white border border-gray-200 rounded-lg p-4 mt-4">
-                                    <h4 className="text-sm font-medium text-gray-900 mb-2">Price Breakdown</h4>
-                                    <div className="space-y-1 text-xs">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Gold Value:</span>
-                                            <span>₹{calculatedPrice.breakdown.pureGoldValue.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Making Charges:</span>
-                                            <span>₹{calculatedPrice.breakdown.makingCharges.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">GST:</span>
-                                            <span>₹{calculatedPrice.breakdown.gstAmount.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Stone Value:</span>
-                                            <span>₹{parseFloat(formData.stoneValue || 0).toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
-                                            <span>Total:</span>
-                                            <span>₹{(calculatedPrice.breakdown.finalPrice + parseFloat(formData.stoneValue || 0)).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Enhanced Stone/Gem Management */}
                     <div className="border-t border-gray-200 pt-6">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center">
