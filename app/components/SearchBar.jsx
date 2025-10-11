@@ -10,6 +10,8 @@ export default function SearchBar({ className = "", placeholder = "Search for je
     const [isLoading, setIsLoading] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [currentQuery, setCurrentQuery] = useState(''); // Track current fetching query
+    const [imageErrors, setImageErrors] = useState({}); // Track image load errors
+    const [imagesLoaded, setImagesLoaded] = useState({}); // Track successfully loaded images
     const router = useRouter();
     const searchRef = useRef(null);
     const suggestionsRef = useRef(null);
@@ -28,6 +30,8 @@ export default function SearchBar({ className = "", placeholder = "Search for je
         
         setIsLoading(true);
         setCurrentQuery(query);
+        setImageErrors({}); // Reset image errors on new search
+        setImagesLoaded({}); // Reset loaded images on new search
         
         // Set a timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
@@ -150,6 +154,14 @@ export default function SearchBar({ className = "", placeholder = "Search for je
             }
         };
     }, []);
+
+    const handleImageError = (suggestionId, imageUrl) => {
+        setImageErrors(prev => ({ ...prev, [suggestionId]: true }));
+    };
+
+    const handleImageLoad = (suggestionId) => {
+        setImagesLoaded(prev => ({ ...prev, [suggestionId]: true }));
+    };
 
     const handleSearch = (query = searchQuery) => {
         const trimmedQuery = query.trim();
@@ -395,31 +407,21 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                     whileHover={{ x: 4, backgroundColor: "rgba(212, 175, 118, 0.05)" }}
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                 >
-                                    {suggestion.image ? (
-                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 relative">
+                                    <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 border border-gray-200 relative flex items-center justify-center">
+                                        {suggestion.image && !imageErrors[suggestion.id] ? (
                                             <img
                                                 src={suggestion.image}
                                                 alt={suggestion.text}
                                                 className="w-full h-full object-cover"
-                                                loading="lazy"
-                                                onError={(e) => {
-                                                    // Hide the image and show fallback
-                                                    e.target.style.display = 'none';
-                                                    const fallback = e.target.nextElementSibling;
-                                                    if (fallback) {
-                                                        fallback.style.display = 'flex';
-                                                    }
-                                                }}
+                                                onLoad={() => handleImageLoad(suggestion.id)}
+                                                onError={() => handleImageError(suggestion.id, suggestion.image)}
                                             />
-                                            <div className="w-full h-full bg-gradient-to-br from-[#D4AF76]/20 to-[#8B6B4C]/20 items-center justify-center absolute inset-0 hidden">
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-[#D4AF76]/20 to-[#8B6B4C]/20 flex items-center justify-center">
                                                 {getTypeIcon(suggestion.type, suggestion.icon)}
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center">
-                                            {getTypeIcon(suggestion.type, suggestion.icon)}
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                     
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between">
