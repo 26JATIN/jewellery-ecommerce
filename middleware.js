@@ -4,37 +4,58 @@ import { verifyTokenEdge } from './lib/auth';
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
 
-    // Check if it's an admin route
+    // Protect admin routes
     if (pathname.startsWith('/admin')) {
         try {
             const token = request.cookies.get('token')?.value;
 
+            // No token - redirect to home with login prompt
             if (!token) {
+                console.log(`Admin access denied: No token for ${pathname}`);
                 const homeUrl = new URL('/', request.url);
                 homeUrl.searchParams.set('login', 'required');
                 homeUrl.searchParams.set('redirect', pathname);
-                return NextResponse.redirect(homeUrl);
+                homeUrl.searchParams.set('message', 'Admin access requires authentication');
+                
+                const response = NextResponse.redirect(homeUrl);
+                // Clear any invalid cookies
+                response.cookies.delete('token');
+                return response;
             }
 
+            // Verify token
             const decoded = await verifyTokenEdge(token);
-            if (!decoded) {
+            if (!decoded || !decoded.userId) {
+                console.log(`Admin access denied: Invalid token for ${pathname}`);
                 const homeUrl = new URL('/', request.url);
                 homeUrl.searchParams.set('login', 'required');
                 homeUrl.searchParams.set('redirect', pathname);
-                return NextResponse.redirect(homeUrl);
+                homeUrl.searchParams.set('message', 'Session expired. Please login again');
+                
+                const response = NextResponse.redirect(homeUrl);
+                // Clear invalid token
+                response.cookies.delete('token');
+                return response;
             }
 
-            // We can't check user.isAdmin here without a database connection
-            // So we'll rely on the client-side and API-side protection
-            // The client-side HOC will handle the admin role check
-
-            return NextResponse.next();
+            // Token is valid, allow through (client-side HOC will check isAdmin)
+            // Add security headers
+            const response = NextResponse.next();
+            response.headers.set('X-Frame-Options', 'DENY');
+            response.headers.set('X-Content-Type-Options', 'nosniff');
+            response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+            
+            return response;
         } catch (error) {
             console.error('Middleware auth error:', error);
             const homeUrl = new URL('/', request.url);
             homeUrl.searchParams.set('login', 'required');
             homeUrl.searchParams.set('redirect', pathname);
-            return NextResponse.redirect(homeUrl);
+            homeUrl.searchParams.set('message', 'Authentication error occurred');
+            
+            const response = NextResponse.redirect(homeUrl);
+            response.cookies.delete('token');
+            return response;
         }
     }
 

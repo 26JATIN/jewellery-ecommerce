@@ -1,8 +1,6 @@
 "use client";
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import QuickViewModal from './QuickViewModal';
+import Link from 'next/link';
 import ImageCarousel from './ImageCarousel';
 import { useCart } from '../context/CartContext';
 
@@ -10,13 +8,10 @@ export default function ProductGrid({
     products, 
     loading = false, 
     error = null,
-    showQuickView = true,
     showAddToCart = true,
     className = "",
     emptyMessage = "No products found."
 }) {
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const { addToCart, setIsCartOpen } = useCart();
 
     const handleAddToCart = async (product) => {
@@ -109,15 +104,13 @@ export default function ProductGrid({
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
-                                            onClick={() => {
-                                                setSelectedProduct(product);
-                                                setIsModalOpen(true);
-                                            }}
-                                            className="flex-1 bg-gray-100 text-[#2C2C2C] px-3 py-2 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
-                                        >
-                                            View
-                                        </button>
+                                        <Link href={`/products/${product._id}`} className="flex-1">
+                                            <button 
+                                                className="w-full bg-gray-100 text-[#2C2C2C] px-3 py-2 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+                                            >
+                                                View
+                                            </button>
+                                        </Link>
                                         <button 
                                             onClick={() => handleAddToCart(product)}
                                             disabled={product.stock === 0}
@@ -144,17 +137,13 @@ export default function ProductGrid({
                                     {/* Hover Actions */}
                                     <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <div className="flex gap-2">
-                                            {showQuickView && (
+                                            <Link href={`/products/${product._id}`} className="flex-1">
                                                 <button 
-                                                    onClick={() => {
-                                                        setSelectedProduct(product);
-                                                        setIsModalOpen(true);
-                                                    }}
-                                                    className="flex-1 bg-white/95 backdrop-blur-sm text-[#2C2C2C] px-3 py-2.5 rounded-xl hover:bg-[#D4AF76] hover:text-white transition-all duration-300 text-sm font-light"
+                                                    className="w-full bg-white/95 backdrop-blur-sm text-[#2C2C2C] px-3 py-2.5 rounded-xl hover:bg-[#D4AF76] hover:text-white transition-all duration-300 text-sm font-light"
                                                 >
-                                                    View
+                                                    View Details
                                                 </button>
-                                            )}
+                                            </Link>
                                             {showAddToCart && (
                                                 <button 
                                                     onClick={() => handleAddToCart(product)}
@@ -186,14 +175,6 @@ export default function ProductGrid({
                     ))}
                 </AnimatePresence>
             </motion.div>
-
-            {showQuickView && (
-                <QuickViewModal 
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    product={selectedProduct}
-                />
-            )}
         </>
     );
 }

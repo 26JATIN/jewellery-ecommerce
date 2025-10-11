@@ -10,12 +10,22 @@ export async function GET() {
         const token = cookieStore.get('token')?.value;
 
         if (!token) {
-            return NextResponse.json({ authenticated: false }, { status: 401 });
+            return NextResponse.json({ 
+                authenticated: false,
+                reason: 'No token provided' 
+            }, { status: 401 });
         }
 
         const decoded = verifyToken(token);
         if (!decoded || !decoded.userId) {
-            return NextResponse.json({ authenticated: false }, { status: 401 });
+            // Clear invalid token
+            const response = NextResponse.json({ 
+                authenticated: false,
+                reason: 'Invalid token' 
+            }, { status: 401 });
+            
+            response.cookies.delete('token');
+            return response;
         }
 
         // Connect to DB and fetch full user data
@@ -23,7 +33,14 @@ export async function GET() {
         const user = await User.findById(decoded.userId).select('-password');
 
         if (!user) {
-            return NextResponse.json({ authenticated: false }, { status: 401 });
+            // Clear token for non-existent user
+            const response = NextResponse.json({ 
+                authenticated: false,
+                reason: 'User not found' 
+            }, { status: 401 });
+            
+            response.cookies.delete('token');
+            return response;
         }
 
         return NextResponse.json({
@@ -32,12 +49,20 @@ export async function GET() {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                isAdmin: user.isAdmin,
-                // Add any other needed user fields
+                isAdmin: user.isAdmin || false,
+                createdAt: user.createdAt
             }
         });
     } catch (error) {
         console.error('Auth check error:', error);
-        return NextResponse.json({ authenticated: false }, { status: 500 });
+        
+        // Clear potentially corrupted token
+        const response = NextResponse.json({ 
+            authenticated: false,
+            reason: 'Authentication error' 
+        }, { status: 500 });
+        
+        response.cookies.delete('token');
+        return response;
     }
 }

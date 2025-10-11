@@ -94,18 +94,43 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         try {
+            // Call logout API to clear server-side cookie
             const res = await fetch('/api/auth/logout', {
                 method: 'POST',
+                credentials: 'include' // Ensure cookies are sent
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                throw new Error('Logout failed');
+                console.error('Logout failed:', data);
+                throw new Error(data.error || 'Logout failed');
             }
 
+            // Clear user state immediately
             setUser(null);
-            router.push('/');
+            
+            // Clear any local storage if used
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+            }
+
+            // Force reload to clear any cached state
+            window.location.href = '/';
         } catch (error) {
             console.error('Logout error:', error);
+            
+            // Even if API fails, clear client state
+            setUser(null);
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+            }
+            
+            // Force redirect
+            window.location.href = '/';
+            
             throw error;
         }
     };

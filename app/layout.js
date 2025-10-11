@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
           <CartProvider>
             <NavbarProvider>
               <ConditionalNavbar />
-              <main className="pb-mobile-navbar">
+              <main>
                 {children}
               </main>
             </NavbarProvider>

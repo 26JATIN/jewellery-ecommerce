@@ -51,12 +51,17 @@ export async function POST(req) {
             redirect: user.isAdmin ? '/admin' : '/'
         });
 
+        // Set secure cookie with token
         response.cookies.set('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
+            path: '/',
             maxAge: 60 * 60 * 24 * 7 // 7 days
         });
+
+        // Log successful login (without sensitive data)
+        console.log(`User logged in: ${user.email} (Admin: ${user.isAdmin})`);
 
         return response;
     } catch (error) {
