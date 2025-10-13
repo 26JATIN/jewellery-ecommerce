@@ -43,15 +43,37 @@ function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'blac
 }
 
 class Title {
-  constructor({ gl, plane, renderer, text, textColor = '#545050', font = '30px sans-serif' }) {
+  constructor({ gl, plane, renderer, text, textColor = '#545050', font = '30px sans-serif', screen }) {
     autoBind(this);
     this.gl = gl;
     this.plane = plane;
     this.renderer = renderer;
     this.text = text;
     this.textColor = textColor;
-    this.font = font;
+    this.screen = screen;
+    this.font = this.getResponsiveFont(font);
     this.createMesh();
+  }
+  
+  getResponsiveFont(baseFont) {
+    if (!this.screen) return baseFont;
+    
+    const isMobile = this.screen.width <= 768;
+    const isTablet = this.screen.width > 768 && this.screen.width <= 1024;
+    
+    // Extract font size from font string
+    const baseFontSize = parseInt(baseFont.match(/\d+/)[0]);
+    
+    let fontSize;
+    if (isMobile) {
+      fontSize = Math.max(16, baseFontSize * 0.6); // Smaller font for mobile
+    } else if (isTablet) {
+      fontSize = Math.max(20, baseFontSize * 0.8); // Medium font for tablet
+    } else {
+      fontSize = baseFontSize; // Original size for desktop
+    }
+    
+    return baseFont.replace(/\d+px/, `${fontSize}px`);
   }
   createMesh() {
     const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
@@ -216,7 +238,8 @@ class Media {
       renderer: this.renderer,
       text: this.text,
       textColor: this.textColor,
-      fontFamily: this.font
+      font: this.font,
+      screen: this.screen
     });
   }
   update(scroll, direction) {
@@ -268,11 +291,42 @@ class Media {
         this.plane.program.uniforms.uViewportSizes.value = [this.viewport.width, this.viewport.height];
       }
     }
-    this.scale = this.screen.height / 1500;
-    this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
-    this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
+    
+    // Responsive scaling based on screen size
+    const isMobile = this.screen.width <= 768;
+    const isTablet = this.screen.width > 768 && this.screen.width <= 1024;
+    
+    // Adjust base scale for different screen sizes
+    let baseScale;
+    if (isMobile) {
+      baseScale = this.screen.height / 800; // Smaller scale for mobile
+    } else if (isTablet) {
+      baseScale = this.screen.height / 1200; // Medium scale for tablet
+    } else {
+      baseScale = this.screen.height / 1500; // Original scale for desktop
+    }
+    
+    this.scale = Math.max(baseScale, 0.3); // Minimum scale to prevent too small cards
+    
+    // Responsive card dimensions
+    let cardHeight, cardWidth;
+    if (isMobile) {
+      cardHeight = 400 * this.scale;
+      cardWidth = 320 * this.scale;
+    } else if (isTablet) {
+      cardHeight = 600 * this.scale;
+      cardWidth = 480 * this.scale;
+    } else {
+      cardHeight = 900 * this.scale;
+      cardWidth = 700 * this.scale;
+    }
+    
+    this.plane.scale.y = (this.viewport.height * cardHeight) / this.screen.height;
+    this.plane.scale.x = (this.viewport.width * cardWidth) / this.screen.width;
     this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
-    this.padding = 2;
+    
+    // Responsive padding
+    this.padding = isMobile ? 1 : 2;
     this.width = this.plane.scale.x + this.padding;
     this.widthTotal = this.width * this.length;
     this.x = this.width * this.index;
@@ -294,6 +348,10 @@ class App {
   ) {
     document.documentElement.classList.remove('no-js');
     this.container = container;
+    
+    // Responsive bend - less curve on mobile for better visibility
+    const isMobile = window.innerWidth <= 768;
+    this.responsiveBend = isMobile ? Math.min(bend * 0.6, 1.8) : bend;
     this.scrollSpeed = scrollSpeed;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onCheckDebounce = debounce(this.onCheck, 200);
@@ -302,7 +360,7 @@ class App {
     this.createScene();
     this.onResize();
     this.createGeometry();
-    this.createMedias(items, bend, textColor, borderRadius, font);
+    this.createMedias(items, this.responsiveBend, textColor, borderRadius, font);
     this.update();
     this.addEventListeners();
   }
@@ -370,12 +428,35 @@ class App {
     this.isDown = true;
     this.scroll.position = this.scroll.current;
     this.start = e.touches ? e.touches[0].clientX : e.clientX;
+    this.startY = e.touches ? e.touches[0].clientY : e.clientY;
+    this.hasMoved = false;
   }
   onTouchMove(e) {
     if (!this.isDown) return;
+    
     const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const distance = (this.start - x) * (this.scrollSpeed * 0.025);
-    this.scroll.target = this.scroll.position + distance;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = this.start - x;
+    const deltaY = this.startY - y;
+    
+    // Only prevent default and move gallery if horizontal movement is dominant
+    if (!this.hasMoved && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      this.hasMoved = true;
+      if (e.touches) {
+        e.preventDefault(); // Prevent page scroll only when we're sure it's horizontal
+      }
+    }
+    
+    // Only update gallery if we've determined this is horizontal movement
+    if (this.hasMoved) {
+      // More sensitive touch movement on mobile
+      const isMobile = this.screen.width <= 768;
+      const multiplier = isMobile ? 0.04 : 0.025; // More sensitive on mobile
+      
+      const distance = deltaX * (this.scrollSpeed * multiplier);
+      this.scroll.target = this.scroll.position + distance;
+    }
   }
   onTouchUp() {
     this.isDown = false;
@@ -448,7 +529,7 @@ class App {
     // Document-level for drag continuation outside container
     document.addEventListener('mousemove', this.boundOnTouchMove);
     document.addEventListener('mouseup', this.boundOnTouchUp);
-    document.addEventListener('touchmove', this.boundOnTouchMove, { passive: true });
+    document.addEventListener('touchmove', this.boundOnTouchMove, { passive: false }); // Non-passive to allow preventDefault
     document.addEventListener('touchend', this.boundOnTouchUp);
   }
   destroy() {

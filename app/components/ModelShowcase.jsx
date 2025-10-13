@@ -97,7 +97,7 @@ export default function ModelShowcase() {
                 </motion.div>
 
                 {/* OGL Circular Gallery */}
-                <div className="h-[600px] md:h-[700px] lg:h-[800px] w-full">
+                <div className="h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] w-full">
                     <CircularGallery
                         items={oglItems}
                         bend={3} // Circular arc effect
