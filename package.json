@@ -12,6 +12,7 @@
     "seed-products": "node scripts/seedProducts.mjs"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.35.0",
     "@tailwindcss/oxide": "^4.1.14",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
@@ -28,7 +29,9 @@
     "mongoose": "^8.18.3",
     "motion": "^12.23.24",
     "next": "15.5.4",
+    "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
+    "ogl": "^1.0.11",
     "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",

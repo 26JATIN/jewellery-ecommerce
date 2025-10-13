@@ -55,14 +55,18 @@ export async function POST(req) {
         }
 
         const formData = await req.formData();
-        const file = formData.get('image');
+        const file = formData.get('file') || formData.get('image'); // Support both field names
+        const folder = formData.get('folder') || 'jewellery-products';
 
         if (!file) {
             return NextResponse.json(
-                { error: 'No image file provided' },
+                { error: 'No file provided' },
                 { status: 400 }
             );
         }
+
+        // Detect file type
+        const fileType = file.type.startsWith('video/') ? 'video' : 'image';
 
         // Convert file to buffer
         const bytes = await file.arrayBuffer();
@@ -70,15 +74,21 @@ export async function POST(req) {
 
         // Upload to Cloudinary
         const uploadResult = await new Promise((resolve, reject) => {
+            const uploadOptions = {
+                resource_type: fileType,
+                folder: folder,
+            };
+
+            // Add transformations only for images
+            if (fileType === 'image') {
+                uploadOptions.transformation = [
+                    { width: 1200, height: 1500, crop: 'limit', quality: 'auto' },
+                    { fetch_format: 'auto' }
+                ];
+            }
+
             cloudinary.uploader.upload_stream(
-                {
-                    resource_type: 'image',
-                    folder: 'jewellery-products',
-                    transformation: [
-                        { width: 800, height: 800, crop: 'fill', quality: 'auto' },
-                        { fetch_format: 'auto' }
-                    ]
-                },
+                uploadOptions,
                 (error, result) => {
                     if (error) {
                         reject(error);

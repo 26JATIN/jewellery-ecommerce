@@ -9,7 +9,7 @@ import LoginModalHandler from './components/LoginModalHandler';
 import NewArrivals from './components/NewArrivals';
 import CategoryStoryBadges from './components/CategoryStoryBadges';
 import FeaturedCollections from './components/FeaturedCollections';
-import BrandStory from './components/BrandStory';
+import ModelShowcase from './components/ModelShowcase';
 import PremiumCTA from './components/PremiumCTA';
 import TrustIndicators from './components/TrustIndicators';
 import Newsletter from './components/Newsletter';
@@ -44,8 +44,8 @@ export default function Home() {
       {/* New Arrivals Section */}
       <NewArrivals />
       
-      {/* Brand Story Section - New */}
-      <BrandStory />
+      {/* Model Showcase Section - Dynamic Gallery */}
+      <ModelShowcase />
       
       {/* Premium Benefits */}
       <Benefits />
