@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/app/components/AdminLayout';
 import withAdminAuth from '@/app/components/withAdminAuth';
 
@@ -33,11 +33,7 @@ const CouponManagement = () => {
     'Wedding', 'Vintage', 'Contemporary', 'Traditional'
   ];
 
-  useEffect(() => {
-    fetchCoupons();
-  }, [statusFilter]);
-
-  const fetchCoupons = async () => {
+  const fetchCoupons = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/coupons?status=${statusFilter}`);
@@ -51,7 +47,11 @@ const CouponManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchCoupons();
+  }, [fetchCoupons]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

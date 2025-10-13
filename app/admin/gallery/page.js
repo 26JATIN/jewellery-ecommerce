@@ -262,7 +262,7 @@ function AdminGalleryPage() {
                                         </button>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Click "Upload" to select from your computer or paste Cloudinary public ID directly
+                                        Click &quot;Upload&quot; to select from your computer or paste Cloudinary public ID directly
                                     </p>
                                     
                                     {/* Preview */}
