@@ -39,10 +39,10 @@ export default function Footer() {
                     <div>
                         <h4 className="font-light text-lg mb-6 text-[#D4AF76]">Support</h4>
                         <ul className="space-y-3">
-                            <li><Link href="/shipping" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Shipping Info</Link></li>
-                            <li><Link href="/returns" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Returns</Link></li>
-                            <li><Link href="/faq" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">FAQ</Link></li>
-                            <li><Link href="/care" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Care Guide</Link></li>
+                            <li><Link href="/policies/shipping" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Shipping & Delivery</Link></li>
+                            <li><Link href="/policies/refund" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Returns & Refunds</Link></li>
+                            <li><Link href="/policies/contact" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">Contact Us</Link></li>
+                            <li><Link href="/policies" className="text-gray-400 hover:text-[#D4AF76] transition-colors font-light">All Policies</Link></li>
                         </ul>
                     </div>
                     
@@ -67,11 +67,13 @@ export default function Footer() {
                 <div className="mt-16 pt-8 border-t border-gray-800">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-gray-500 font-light text-sm">
-                            © 2025 LUXE. All rights reserved.
+                            © 2025 Nandika Jewellers. All rights reserved.
                         </p>
-                        <div className="flex gap-6 text-sm">
-                            <Link href="/privacy" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Privacy Policy</Link>
-                            <Link href="/terms" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Terms of Service</Link>
+                        <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
+                            <Link href="/policies/privacy" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Privacy Policy</Link>
+                            <Link href="/policies/terms" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Terms & Conditions</Link>
+                            <Link href="/policies/refund" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Refund Policy</Link>
+                            <Link href="/policies/shipping" className="text-gray-500 hover:text-[#D4AF76] transition-colors font-light">Shipping Policy</Link>
                         </div>
                     </div>
                 </div>
