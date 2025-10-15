@@ -2,6 +2,7 @@
   "name": "jewellery-ecommerce",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,9 +13,12 @@
     "seed-products": "node scripts/seedProducts.mjs"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@tabler/icons-react": "^3.35.0",
     "@tailwindcss/oxide": "^4.1.14",
+    "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
+    "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
@@ -22,6 +26,7 @@
     "esm": "^3.2.25",
     "framer-motion": "^12.23.22",
     "jose": "^6.1.0",
+    "jsdom": "^27.0.0",
     "jsonwebtoken": "^9.0.2",
     "lightningcss": "^1.30.2",
     "lucide-react": "^0.545.0",
@@ -32,6 +37,9 @@
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
     "ogl": "^1.0.11",
+    "puppeteer": "^24.25.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",

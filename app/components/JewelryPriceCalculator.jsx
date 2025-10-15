@@ -14,6 +14,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
   const [calculation, setCalculation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPrices, setCurrentPrices] = useState(null);
 
   // INR only for Indian jewelry business
   const currencies = [
@@ -21,12 +22,31 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
   ];
 
   const goldPurities = [
-    { value: '24', label: '24K (99.9% Pure)' },
-    { value: '22', label: '22K (91.7% Pure)' },
-    { value: '18', label: '18K (75% Pure)' },
-    { value: '14', label: '14K (58.3% Pure)' },
-    { value: '10', label: '10K (41.7% Pure)' }
+    { value: '24', label: '24K (99.9% Pure)', key: '24k' },
+    { value: '22', label: '22K (91.7% Pure)', key: '22k' },
+    { value: '18', label: '18K (75% Pure)', key: '18k' }
   ];
+
+  // Fetch current gold prices
+  useEffect(() => {
+    const fetchCurrentPrices = async () => {
+      try {
+        const response = await fetch('/api/gold-price?currency=INR&cache=true');
+        const result = await response.json();
+        if (result.success && result.data.detailed) {
+          setCurrentPrices(result.data.detailed);
+        }
+      } catch (err) {
+        console.error('Error fetching current prices:', err);
+      }
+    };
+    
+    fetchCurrentPrices();
+    
+    // Refresh prices every 5 minutes
+    const interval = setInterval(fetchCurrentPrices, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -109,6 +129,39 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
     >
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Jewelry Price Calculator (₹ INR)</h2>
       
+      {/* Current Gold Prices Display */}
+      {currentPrices && currentPrices.gold && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-lg">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Current Gold Prices (Per Gram)</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {currentPrices.gold['24k'] && (
+              <div className="bg-white p-3 rounded border border-yellow-300">
+                <div className="text-xs text-gray-600 mb-1">24K Gold</div>
+                <div className="text-lg font-bold text-yellow-700">
+                  {formatPrice(currentPrices.gold['24k'])}
+                </div>
+              </div>
+            )}
+            {currentPrices.gold['22k'] && (
+              <div className="bg-white p-3 rounded border border-amber-300">
+                <div className="text-xs text-gray-600 mb-1">22K Gold</div>
+                <div className="text-lg font-bold text-amber-700">
+                  {formatPrice(currentPrices.gold['22k'])}
+                </div>
+              </div>
+            )}
+            {currentPrices.gold['18k'] && (
+              <div className="bg-white p-3 rounded border border-orange-300">
+                <div className="text-xs text-gray-600 mb-1">18K Gold</div>
+                <div className="text-lg font-bold text-orange-700">
+                  {formatPrice(currentPrices.gold['18k'])}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       {/* Input Form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Gold Weight */}
@@ -186,7 +239,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Currency (Fixed)
           </label>
-          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-green-50 border-green-200">
+          <div className="w-full px-3 py-2 border border-green-200 rounded-md bg-green-50">
             <span className="text-green-800 font-medium">₹ Indian Rupee (INR)</span>
             <span className="text-sm text-green-600 ml-2">- All calculations in INR</span>
           </div>

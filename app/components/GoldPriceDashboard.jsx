@@ -117,12 +117,17 @@ const GoldPriceDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Live Precious Metal Prices (₹ INR)</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Live Gold & Silver Prices (Per Gram)</h2>
           <p className="text-gray-600 text-sm">
-            Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Loading...'} • All prices in Indian Rupees
+            Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Loading...'} • All prices in Indian Rupees (₹/gram)
             {goldData?.fallback && (
               <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
                 Fallback Data
+              </span>
+            )}
+            {goldData?.source && (
+              <span className="ml-2 text-xs text-gray-500">
+                Source: {goldData.source}
               </span>
             )}
           </p>
@@ -136,30 +141,87 @@ const GoldPriceDashboard = () => {
         </div>
       </div>
 
-      {/* Price Cards */}
-      {goldData && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {Object.entries(goldData.rates).map(([metal, price]) => (
-            <motion.div
-              key={metal}
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-700 capitalize">{metal}</h3>
-                {getChangeIndicator(price)}
+      {/* Gold Purity Cards */}
+      {goldData && goldData.detailed && (
+        <>
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Gold Prices (Per Gram)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* 24K Gold */}
+              {goldData.detailed.gold['24k'] && (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-lg border-2 border-yellow-300 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">24K Gold</h3>
+                    <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">99.99% Pure</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatPrice(goldData.detailed.gold['24k'])}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">per gram</p>
+                </motion.div>
+              )}
+
+              {/* 22K Gold */}
+              {goldData.detailed.gold['22k'] && (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-amber-50 to-amber-100 p-5 rounded-lg border-2 border-amber-300 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">22K Gold</h3>
+                    <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded">91.67% Pure</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatPrice(goldData.detailed.gold['22k'])}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">per gram</p>
+                </motion.div>
+              )}
+
+              {/* 18K Gold */}
+              {goldData.detailed.gold['18k'] && (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-lg border-2 border-orange-300 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">18K Gold</h3>
+                    <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">75.00% Pure</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatPrice(goldData.detailed.gold['18k'])}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">per gram</p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          {/* Silver Price Card */}
+          {goldData.detailed.silver?.perGram && (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Silver Price (Per Gram)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-lg border-2 border-gray-300 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">Silver 999</h3>
+                    <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">99.99% Pure</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatPrice(goldData.detailed.silver.perGram)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">per gram</p>
+                </motion.div>
               </div>
-              <div className="space-y-1">
-                <p className="text-lg font-bold text-gray-900">
-                  {formatPrice(price)} <span className="text-xs text-gray-500">/oz</span>
-                </p>
-                <p className="text-sm text-gray-600">
-                  {formatPrice(goldData.perGram[metal])} <span className="text-xs text-gray-500">/g</span>
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Refresh Button */}
