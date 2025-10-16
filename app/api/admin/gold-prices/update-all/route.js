@@ -3,6 +3,14 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { fetchLiveGoldPrice, calculateJewelryPrice } from '@/lib/goldPrice';
 
+/**
+ * @deprecated This route is deprecated. Use /api/admin/products/bulk-price-update instead
+ * This route is maintained for backward compatibility only
+ * 
+ * IMPORTANT: This route will be removed in a future version
+ * Please migrate to the new consolidated route: /api/admin/products/bulk-price-update
+ */
+
 export async function POST(request) {
   try {
     console.log('Starting bulk product price update...');
