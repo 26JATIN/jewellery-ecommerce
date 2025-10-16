@@ -13,6 +13,7 @@ import ModelShowcase from './components/ModelShowcase';
 import PremiumCTA from './components/PremiumCTA';
 import TrustIndicators from './components/TrustIndicators';
 import Newsletter from './components/Newsletter';
+import VideoShowcaseSection from './components/HeroVideoShowcase';
 
 // Force dynamic rendering to avoid SSG issues with useSearchParams
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,9 @@ export default function Home() {
       
       {/* New Arrivals Section */}
       <NewArrivals />
+
+      {/* Video Showcase Section */}
+      <VideoShowcaseSection />
       
       {/* Model Showcase Section - Dynamic Gallery */}
       <ModelShowcase />
