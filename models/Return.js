@@ -18,8 +18,8 @@ const returnSchema = new mongoose.Schema({
     // Return request details
     returnNumber: {
         type: String,
-        unique: true,
-        required: true
+        unique: true
+        // Not marked as required since it's auto-generated in pre-save hook
     },
     
     // Items being returned (subset of original order items)
@@ -36,6 +36,7 @@ const returnSchema = new mongoose.Schema({
             required: true,
             min: 1
         },
+        orderItemId: String, // Track which specific order item this return is for
         image: String,
         // Return reason for each item
         returnReason: {
@@ -91,6 +92,7 @@ const returnSchema = new mongoose.Schema({
     // Return policy compliance
     returnWindow: {
         orderDate: Date,
+        deliveryDate: Date,
         returnRequestDate: {
             type: Date,
             default: Date.now
@@ -157,12 +159,23 @@ const returnSchema = new mongoose.Schema({
         // Pickup status
         pickupStatus: {
             type: String,
-            enum: ['pending', 'scheduled', 'attempted', 'completed', 'failed'],
+            enum: ['pending', 'scheduled', 'attempted', 'completed', 'failed', 'not_required'],
             default: 'pending'
         },
         
         // Pickup instructions from customer
-        specialInstructions: String
+        specialInstructions: String,
+        
+        // Tracking details
+        currentLocation: String,
+        lastUpdateAt: Date,
+        deliveredToWarehouse: Date,
+        trackingHistory: [{
+            activity: String,
+            location: String,
+            timestamp: Date,
+            statusCode: String
+        }]
     },
     
     // Quality inspection at warehouse
@@ -255,7 +268,9 @@ const returnSchema = new mongoose.Schema({
         submittedAt: Date
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
 // Indexes for better query performance
@@ -266,18 +281,46 @@ returnSchema.index({ status: 1 });
 returnSchema.index({ 'returnWindow.returnRequestDate': 1 });
 returnSchema.index({ 'pickup.scheduledDate': 1 });
 
+// Compound indexes for common query patterns
+returnSchema.index({ user: 1, status: 1 }); // User returns filtered by status
+returnSchema.index({ user: 1, createdAt: -1 }); // User's recent returns
+returnSchema.index({ status: 1, createdAt: -1 }); // Admin dashboard queries
+returnSchema.index({ 'pickup.pickupStatus': 1, 'pickup.scheduledDate': 1 }); // Pickup scheduling
+returnSchema.index({ order: 1, createdAt: -1 }); // Order return history
+
+// Compound unique index to prevent duplicate active returns for same order
+// This prevents race conditions when creating multiple returns simultaneously
+returnSchema.index(
+    { order: 1, status: 1 }, 
+    { 
+        unique: true,
+        partialFilterExpression: { 
+            status: { 
+                $nin: ['cancelled', 'completed'] 
+            } 
+        },
+        name: 'unique_active_return_per_order'
+    }
+);
+
 // Pre-save middleware to generate return number
 returnSchema.pre('save', async function(next) {
     if (this.isNew && !this.returnNumber) {
         try {
-            // Use this.constructor to avoid circular reference
-            const count = await this.constructor.countDocuments();
+            // Get the model from the connection to avoid circular reference
+            const ReturnModel = mongoose.model('Return');
+            const count = await ReturnModel.countDocuments();
             this.returnNumber = `RET${Date.now()}${String(count + 1).padStart(4, '0')}`;
         } catch (error) {
             console.error('Error generating return number:', error);
-            // Fallback to timestamp-based number
-            this.returnNumber = `RET${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+            // Fallback to timestamp-based number with more entropy
+            this.returnNumber = `RET${Date.now()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
         }
+    }
+    
+    // Ensure returnNumber is always set
+    if (!this.returnNumber) {
+        this.returnNumber = `RET${Date.now()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
     }
     
     // Update status history
@@ -303,15 +346,49 @@ returnSchema.virtual('returnAge').get(function() {
 returnSchema.virtual('isCurrentlyEligible').get(function() {
     if (!this.eligibility.isEligible) return false;
     
-    const daysSinceOrder = Math.floor(
-        (this.returnWindow.returnRequestDate - this.returnWindow.orderDate) / (1000 * 60 * 60 * 24)
+    // Use delivery date if available, otherwise use order date
+    const referenceDate = this.returnWindow.deliveryDate || this.returnWindow.orderDate;
+    const daysSinceDelivery = Math.floor(
+        (this.returnWindow.returnRequestDate - referenceDate) / (1000 * 60 * 60 * 24)
     );
     
-    return daysSinceOrder <= this.returnWindow.allowedReturnDays;
+    return daysSinceDelivery <= this.returnWindow.allowedReturnDays;
 });
+
+// State machine for valid status transitions
+const VALID_TRANSITIONS = {
+    requested: ['pending_approval', 'approved', 'rejected', 'cancelled'],
+    pending_approval: ['approved', 'rejected', 'cancelled'],
+    approved: ['pickup_scheduled', 'cancelled'],
+    rejected: [], // Terminal state
+    pickup_scheduled: ['picked_up', 'cancelled'],
+    picked_up: ['in_transit'],
+    in_transit: ['received'],
+    received: ['inspected'],
+    inspected: ['approved_refund', 'rejected_refund'],
+    approved_refund: ['refund_processed'],
+    rejected_refund: [], // Terminal state
+    refund_processed: ['completed'],
+    completed: [], // Terminal state
+    cancelled: [] // Terminal state
+};
 
 // Methods
 returnSchema.methods.updateStatus = function(newStatus, updatedBy, note = '') {
+    const currentStatus = this.status;
+    
+    // Validate state transition
+    if (!VALID_TRANSITIONS[currentStatus]) {
+        throw new Error(`Invalid current status: ${currentStatus}`);
+    }
+    
+    if (!VALID_TRANSITIONS[currentStatus].includes(newStatus)) {
+        throw new Error(
+            `Invalid status transition: Cannot move from "${currentStatus}" to "${newStatus}". ` +
+            `Valid transitions: ${VALID_TRANSITIONS[currentStatus].join(', ') || 'none (terminal state)'}`
+        );
+    }
+    
     this.status = newStatus;
     this.modifiedBy = updatedBy;
     
@@ -327,21 +404,78 @@ returnSchema.methods.updateStatus = function(newStatus, updatedBy, note = '') {
     return this.save();
 };
 
+// Check if a status transition is valid
+returnSchema.methods.canTransitionTo = function(newStatus) {
+    const currentStatus = this.status;
+    return VALID_TRANSITIONS[currentStatus]?.includes(newStatus) || false;
+};
+
+// Get all valid next statuses
+returnSchema.methods.getValidNextStatuses = function() {
+    return VALID_TRANSITIONS[this.status] || [];
+};
+
 returnSchema.methods.calculateRefundAmount = function() {
     const originalAmount = this.refundDetails.originalAmount;
     const returnShippingCost = this.refundDetails.returnShippingCost || 0;
     const restockingFee = this.refundDetails.restockingFee || 0;
     
+    // Validate amounts
+    if (originalAmount <= 0) {
+        throw new Error('Original amount must be greater than 0');
+    }
+    
+    if (returnShippingCost < 0 || restockingFee < 0) {
+        throw new Error('Shipping cost and restocking fee cannot be negative');
+    }
+    
+    if (returnShippingCost + restockingFee > originalAmount) {
+        throw new Error('Total deductions cannot exceed original amount');
+    }
+    
     this.refundDetails.refundAmount = Math.max(0, originalAmount - returnShippingCost - restockingFee);
     return this.refundDetails.refundAmount;
 };
 
+// Validate refund details before processing
+returnSchema.methods.validateRefundDetails = function() {
+    const { originalAmount, refundAmount, returnShippingCost = 0, restockingFee = 0 } = this.refundDetails;
+    
+    const errors = [];
+    
+    if (!originalAmount || originalAmount <= 0) {
+        errors.push('Invalid original amount');
+    }
+    
+    if (refundAmount === undefined || refundAmount === null) {
+        errors.push('Refund amount not calculated');
+    }
+    
+    if (refundAmount > originalAmount) {
+        errors.push('Refund amount cannot exceed original amount');
+    }
+    
+    if (refundAmount < 0) {
+        errors.push('Refund amount cannot be negative');
+    }
+    
+    const expectedRefund = originalAmount - returnShippingCost - restockingFee;
+    if (Math.abs(refundAmount - expectedRefund) > 0.01) { // Allow 1 paisa tolerance for rounding
+        errors.push(`Refund amount mismatch. Expected: ${expectedRefund}, Got: ${refundAmount}`);
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+};
+
 returnSchema.methods.canBeReturned = function() {
     const now = new Date();
-    const orderDate = this.returnWindow.orderDate;
-    const daysSinceOrder = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+    const referenceDate = this.returnWindow.deliveryDate || this.returnWindow.orderDate;
+    const daysSinceDelivery = Math.floor((now - referenceDate) / (1000 * 60 * 60 * 24));
     
-    return daysSinceOrder <= this.returnWindow.allowedReturnDays && this.eligibility.isEligible;
+    return daysSinceDelivery <= this.returnWindow.allowedReturnDays && this.eligibility.isEligible;
 };
 
 // Static methods

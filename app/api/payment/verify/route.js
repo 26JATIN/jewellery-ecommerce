@@ -5,6 +5,7 @@ import Order from '@/models/Order';
 import Coupon from '@/models/Coupon';
 import config from '@/lib/config';
 import { orderAutomationService } from '@/lib/orderAutomationService';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(req) {
     try {
@@ -14,6 +15,24 @@ export async function POST(req) {
             razorpay_order_id, 
             razorpay_signature 
         } = await req.json();
+        
+        // Rate limiting: 5 verification attempts per order per 5 minutes
+        const rateLimitResult = rateLimit(`payment_verify_${orderId}`, 5, 5 * 60 * 1000);
+        
+        if (!rateLimitResult.allowed) {
+            return NextResponse.json(
+                { 
+                    error: `Too many verification attempts. Please try again in ${Math.ceil(rateLimitResult.waitTime / 60)} minutes.`,
+                    retryAfter: rateLimitResult.retryAfter
+                },
+                { 
+                    status: 429,
+                    headers: {
+                        'Retry-After': rateLimitResult.retryAfter.toString()
+                    }
+                }
+            );
+        }
 
         // Verify signature
         const body = razorpay_order_id + "|" + razorpay_payment_id;

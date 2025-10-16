@@ -14,13 +14,23 @@ export function useProducts() {
             
             if (res.ok) {
                 const data = await res.json();
-                setProducts(data);
+                // API returns paginated response with data nested
+                if (data.success && Array.isArray(data.data)) {
+                    setProducts(data.data);
+                } else if (Array.isArray(data)) {
+                    // Backward compatibility if API returns direct array
+                    setProducts(data);
+                } else {
+                    console.error('Unexpected API response format:', data);
+                    setProducts([]);
+                }
             } else {
                 throw new Error('Failed to fetch products');
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
             setError(err.message);
+            setProducts([]); // Ensure products is always an array
         } finally {
             setLoading(false);
         }

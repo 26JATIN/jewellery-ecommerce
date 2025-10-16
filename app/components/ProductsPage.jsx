@@ -51,7 +51,17 @@ export default function ProductsPage() {
             setLoading(true);
             const response = await fetch('/api/products');
             const data = await response.json();
-            setProducts(data);
+            
+            // API now returns paginated response with data nested
+            if (data.success && Array.isArray(data.data)) {
+                setProducts(data.data);
+            } else if (Array.isArray(data)) {
+                // Backward compatibility if API returns direct array
+                setProducts(data);
+            } else {
+                console.error('Unexpected API response format:', data);
+                setProducts([]);
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
             setProducts([]);
@@ -61,7 +71,7 @@ export default function ProductsPage() {
     };
 
     // Filter and sort products
-    const filteredProducts = products
+    const filteredProducts = (Array.isArray(products) ? products : [])
         .filter(product => {
             const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
             const matchesSearch = !searchTerm || 

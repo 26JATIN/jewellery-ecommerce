@@ -68,20 +68,31 @@ export default function Collections() {
             const response = await fetch('/api/products');
             if (response.ok) {
                 const data = await response.json();
-                setProducts(data);
+                // API returns paginated response with data nested
+                if (data.success && Array.isArray(data.data)) {
+                    setProducts(data.data);
+                } else if (Array.isArray(data)) {
+                    // Backward compatibility if API returns direct array
+                    setProducts(data);
+                } else {
+                    console.error('Unexpected API response format:', data);
+                    setProducts([]);
+                }
             } else {
                 setError('Failed to fetch products');
+                setProducts([]);
             }
         } catch (error) {
             console.error('Error fetching products:', error);
             setError('Failed to fetch products');
+            setProducts([]);
         } finally {
             setLoading(false);
         }
     };
 
     // Filter and sort products
-    const filteredProducts = products
+    const filteredProducts = (Array.isArray(products) ? products : [])
         .filter(product =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

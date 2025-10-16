@@ -86,24 +86,43 @@ export async function POST(req) {
             quantity: 1
         };
         
+        // Use atomic operations to prevent race conditions
         if (!cart) {
-            cart = new Cart({
+            // Create new cart
+            cart = await Cart.create({
                 user: decoded.userId,
                 items: [cartItem]
             });
         } else {
-            const existingItemIndex = cart.items.findIndex(
+            // Check if item already exists
+            const existingItem = cart.items.find(
                 item => item.product.toString() === productId.toString()
             );
 
-            if (existingItemIndex > -1) {
-                cart.items[existingItemIndex].quantity += 1;
+            if (existingItem) {
+                // Use atomic $inc to increment quantity
+                cart = await Cart.findOneAndUpdate(
+                    { 
+                        user: decoded.userId,
+                        'items.product': productId 
+                    },
+                    { 
+                        $inc: { 'items.$.quantity': 1 } 
+                    },
+                    { new: true }
+                );
             } else {
-                cart.items.push(cartItem);
+                // Use atomic $push to add new item
+                cart = await Cart.findOneAndUpdate(
+                    { user: decoded.userId },
+                    { $push: { items: cartItem } },
+                    { new: true }
+                );
             }
         }
 
-        await cart.save();
+        // Populate product details for response
+        await cart.populate('items.product');
 
         return NextResponse.json({ 
             items: cart.items,

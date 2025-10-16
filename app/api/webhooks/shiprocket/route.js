@@ -1,6 +1,29 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+
+// Verify webhook signature for security
+function verifyWebhookSignature(payload, signature, secret) {
+    if (!secret) {
+        console.warn('⚠️  SHIPROCKET_WEBHOOK_SECRET not configured - skipping verification');
+        return true; // Allow in development
+    }
+    
+    if (!signature) {
+        return false;
+    }
+    
+    const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(JSON.stringify(payload))
+        .digest('hex');
+    
+    return crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(expectedSignature)
+    );
+}
 
 // Shiprocket webhook handler for automatic tracking updates
 export async function POST(req) {
@@ -8,8 +31,19 @@ export async function POST(req) {
         const webhookData = await req.json();
         console.log('Shiprocket webhook received:', JSON.stringify(webhookData, null, 2));
 
-        // Verify webhook authenticity (optional - add webhook secret verification)
+        // Verify webhook authenticity
         const signature = req.headers.get('x-shiprocket-signature');
+        const webhookSecret = process.env.SHIPROCKET_WEBHOOK_SECRET;
+        
+        if (!verifyWebhookSignature(webhookData, signature, webhookSecret)) {
+            console.error('❌ Invalid webhook signature');
+            return NextResponse.json(
+                { error: 'Invalid signature' },
+                { status: 401 }
+            );
+        }
+        
+        console.log('✅ Webhook signature verified');
         
         // Extract relevant data from webhook
         const {

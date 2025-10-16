@@ -2,9 +2,29 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { verifyPassword, generateToken } from '@/lib/auth';
+import { rateLimit, getClientIP } from '@/lib/rateLimit';
 
 export async function POST(req) {
     try {
+        // Rate limiting: 5 login attempts per 15 minutes per IP
+        const clientIP = getClientIP(req);
+        const rateLimitResult = rateLimit(`login_${clientIP}`, 5, 15 * 60 * 1000);
+        
+        if (!rateLimitResult.allowed) {
+            return NextResponse.json(
+                { 
+                    error: `Too many login attempts. Please try again in ${rateLimitResult.waitTime} seconds.`,
+                    retryAfter: rateLimitResult.retryAfter
+                },
+                { 
+                    status: 429,
+                    headers: {
+                        'Retry-After': rateLimitResult.retryAfter.toString()
+                    }
+                }
+            );
+        }
+        
         await connectDB();
         const { email, password } = await req.json();
 

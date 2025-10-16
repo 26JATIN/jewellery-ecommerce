@@ -113,15 +113,99 @@ export async function POST(req) {
 
         await connectDB();
 
-        // SERVER-SIDE VALIDATION: Calculate actual cart total
-        const productIds = items.map(item => item.product || item.productId);
+        // Validate items array
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return NextResponse.json(
+                { error: 'Cart is empty' },
+                { status: 400 }
+            );
+        }
+
+        // SERVER-SIDE VALIDATION: Calculate actual cart total and check stock
+        // Extract product IDs properly (handle both string and object formats)
+        const productIds = items.map(item => {
+            const productId = item.product || item.productId || item.id || item._id;
+            // Convert to string if it's an object
+            return typeof productId === 'object' && productId._id 
+                ? productId._id.toString()
+                : productId?.toString();
+        }).filter(Boolean); // Remove any undefined/null values
+        
+        if (productIds.length === 0) {
+            return NextResponse.json(
+                { error: 'Invalid cart items: No product IDs found' },
+                { status: 400 }
+            );
+        }
+        
         const products = await Product.find({ _id: { $in: productIds } });
+        
+        // Check stock availability first
+        const stockErrors = [];
+        const notFoundProducts = [];
+        
+        for (const item of items) {
+            const productId = item.product || item.productId || item.id || item._id;
+            const productIdString = typeof productId === 'object' && productId._id 
+                ? productId._id.toString()
+                : productId?.toString();
+                
+            const product = products.find(p => p._id.toString() === productIdString);
+            
+            if (!product) {
+                notFoundProducts.push({
+                    name: item.name || 'Unknown Product',
+                    id: productIdString,
+                    originalItem: item
+                });
+                continue;
+            }
+            
+            // Validate stock availability
+            if (product.stock < item.quantity) {
+                stockErrors.push({
+                    productName: product.name,
+                    requested: item.quantity,
+                    available: product.stock
+                });
+            }
+        }
+        
+        // If products not found, return detailed error
+        if (notFoundProducts.length > 0) {
+            console.error('Products not found:', notFoundProducts);
+            return NextResponse.json(
+                { 
+                    error: `${notFoundProducts.length} product(s) not found in database`,
+                    details: notFoundProducts.map(p => `${p.name} (ID: ${p.id})`).join(', '),
+                    notFoundProducts: notFoundProducts
+                },
+                { status: 404 }
+            );
+        }
+        
+        // If any stock issues, return error
+        if (stockErrors.length > 0) {
+            return NextResponse.json(
+                { 
+                    error: 'Insufficient stock for some items',
+                    stockErrors: stockErrors 
+                },
+                { status: 400 }
+            );
+        }
         
         let calculatedTotal = 0;
         const enrichedItems = items.map(item => {
-            const product = products.find(p => p._id.toString() === (item.product || item.productId).toString());
+            const productId = item.product || item.productId || item.id || item._id;
+            const productIdString = typeof productId === 'object' && productId._id 
+                ? productId._id.toString()
+                : productId?.toString();
+                
+            const product = products.find(p => p._id.toString() === productIdString);
             if (!product) {
-                throw new Error(`Product not found: ${item.product || item.productId}`);
+                // This shouldn't happen as we already checked above
+                throw new Error(`Product ${item.name || productIdString} not found`);
             }
             const itemTotal = (product.sellingPrice || product.price) * item.quantity;
             calculatedTotal += itemTotal;
@@ -241,6 +325,16 @@ export async function POST(req) {
         const order = new Order(orderData);
 
         await order.save();
+        
+        // Decrement stock for all ordered items (atomic operation)
+        for (const item of enrichedItems) {
+            await Product.findByIdAndUpdate(
+                item.product,
+                { $inc: { stock: -item.quantity } },
+                { new: true }
+            );
+            console.log(`Decremented stock for product ${item.product} by ${item.quantity}`);
+        }
 
         return NextResponse.json(order);
     } catch (error) {

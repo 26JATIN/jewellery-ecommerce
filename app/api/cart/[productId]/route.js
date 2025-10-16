@@ -21,26 +21,33 @@ export async function PATCH(req, { params }) {
         const { productId } = params;
         const { quantity } = await req.json();
 
+        // Validate quantity
+        if (!quantity || quantity < 1) {
+            return NextResponse.json(
+                { error: 'Quantity must be at least 1' },
+                { status: 400 }
+            );
+        }
+
         await connectDB();
-        const cart = await Cart.findOne({ user: decoded.userId });
+        
+        // Use atomic $set operation to update quantity
+        const cart = await Cart.findOneAndUpdate(
+            { 
+                user: decoded.userId,
+                'items.product': productId 
+            },
+            { 
+                $set: { 'items.$.quantity': quantity } 
+            },
+            { new: true }
+        ).populate('items.product');
         
         if (!cart) {
-            return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Cart or item not found' }, { status: 404 });
         }
 
-        const itemIndex = cart.items.findIndex(item => 
-            item.product.toString() === productId
-        );
-
-        if (itemIndex === -1) {
-            return NextResponse.json({ error: 'Item not found in cart' }, { status: 404 });
-        }
-
-        cart.items[itemIndex].quantity = quantity;
-        await cart.save();
-        
-        const populatedCart = await cart.populate('items.product');
-        return NextResponse.json(populatedCart.items);
+        return NextResponse.json(cart.items);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to update cart' }, { status: 500 });
     }
@@ -63,19 +70,19 @@ export async function DELETE(req, { params }) {
         const { productId } = params;
 
         await connectDB();
-        const cart = await Cart.findOne({ user: decoded.userId });
+        
+        // Use atomic $pull operation to remove item
+        const cart = await Cart.findOneAndUpdate(
+            { user: decoded.userId },
+            { $pull: { items: { product: productId } } },
+            { new: true }
+        ).populate('items.product');
         
         if (!cart) {
             return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
         }
 
-        cart.items = cart.items.filter(item => 
-            item.product.toString() !== productId
-        );
-
-        await cart.save();
-        const populatedCart = await cart.populate('items.product');
-        return NextResponse.json(populatedCart.items);
+        return NextResponse.json(cart.items);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to remove item' }, { status: 500 });
     }
