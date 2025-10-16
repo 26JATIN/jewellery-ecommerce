@@ -4,6 +4,7 @@ import Product from '@/models/Product';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { calculateJewelryPrice } from '@/lib/goldPrice';
 
 // Middleware to check admin access
 async function checkAdminAccess() {
@@ -79,9 +80,9 @@ export async function PUT(req, { params }) {
         const { productId } = await params;
         const data = await req.json();
 
-        // Validate required fields
-        const requiredFields = ['name', 'description', 'category', 'mrp', 'costPrice', 'sellingPrice', 'sku'];
-        for (const field of requiredFields) {
+        // Validate required fields (different for dynamic vs fixed pricing)
+        const basicRequiredFields = ['name', 'description', 'category', 'sku', 'costPrice'];
+        for (const field of basicRequiredFields) {
             if (!data[field]) {
                 return NextResponse.json(
                     { error: `${field} is required` },
@@ -90,19 +91,100 @@ export async function PUT(req, { params }) {
             }
         }
 
-        // Validate pricing logic
-        if (data.sellingPrice > data.mrp) {
-            return NextResponse.json(
-                { error: 'Selling price cannot be greater than MRP' },
-                { status: 400 }
-            );
-        }
+        // For dynamic pricing, calculate MRP and selling price automatically
+        if (data.pricingMethod === 'dynamic' || data.isDynamicPricing) {
+            // Validate dynamic pricing requirements
+            if (data.metalType === 'gold' && (!data.goldWeight || data.goldWeight <= 0)) {
+                return NextResponse.json(
+                    { error: 'Gold weight is required for dynamic pricing' },
+                    { status: 400 }
+                );
+            }
+            if (data.metalType === 'silver' && (!data.silverWeight || data.silverWeight <= 0)) {
+                return NextResponse.json(
+                    { error: 'Silver weight is required for dynamic pricing' },
+                    { status: 400 }
+                );
+            }
 
-        if (data.costPrice > data.sellingPrice) {
-            return NextResponse.json(
-                { error: 'Cost price cannot be greater than selling price' },
-                { status: 400 }
-            );
+            // Validate discount percent is provided
+            if (data.discountPercent === undefined || data.discountPercent === null) {
+                data.discountPercent = 0; // Default to 0% discount
+            }
+
+            // Calculate MRP based on current metal rates
+            try {
+                const priceCalc = await calculateJewelryPrice({
+                    goldWeight: data.goldWeight || 0,
+                    goldPurity: data.goldPurity || 22,
+                    silverWeight: data.silverWeight || 0,
+                    silverPurity: data.silverPurity || 925,
+                    platinumWeight: data.platinumWeight || 0,
+                    platinumPurity: data.platinumPurity || 950,
+                    makingChargePercent: data.makingChargePercent || 15,
+                    stoneValue: data.stoneValue || 0,
+                    gstPercent: 3,
+                    currency: 'INR'
+                });
+
+                if (priceCalc.success) {
+                    // Calculate MRP (auto-calculated from metal rates)
+                    data.mrp = priceCalc.breakdown.finalPrice;
+                    
+                    // Calculate Selling Price = MRP - (MRP × discount%)
+                    const discountMultiplier = 1 - (data.discountPercent / 100);
+                    data.sellingPrice = data.mrp * discountMultiplier;
+                    data.price = data.sellingPrice; // For backward compatibility
+                    
+                    data.isDynamicPricing = true;
+                    data.pricingMethod = 'dynamic';
+
+                    // Validate cost price is less than selling price
+                    if (data.costPrice > data.sellingPrice) {
+                        return NextResponse.json(
+                            { error: 'Cost price should be less than selling price for profitability' },
+                            { status: 400 }
+                        );
+                    }
+                } else {
+                    return NextResponse.json(
+                        { error: 'Failed to calculate price: ' + priceCalc.error },
+                        { status: 400 }
+                    );
+                }
+            } catch (error) {
+                console.error('Price calculation error:', error);
+                return NextResponse.json(
+                    { error: 'Failed to calculate dynamic price' },
+                    { status: 500 }
+                );
+            }
+        } else {
+            // For fixed pricing, validate price fields
+            const priceFields = ['sellingPrice', 'mrp'];
+            for (const field of priceFields) {
+                if (!data[field]) {
+                    return NextResponse.json(
+                        { error: `${field} is required for fixed pricing` },
+                        { status: 400 }
+                    );
+                }
+            }
+
+            // Validate pricing logic
+            if (data.sellingPrice > data.mrp) {
+                return NextResponse.json(
+                    { error: 'Selling price cannot be greater than MRP' },
+                    { status: 400 }
+                );
+            }
+
+            if (data.costPrice > data.sellingPrice) {
+                return NextResponse.json(
+                    { error: 'Cost price cannot be greater than selling price' },
+                    { status: 400 }
+                );
+            }
         }
 
         await connectDB();

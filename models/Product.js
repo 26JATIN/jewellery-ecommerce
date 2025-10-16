@@ -166,6 +166,12 @@ const productSchema = new mongoose.Schema({
         enum: ['fixed', 'dynamic'],
         default: 'fixed'
     },
+    discountPercent: {
+        type: Number,
+        default: 0, // Discount percentage for dynamic pricing (MRP - discount% = Selling Price)
+        min: 0,
+        max: 100
+    },
     lastPriceUpdate: {
         type: Date,
         default: Date.now

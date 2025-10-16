@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AddressForm({ onSubmit }) {
@@ -10,19 +10,92 @@ export default function AddressForm({ onSubmit }) {
         city: '',
         state: '',
         postalCode: '',
-        country: '',
+        country: 'India',
         phone: ''
     });
 
     const [focusedField, setFocusedField] = useState(null);
     const [errors, setErrors] = useState({});
+    const [fetchingLocation, setFetchingLocation] = useState(false);
+    const [pincodeError, setPincodeError] = useState('');
+
+    // Fetch city and state based on Indian PIN code
+    useEffect(() => {
+        const fetchLocationByPincode = async (pincode) => {
+            // Validate PIN code format (6 digits for India)
+            if (!/^\d{6}$/.test(pincode)) {
+                return;
+            }
+
+            setFetchingLocation(true);
+            setPincodeError('');
+
+            try {
+                // Using India Post API (free)
+                const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                const data = await response.json();
+
+                if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice) {
+                    const postOffice = data[0].PostOffice[0];
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        city: postOffice.District || '',
+                        state: postOffice.State || ''
+                    }));
+
+                    // Clear any previous errors
+                    setErrors(prev => ({ ...prev, city: '', state: '' }));
+                } else {
+                    setPincodeError('Invalid PIN code. Please check and try again.');
+                    setFormData(prev => ({
+                        ...prev,
+                        city: '',
+                        state: ''
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching location:', error);
+                setPincodeError('Unable to fetch location. Please enter manually.');
+            } finally {
+                setFetchingLocation(false);
+            }
+        };
+
+        if (formData.postalCode) {
+            const timeoutId = setTimeout(() => {
+                fetchLocationByPincode(formData.postalCode);
+            }, 500); // Debounce API calls
+
+            return () => clearTimeout(timeoutId);
+        } else {
+            setPincodeError('');
+        }
+    }, [formData.postalCode]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        // For postal code, only allow digits and limit to 6 characters
+        if (name === 'postalCode') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 6);
+            setFormData(prev => ({
+                ...prev,
+                [name]: digitsOnly
+            }));
+        } else if (name === 'phone') {
+            // For phone, only allow digits and limit to 10 characters
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData(prev => ({
+                ...prev,
+                [name]: digitsOnly
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
         
         // Clear error when user starts typing
         if (errors[name]) {
@@ -37,12 +110,15 @@ export default function AddressForm({ onSubmit }) {
         if (!formData.addressLine1.trim()) newErrors.addressLine1 = 'Address is required';
         if (!formData.city.trim()) newErrors.city = 'City is required';
         if (!formData.state.trim()) newErrors.state = 'State is required';
-        if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
-        if (!formData.country) newErrors.country = 'Please select a country';
+        if (!formData.postalCode.trim()) {
+            newErrors.postalCode = 'PIN code is required';
+        } else if (!/^\d{6}$/.test(formData.postalCode)) {
+            newErrors.postalCode = 'PIN code must be 6 digits';
+        }
         if (!formData.phone.trim()) {
             newErrors.phone = 'Phone number is required';
-        } else if (!/^[0-9]{10}$/.test(formData.phone)) {
-            newErrors.phone = 'Phone must be 10 digits';
+        } else if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            newErrors.phone = 'Enter valid 10-digit mobile number';
         }
         
         setErrors(newErrors);
@@ -224,6 +300,7 @@ export default function AddressForm({ onSubmit }) {
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             City <span className="text-red-500">*</span>
+                            {fetchingLocation && <span className="text-xs text-blue-600 ml-2">(Auto-filling...)</span>}
                         </label>
                         <motion.div
                             variants={inputVariants}
@@ -236,12 +313,13 @@ export default function AddressForm({ onSubmit }) {
                                 onChange={handleChange}
                                 onFocus={() => setFocusedField('city')}
                                 onBlur={() => setFocusedField(null)}
-                                placeholder="New York"
+                                placeholder="Mumbai"
                                 className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                                     errors.city 
                                         ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
                                         : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
-                                } outline-none`}
+                                } outline-none ${fetchingLocation ? 'bg-gray-50' : ''}`}
+                                readOnly={fetchingLocation}
                             />
                         </motion.div>
                         <AnimatePresence>
@@ -261,6 +339,7 @@ export default function AddressForm({ onSubmit }) {
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             State <span className="text-red-500">*</span>
+                            {fetchingLocation && <span className="text-xs text-blue-600 ml-2">(Auto-filling...)</span>}
                         </label>
                         <motion.div
                             variants={inputVariants}
@@ -273,12 +352,13 @@ export default function AddressForm({ onSubmit }) {
                                 onChange={handleChange}
                                 onFocus={() => setFocusedField('state')}
                                 onBlur={() => setFocusedField(null)}
-                                placeholder="NY"
+                                placeholder="Maharashtra"
                                 className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                                     errors.state 
                                         ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
                                         : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
-                                } outline-none`}
+                                } outline-none ${fetchingLocation ? 'bg-gray-50' : ''}`}
+                                readOnly={fetchingLocation}
                             />
                         </motion.div>
                         <AnimatePresence>
@@ -296,112 +376,71 @@ export default function AddressForm({ onSubmit }) {
                     </div>
                 </motion.div>
 
-                {/* Postal Code and Country */}
+                {/* Postal Code */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Postal Code <span className="text-red-500">*</span>
-                        </label>
-                        <motion.div
-                            variants={inputVariants}
-                            animate={focusedField === 'postalCode' ? 'focus' : errors.postalCode ? 'error' : 'initial'}
-                        >
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    name="postalCode"
-                                    value={formData.postalCode}
-                                    onChange={handleChange}
-                                    onFocus={() => setFocusedField('postalCode')}
-                                    onBlur={() => setFocusedField(null)}
-                                    placeholder="10001"
-                                    className={`pl-12 w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-                                        errors.postalCode 
-                                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
-                                            : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
-                                    } outline-none`}
-                                />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        PIN Code <span className="text-red-500">*</span>
+                    </label>
+                    <motion.div
+                        variants={inputVariants}
+                        animate={focusedField === 'postalCode' ? 'focus' : errors.postalCode ? 'error' : 'initial'}
+                    >
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
                             </div>
-                        </motion.div>
-                        <AnimatePresence>
-                            {errors.postalCode && (
-                                <motion.p
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className="text-red-500 text-xs mt-1 ml-1"
-                                >
-                                    {errors.postalCode}
-                                </motion.p>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Country <span className="text-red-500">*</span>
-                        </label>
-                        <motion.div
-                            variants={inputVariants}
-                            animate={focusedField === 'country' ? 'focus' : errors.country ? 'error' : 'initial'}
-                        >
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <select
-                                    name="country"
-                                    value={formData.country}
-                                    onChange={handleChange}
-                                    onFocus={() => setFocusedField('country')}
-                                    onBlur={() => setFocusedField(null)}
-                                    className={`pl-12 w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 appearance-none ${
-                                        errors.country 
-                                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
-                                            : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
-                                    } outline-none bg-white`}
-                                >
-                                    <option value="">Select Country</option>
-                                    <option value="IN">India</option>
-                                    <option value="US">United States</option>
-                                    <option value="CA">Canada</option>
-                                    <option value="GB">United Kingdom</option>
-                                    <option value="AU">Australia</option>
-                                    <option value="AE">United Arab Emirates</option>
-                                    <option value="SG">Singapore</option>
-                                </select>
+                            {fetchingLocation && (
                                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#D4AF76]"></div>
                                 </div>
-                            </div>
-                        </motion.div>
-                        <AnimatePresence>
-                            {errors.country && (
-                                <motion.p
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className="text-red-500 text-xs mt-1 ml-1"
-                                >
-                                    {errors.country}
-                                </motion.p>
                             )}
-                        </AnimatePresence>
-                    </div>
+                            <input
+                                type="text"
+                                name="postalCode"
+                                value={formData.postalCode}
+                                onChange={handleChange}
+                                onFocus={() => setFocusedField('postalCode')}
+                                onBlur={() => setFocusedField(null)}
+                                placeholder="400001"
+                                maxLength="6"
+                                className={`pl-12 w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                                    errors.postalCode 
+                                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                                        : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
+                                } outline-none`}
+                            />
+                        </div>
+                    </motion.div>
+                    <AnimatePresence>
+                        {(errors.postalCode || pincodeError) && (
+                            <motion.p
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="text-red-500 text-xs mt-1 ml-1"
+                            >
+                                {errors.postalCode || pincodeError}
+                            </motion.p>
+                        )}
+                    </AnimatePresence>
+                    {formData.city && formData.state && !pincodeError && (
+                        <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-green-600 text-xs mt-1 ml-1 flex items-center gap-1"
+                        >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Location auto-filled from PIN code
+                        </motion.p>
+                    )}
                 </motion.div>
 
                 {/* Phone */}
@@ -411,7 +450,7 @@ export default function AddressForm({ onSubmit }) {
                     transition={{ delay: 0.35 }}
                 >
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Phone Number <span className="text-red-500">*</span>
+                        Mobile Number <span className="text-red-500">*</span>
                     </label>
                     <motion.div
                         variants={inputVariants}
@@ -419,9 +458,10 @@ export default function AddressForm({ onSubmit }) {
                     >
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
+                                <span className="text-gray-600 font-medium">+91</span>
                             </div>
                             <input
                                 type="tel"
@@ -430,9 +470,9 @@ export default function AddressForm({ onSubmit }) {
                                 onChange={handleChange}
                                 onFocus={() => setFocusedField('phone')}
                                 onBlur={() => setFocusedField(null)}
-                                placeholder="1234567890"
+                                placeholder="9876543210"
                                 maxLength="10"
-                                className={`pl-12 w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                                className={`pl-20 w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                                     errors.phone 
                                         ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
                                         : 'border-gray-200 focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20'
@@ -452,6 +492,9 @@ export default function AddressForm({ onSubmit }) {
                             </motion.p>
                         )}
                     </AnimatePresence>
+                    <p className="text-xs text-gray-500 mt-1 ml-1">
+                        Enter 10-digit mobile number starting with 6, 7, 8, or 9
+                    </p>
                 </motion.div>
             </div>
 

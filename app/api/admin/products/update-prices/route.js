@@ -23,14 +23,18 @@ export async function POST(request) {
       // Update specific products
       productsToUpdate = await Product.find({
         _id: { $in: productIds },
-        isDynamicPricing: true,
-        goldWeight: { $gt: 0 }
+        $or: [
+          { pricingMethod: 'dynamic' },
+          { isDynamicPricing: true }
+        ]
       });
     } else {
       // Update all products with dynamic pricing enabled
       productsToUpdate = await Product.find({
-        isDynamicPricing: true,
-        goldWeight: { $gt: 0 }
+        $or: [
+          { pricingMethod: 'dynamic' },
+          { isDynamicPricing: true }
+        ]
       });
     }
 
@@ -48,29 +52,42 @@ export async function POST(request) {
     for (const product of productsToUpdate) {
       try {
         const calculation = await calculateJewelryPrice({
-          goldWeight: product.goldWeight,
-          goldPurity: product.goldPurity,
-          makingChargePercent: product.makingChargePercent,
+          goldWeight: product.goldWeight || 0,
+          goldPurity: product.goldPurity || 22,
+          silverWeight: product.silverWeight || 0,
+          silverPurity: product.silverPurity || 925,
+          platinumWeight: product.platinumWeight || 0,
+          platinumPurity: product.platinumPurity || 950,
+          makingChargePercent: product.makingChargePercent || 15,
+          stoneValue: product.stoneValue || 0,
           gstPercent: 3, // Default GST
           currency
         });
 
         if (calculation.success) {
-          const newPrice = calculation.breakdown.finalPrice;
-          const oldPrice = product.sellingPrice;
+          const newMRP = calculation.breakdown.finalPrice;
+          const oldMRP = product.mrp;
+          const oldSellingPrice = product.sellingPrice;
 
-          // Update product prices
+          // Calculate new selling price using the discount percentage
+          const discountPercent = product.discountPercent || 0;
+          const discountMultiplier = 1 - (discountPercent / 100);
+          const newSellingPrice = newMRP * discountMultiplier;
+
+          // Update product prices (MRP auto-calculated, selling price = MRP - discount%, cost price unchanged)
           await Product.findByIdAndUpdate(product._id, {
-            price: newPrice,
-            sellingPrice: newPrice,
-            mrp: newPrice * 1.1, // 10% margin for MRP
+            mrp: newMRP,
+            sellingPrice: newSellingPrice,
+            price: newSellingPrice, // For backward compatibility
+            // Don't update costPrice - it's manually entered by admin
+            // Don't update discountPercent - it's manually set by admin
             lastPriceUpdate: new Date(),
             $push: {
               priceHistory: {
                 date: new Date(),
-                goldPrice: calculation.goldPriceData.perGram.gold,
-                calculatedPrice: newPrice,
-                finalPrice: newPrice
+                goldPrice: calculation.goldPriceData?.perGram?.gold || 0,
+                calculatedPrice: newMRP,
+                finalPrice: newSellingPrice
               }
             }
           });
@@ -78,10 +95,16 @@ export async function POST(request) {
           updateResults.push({
             productId: product._id,
             name: product.name,
-            oldPrice,
-            newPrice,
-            change: newPrice - oldPrice,
-            changePercent: ((newPrice - oldPrice) / oldPrice * 100).toFixed(2)
+            metalType: product.metalType,
+            oldMRP,
+            newMRP,
+            oldSellingPrice,
+            newSellingPrice,
+            discountPercent,
+            mrpChange: newMRP - oldMRP,
+            mrpChangePercent: oldMRP > 0 ? ((newMRP - oldMRP) / oldMRP * 100).toFixed(2) : '0',
+            sellingPriceChange: newSellingPrice - oldSellingPrice,
+            sellingPriceChangePercent: oldSellingPrice > 0 ? ((newSellingPrice - oldSellingPrice) / oldSellingPrice * 100).toFixed(2) : '0'
           });
         } else {
           errors.push({
@@ -129,8 +152,11 @@ export async function GET(request) {
 
     // Get products with dynamic pricing enabled
     const dynamicProducts = await Product.find({
-      isDynamicPricing: true
-    }).select('name sku goldWeight goldPurity makingChargePercent lastPriceUpdate sellingPrice');
+      $or: [
+        { pricingMethod: 'dynamic' },
+        { isDynamicPricing: true }
+      ]
+    }).select('name sku metalType goldWeight goldPurity silverWeight silverPurity platinumWeight platinumPurity makingChargePercent stoneValue lastPriceUpdate sellingPrice');
 
     return NextResponse.json({
       success: true,

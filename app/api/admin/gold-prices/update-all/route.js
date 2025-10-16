@@ -23,10 +23,12 @@ export async function POST(request) {
     const currentGoldPrice = goldPriceResult.perGram.gold;
     console.log('Current gold price per gram (INR):', currentGoldPrice);
 
-    // Find all products with dynamic pricing enabled
+    // Find all products with dynamic pricing enabled (any metal type)
     const dynamicProducts = await Product.find({ 
-      isDynamicPricing: true,
-      goldWeight: { $exists: true, $gt: 0 }
+      $or: [
+        { pricingMethod: 'dynamic' },
+        { isDynamicPricing: true }
+      ]
     });
 
     console.log(`Found ${dynamicProducts.length} products with dynamic pricing`);
@@ -35,15 +37,23 @@ export async function POST(request) {
     if (dynamicProducts.length > 0) {
       console.log('Products found for update:');
       dynamicProducts.forEach(product => {
-        console.log(`- ${product.name}: ${product.goldWeight}g, ${product.goldPurity}K, current price: ₹${product.price}`);
+        const metalInfo = product.metalType === 'gold' 
+          ? `${product.goldWeight}g Gold ${product.goldPurity}K`
+          : product.metalType === 'silver'
+          ? `${product.silverWeight}g Silver ${product.silverPurity}`
+          : product.metalType === 'platinum'
+          ? `${product.platinumWeight}g Platinum ${product.platinumPurity}`
+          : 'Mixed metals';
+        console.log(`- ${product.name}: ${metalInfo}, current price: ₹${product.price || 0}`);
       });
     }
 
     if (dynamicProducts.length === 0) {
       // Check what products exist in database for debugging
       const totalProducts = await Product.countDocuments();
-      const productsWithDynamicPricing = await Product.countDocuments({ isDynamicPricing: true });
-      const productsWithGoldWeight = await Product.countDocuments({ goldWeight: { $exists: true, $gt: 0 } });
+      const productsWithDynamicPricing = await Product.countDocuments({ 
+        $or: [{ pricingMethod: 'dynamic' }, { isDynamicPricing: true }]
+      });
       
       return NextResponse.json({
         success: true,
@@ -53,8 +63,7 @@ export async function POST(request) {
         debug: {
           totalProducts,
           productsWithDynamicPricing,
-          productsWithGoldWeight,
-          suggestion: 'Run scripts/addDynamicProducts.mjs to add sample products with dynamic pricing'
+          suggestion: 'Enable dynamic pricing for products from the Products section'
         }
       });
     }
@@ -66,48 +75,70 @@ export async function POST(request) {
     // Update each product
     for (const product of dynamicProducts) {
       try {
-        // Calculate new price
+        // Calculate new price based on metal type and specifications
         const priceCalculation = await calculateJewelryPrice({
-          goldWeight: product.goldWeight,
-          goldPurity: product.goldPurity || 22, // Default to 22K
-          makingChargePercent: product.makingChargePercent || 15, // Default 15%
-          gstPercent: product.gstPercent || 3, // Default 3% GST for jewelry in India
+          goldWeight: product.goldWeight || 0,
+          goldPurity: product.goldPurity || 22,
+          silverWeight: product.silverWeight || 0,
+          silverPurity: product.silverPurity || 925,
+          platinumWeight: product.platinumWeight || 0,
+          platinumPurity: product.platinumPurity || 950,
+          makingChargePercent: product.makingChargePercent || 15,
+          stoneValue: product.stoneValue || 0,
+          gstPercent: product.gstPercent || 3,
           currency: 'INR'
         });
 
         if (priceCalculation.success) {
-          const newPrice = priceCalculation.breakdown.finalPrice;
-          const oldPrice = product.price;
+          const newMRP = priceCalculation.breakdown.finalPrice;
+          const oldMRP = product.mrp || 0;
+          const oldSellingPrice = product.sellingPrice || product.price || 0;
 
-          // Validate the new price
-          if (!newPrice || newPrice <= 0) {
-            console.error(`Invalid price calculated for product ${product._id}: ${newPrice}`);
+          // Validate the new MRP
+          if (!newMRP || newMRP <= 0) {
+            console.error(`Invalid MRP calculated for product ${product._id}: ${newMRP}`);
             updateResults.push({
               productId: product._id.toString(),
               name: product.name,
-              error: `Invalid price calculated: ${newPrice}`,
+              metalType: product.metalType,
+              error: `Invalid MRP calculated: ${newMRP}`,
               success: false
             });
             errorCount++;
             continue;
           }
 
-          // Update product price
+          // Calculate new selling price using the discount percentage
+          const discountPercent = product.discountPercent || 0;
+          const discountMultiplier = 1 - (discountPercent / 100);
+          const newSellingPrice = newMRP * discountMultiplier;
+
+          // Update product prices (MRP auto-calculated, selling price = MRP - discount%, cost price unchanged)
           await Product.findByIdAndUpdate(product._id, {
-            price: newPrice,
+            mrp: newMRP,
+            sellingPrice: newSellingPrice,
+            price: newSellingPrice, // For backward compatibility
+            // Don't update costPrice - it's manually entered by admin
+            // Don't update discountPercent - it's manually set by admin
             lastPriceUpdate: new Date(),
             goldPriceAtUpdate: currentGoldPrice
           });
 
-          console.log(`Updated ${product.name}: ₹${oldPrice} → ₹${newPrice}`);
+          console.log(`Updated ${product.name} (${product.metalType}): MRP ₹${oldMRP} → ₹${newMRP}, Selling ₹${oldSellingPrice} → ₹${newSellingPrice}`);
 
           updateResults.push({
             productId: product._id.toString(),
             name: product.name,
-            oldPrice: oldPrice,
-            newPrice: newPrice,
-            priceChange: newPrice - oldPrice,
-            priceChangePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100) : 0,
+            metalType: product.metalType,
+            oldMRP: oldMRP,
+            newMRP: newMRP,
+            oldSellingPrice: oldSellingPrice,
+            newSellingPrice: newSellingPrice,
+            discountPercent: discountPercent,
+            mrpChange: newMRP - oldMRP,
+            mrpChangePercent: oldMRP > 0 ? ((newMRP - oldMRP) / oldMRP * 100) : 0,
+            sellingPriceChange: newSellingPrice - oldSellingPrice,
+            sellingPriceChangePercent: oldSellingPrice > 0 ? ((newSellingPrice - oldSellingPrice) / oldSellingPrice * 100) : 0,
             success: true
           });
 
@@ -117,6 +148,7 @@ export async function POST(request) {
           updateResults.push({
             productId: product._id.toString(),
             name: product.name,
+            metalType: product.metalType,
             error: priceCalculation.error || 'Price calculation failed',
             success: false
           });
@@ -127,6 +159,7 @@ export async function POST(request) {
         updateResults.push({
           productId: product._id.toString(),
           name: product.name,
+          metalType: product.metalType || 'unknown',
           error: error.message,
           success: false
         });

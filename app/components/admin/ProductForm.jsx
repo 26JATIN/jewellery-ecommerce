@@ -674,10 +674,15 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 ...formData,
                 image: imageUrl,
                 images: uploadedImages,
-                mrp: parseFloat(formData.mrp),
-                costPrice: parseFloat(formData.costPrice),
-                sellingPrice: parseFloat(formData.sellingPrice),
-                price: parseFloat(formData.sellingPrice),
+                // For dynamic pricing, use calculated selling price but keep manual cost price and MRP
+                mrp: parseFloat(formData.mrp), // Always use manual input
+                costPrice: parseFloat(formData.costPrice), // Always use manual input
+                sellingPrice: formData.pricingMethod === 'dynamic'
+                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
+                    : parseFloat(formData.sellingPrice),
+                price: formData.pricingMethod === 'dynamic'
+                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
+                    : parseFloat(formData.sellingPrice),
                 stock: parseInt(formData.stock) || 0,
                 // Dynamic pricing fields
                 metalType: formData.metalType,
@@ -1134,53 +1139,157 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                         )}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            MRP (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="mrp"
-                            value={formData.mrp}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
+                    {/* Show price fields only for Fixed Pricing */}
+                    {formData.pricingMethod === 'fixed' && (
+                        <>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    MRP (₹ INR) *
+                                </label>
+                                <input
+                                    type="number"
+                                    name="mrp"
+                                    value={formData.mrp}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    step="0.01"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                    required
+                                />
+                            </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Cost Price (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="costPrice"
-                            value={formData.costPrice}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Cost Price (₹ INR) *
+                                </label>
+                                <input
+                                    type="number"
+                                    name="costPrice"
+                                    value={formData.costPrice}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    step="0.01"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                    required
+                                />
+                            </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Selling Price (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="sellingPrice"
-                            value={formData.sellingPrice}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Selling Price (₹ INR) *
+                                </label>
+                                <input
+                                    type="number"
+                                    name="sellingPrice"
+                                    value={formData.sellingPrice}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    step="0.01"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                    required
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {/* For Dynamic Pricing - Show Cost Price and Discount % fields */}
+                    {formData.pricingMethod === 'dynamic' && (
+                        <>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Cost Price (₹ INR) *
+                                </label>
+                                <input
+                                    type="number"
+                                    name="costPrice"
+                                    value={formData.costPrice}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    step="0.01"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                    required
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Enter your actual cost/purchase price for this product
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Discount Percentage (%) *
+                                </label>
+                                <input
+                                    type="number"
+                                    name="discountPercent"
+                                    value={formData.discountPercent || 0}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                    required
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Discount to apply on MRP (e.g., 10% off)
+                                </p>
+                                {calculatedPrice?.breakdown?.finalPrice && (
+                                    <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+                                        <p className="text-xs text-gray-700">
+                                            <strong>MRP:</strong> ₹{calculatedPrice.breakdown.finalPrice.toFixed(2)} (auto-calculated)
+                                        </p>
+                                        <p className="text-xs text-green-600 font-semibold mt-1">
+                                            <strong>Selling Price:</strong> ₹{(calculatedPrice.breakdown.finalPrice * (1 - (formData.discountPercent || 0) / 100)).toFixed(2)} 
+                                            {formData.discountPercent > 0 && ` (${formData.discountPercent}% off)`}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Show info message for Dynamic Pricing */}
+                    {formData.pricingMethod === 'dynamic' && (
+                        <div className="md:col-span-2">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-start">
+                                    <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-blue-900">Dynamic Pricing Enabled</h4>
+                                        <p className="text-sm text-blue-700 mt-1">
+                                            MRP will be automatically calculated based on:
+                                        </p>
+                                        <ul className="text-sm text-blue-600 mt-2 space-y-1 list-disc list-inside ml-2">
+                                            <li>Live metal rates (Gold/Silver/Platinum)</li>
+                                            <li>Metal weight and purity</li>
+                                            <li>Making charges</li>
+                                            <li>Stone value (if applicable)</li>
+                                        </ul>
+                                        <div className="mt-3 pt-3 border-t border-blue-200">
+                                            <p className="text-xs text-blue-700">
+                                                <strong>Manual Inputs:</strong>
+                                            </p>
+                                            <ul className="text-xs text-blue-600 mt-1 space-y-0.5 ml-4">
+                                                <li>• Cost Price - Your actual cost/purchase price</li>
+                                                <li>• Discount % - Percentage discount on MRP (e.g., 10% off)</li>
+                                            </ul>
+                                            <p className="text-xs text-blue-700 mt-2">
+                                                <strong>Auto-Calculated:</strong>
+                                            </p>
+                                            <ul className="text-xs text-blue-600 mt-1 space-y-0.5 ml-4">
+                                                <li>• MRP - Maximum Retail Price (based on metal rates)</li>
+                                                <li>• Selling Price - MRP minus discount% (final price)</li>
+                                            </ul>
+                                        </div>
+                                        <p className="text-xs text-blue-600 mt-2 font-medium">
+                                            💡 When gold prices change, MRP and Selling Price will update automatically. Cost price and discount % remain as you set them.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
