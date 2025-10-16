@@ -180,36 +180,6 @@ async function addMultipleImageProducts() {
                 tags: ["silver", "ring", "modern", "geometric"],
                 createdAt: new Date(),
                 updatedAt: new Date()
-            },
-            {
-                name: "Platinum Wedding Band",
-                description: "Premium platinum wedding band with diamond inlay, symbol of eternal love.",
-                category: categories[0].name,
-                categoryId: categories[0]._id,
-                price: 95000,
-                sellingPrice: 90250,
-                mrp: 105000,
-                stock: 2,
-                metalType: "platinum",
-                platinumWeight: 8.5,
-                platinumPurity: "950",
-                images: [
-                    {
-                        url: "/product1.jpg", 
-                        alt: "Platinum Wedding Band - Front View",
-                        isPrimary: true,
-                        order: 0
-                    },
-                    {
-                        url: "/product2.jpg",
-                        alt: "Platinum Wedding Band - Diamond Inlay Detail",
-                        isPrimary: false,
-                        order: 1
-                    }
-                ],
-                tags: ["platinum", "wedding", "diamond", "premium"],
-                createdAt: new Date(),
-                updatedAt: new Date()
             }
         ];
 

@@ -15,15 +15,14 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         image: '',
         images: [],
         isActive: true,
+        tags: [],
         // Dynamic pricing fields
         pricingMethod: 'fixed',
         metalType: 'gold',
         goldWeight: '',
         goldPurity: '22',
         silverWeight: '',
-        silverPurity: '925',
-        platinumWeight: '',
-        platinumPurity: '950',
+        silverPurity: '999',
         makingChargePercent: '15',
         stoneValue: '',
         isDynamicPricing: false,
@@ -45,32 +44,17 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
     const goldPurities = [
         { value: '24', label: '24K (99.9% Pure)' },
         { value: '22', label: '22K (91.7% Pure)' },
-        { value: '18', label: '18K (75% Pure)' },
-        { value: '14', label: '14K (58.3% Pure)' },
-        { value: '10', label: '10K (41.7% Pure)' }
+        { value: '20', label: '20K (83.3% Pure)' },
+        { value: '18', label: '18K (75% Pure)' }
     ];
 
     const silverPurities = [
-        { value: '999', label: '999 (99.9% Pure Silver)' },
-        { value: '950', label: '950 (95% Pure Silver)' },
-        { value: '925', label: '925 (Sterling Silver - 92.5%)' },
-        { value: '900', label: '900 (90% Pure Silver)' },
-        { value: '835', label: '835 (83.5% Pure Silver)' },
-        { value: '800', label: '800 (80% Pure Silver)' }
-    ];
-
-    const platinumPurities = [
-        { value: '999', label: '999 (99.9% Pure Platinum)' },
-        { value: '950', label: '950 (95% Pure Platinum - Jewelry Grade)' },
-        { value: '900', label: '900 (90% Pure Platinum)' },
-        { value: '850', label: '850 (85% Pure Platinum)' }
+        { value: '999', label: '999 (99.9% Pure Silver)' }
     ];
 
     const metalTypes = [
         { value: 'gold', label: 'Gold' },
-        { value: 'silver', label: 'Silver' },
-        { value: 'platinum', label: 'Platinum' },
-        { value: 'mixed', label: 'Mixed Metals' }
+        { value: 'silver', label: 'Silver' }
     ];
 
     const stoneTypes = [
@@ -107,7 +91,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                         { name: 'Diamond' },
                         { name: 'Gold' },
                         { name: 'Silver' },
-                        { name: 'Platinum' },
                         { name: 'Wedding' },
                         { name: 'Vintage' },
                         { name: 'Contemporary' },
@@ -121,7 +104,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     { name: 'Diamond' },
                     { name: 'Gold' },
                     { name: 'Silver' },
-                    { name: 'Platinum' },
                     { name: 'Wedding' },
                     { name: 'Vintage' },
                     { name: 'Contemporary' },
@@ -144,20 +126,19 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 mrp: product.mrp || '',
                 costPrice: product.costPrice || '',
                 sellingPrice: product.sellingPrice || '',
-                price: product.price || product.sellingPrice || '',
+                price: product.sellingPrice || '',
                 stock: product.stock || '',
                 sku: product.sku || '',
                 image: product.image || '',
                 isActive: product.isActive !== undefined ? product.isActive : true,
+                tags: product.tags || [],
                 // Dynamic pricing fields
                 pricingMethod: product.pricingMethod || 'fixed',
                 metalType: product.metalType || 'gold',
                 goldWeight: product.goldWeight || '',
                 goldPurity: product.goldPurity || '22',
                 silverWeight: product.silverWeight || '',
-                silverPurity: product.silverPurity || '925',
-                platinumWeight: product.platinumWeight || '',
-                platinumPurity: product.platinumPurity || '950',
+                silverPurity: product.silverPurity || '999',
                 makingChargePercent: product.makingChargePercent || '15',
                 stoneValue: product.stoneValue || '',
                 isDynamicPricing: product.isDynamicPricing || false,
@@ -234,7 +215,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         const selectedMetal = formData.metalType;
         const isGold = selectedMetal === 'gold';
         const isSilver = selectedMetal === 'silver';
-        const isPlatinum = selectedMetal === 'platinum';
         const isMixed = selectedMetal === 'mixed';
         
         // Validate only the selected metal type
@@ -255,16 +235,8 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 }
                 break;
                 
-            case 'platinum':
-                const platinumWeight = parseFloat(formData.platinumWeight);
-                if (!formData.platinumWeight || isNaN(platinumWeight) || platinumWeight <= 0) {
-                    alert('Platinum weight is required for pricing calculation. Please enter a value like 5.5 grams.');
-                    return;
-                }
-                break;
-                
             default:
-                alert('Please select a valid metal type (Gold, Silver, or Platinum).');
+                alert('Please select a valid metal type (Gold or Silver).');
                 return;
         }
 
@@ -300,20 +272,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     body: JSON.stringify({
                         silverWeight: parseFloat(formData.silverWeight),
                         silverPurity: parseFloat(formData.silverPurity),
-                        makingChargePercent: parseFloat(formData.makingChargePercent),
-                        gstPercent: 3,
-                        currency: 'INR'
-                    })
-                });
-            } else if (isPlatinum) {
-                response = await fetch('/api/platinum-price', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        platinumWeight: parseFloat(formData.platinumWeight),
-                        platinumPurity: parseFloat(formData.platinumPurity),
                         makingChargePercent: parseFloat(formData.makingChargePercent),
                         gstPercent: 3,
                         currency: 'INR'
@@ -391,8 +349,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             let defaultMakingCharge = '15';
             if (newValue === 'silver') {
                 defaultMakingCharge = '20'; // Silver typically has higher making charges
-            } else if (newValue === 'platinum') {
-                defaultMakingCharge = '10'; // Platinum typically has lower making charges
             }
             
             setFormData(prev => ({
@@ -672,19 +628,22 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 ...formData,
                 image: imageUrl,
                 images: uploadedImages,
-                mrp: parseFloat(formData.mrp),
-                costPrice: parseFloat(formData.costPrice),
-                sellingPrice: parseFloat(formData.sellingPrice),
-                price: parseFloat(formData.sellingPrice),
+                // For dynamic pricing, use calculated selling price but keep manual cost price and MRP
+                mrp: parseFloat(formData.mrp), // Always use manual input
+                costPrice: parseFloat(formData.costPrice), // Always use manual input
+                sellingPrice: formData.pricingMethod === 'dynamic'
+                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
+                    : parseFloat(formData.sellingPrice),
+                price: formData.pricingMethod === 'dynamic'
+                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
+                    : parseFloat(formData.sellingPrice),
                 stock: parseInt(formData.stock) || 0,
                 // Dynamic pricing fields
                 metalType: formData.metalType,
                 goldWeight: parseFloat(formData.goldWeight) || 0,
                 goldPurity: parseFloat(formData.goldPurity) || 22,
                 silverWeight: parseFloat(formData.silverWeight) || 0,
-                silverPurity: parseFloat(formData.silverPurity) || 925,
-                platinumWeight: parseFloat(formData.platinumWeight) || 0,
-                platinumPurity: parseFloat(formData.platinumPurity) || 950,
+                silverPurity: parseFloat(formData.silverPurity) || 999,
                 makingChargePercent: parseFloat(formData.makingChargePercent) || 15,
                 stoneValue: parseFloat(formData.stoneValue) || 0,
                 isDynamicPricing: formData.isDynamicPricing,
@@ -712,142 +671,235 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
     };
 
     return (
-        <div className="p-6">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900">
-                        {product ? 'Edit Product' : 'Add New Product'}
-                    </h2>
-                    <p className="text-gray-600 text-sm mt-1">
-                        {product ? 'Update product information and pricing' : 'Fill in the details for your new product'}
-                    </p>
-                </div>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Product Name *
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
+        <div className="max-w-7xl mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Section 1: Basic Information */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-[#8B6B4C] to-[#725939] px-6 py-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Basic Information
+                        </h3>
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            SKU *
-                        </label>
-                        <input
-                            type="text"
-                            name="sku"
-                            value={formData.sku}
-                            onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Category *
-                        </label>
-                        <select
-                            name="category"
-                            value={formData.category}
-                            onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                            disabled={loadingCategories}
-                        >
-                            <option value="">
-                                {loadingCategories ? 'Loading categories...' : 'Select Category'}
-                            </option>
-                            {categories.map(cat => (
-                                <option key={cat.name || cat} value={cat.name || cat}>
-                                    {cat.name || cat}
-                                </option>
-                            ))}
-                        </select>
-                        {loadingCategories && (
-                            <p className="text-xs text-gray-500 mt-1">
-                                Loading available categories...
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Stock Quantity
-                        </label>
-                        <input
-                            type="number"
-                            name="stock"
-                            value={formData.stock}
-                            onChange={handleInputChange}
-                            min="0"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                        />
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Pricing Method
-                        </label>
-                        <div className="grid grid-cols-1 gap-2">
-                            <div className="flex items-center p-3 border border-gray-300 rounded-lg">
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Product Name *
+                                </label>
                                 <input
-                                    type="radio"
-                                    name="pricingMethod"
-                                    value="fixed"
-                                    checked={formData.pricingMethod === 'fixed'}
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
                                     onChange={handleInputChange}
-                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                    placeholder="e.g., Gold Diamond Ring"
+                                    required
                                 />
-                                <div className="ml-3">
-                                    <label className="block text-sm font-medium text-gray-900">
-                                        Fixed Pricing
-                                    </label>
-                                    <p className="text-xs text-gray-500">Set manual prices</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    SKU *
+                                </label>
+                                <input
+                                    type="text"
+                                    name="sku"
+                                    value={formData.sku}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                    placeholder="Auto-generated"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Category *
+                                </label>
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                    required
+                                    disabled={loadingCategories}
+                                >
+                                    <option value="">
+                                        {loadingCategories ? 'Loading categories...' : 'Select Category'}
+                                    </option>
+                                    {categories.map(cat => (
+                                        <option key={cat.name || cat} value={cat.name || cat}>
+                                            {cat.name || cat}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Stock Quantity
+                                </label>
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    value={formData.stock}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                    placeholder="Available quantity"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description *
+                                </label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleInputChange}
+                                    rows="4"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                    placeholder="Detailed product description..."
+                                    required
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Target Audience
+                                </label>
+                                <div className="flex flex-wrap gap-4">
+                                    {['Men', 'Women', 'Kids'].map((tag) => (
+                                        <label key={tag} className="flex items-center space-x-2 cursor-pointer bg-gray-50 px-4 py-2.5 rounded-lg border border-gray-200 hover:border-[#8B6B4C] transition-all">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.tags.includes(tag)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setFormData({
+                                                            ...formData,
+                                                            tags: [...formData.tags, tag]
+                                                        });
+                                                    } else {
+                                                        setFormData({
+                                                            ...formData,
+                                                            tags: formData.tags.filter(t => t !== tag)
+                                                        });
+                                                    }
+                                                }}
+                                                className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 rounded"
+                                            />
+                                            <span className="text-sm font-medium text-gray-700">{tag}</span>
+                                        </label>
+                                    ))}
                                 </div>
                             </div>
-                            
-                            <div className="flex items-center p-3 border border-gray-300 rounded-lg">
-                                <input
-                                    type="radio"
-                                    name="pricingMethod"
-                                    value="dynamic"
-                                    checked={formData.pricingMethod === 'dynamic'}
-                                    onChange={handleInputChange}
-                                    className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300"
-                                />
-                                <div className="ml-3">
-                                    <label className="block text-sm font-medium text-gray-900">
-                                        Dynamic Pricing
-                                    </label>
-                                    <p className="text-xs text-gray-500">Based on live gold rates</p>
+
+                            <div className="md:col-span-2">
+                                <label className="flex items-center space-x-2 cursor-pointer bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 hover:border-[#8B6B4C] transition-all">
+                                    <input
+                                        type="checkbox"
+                                        name="isActive"
+                                        checked={formData.isActive}
+                                        onChange={handleInputChange}
+                                        className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 rounded"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Product is Active (Visible to Customers)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 2: Pricing Method */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-[#8B6B4C] to-[#725939] px-6 py-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Pricing Configuration
+                        </h3>
+                    </div>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div 
+                                onClick={() => handleInputChange({ target: { name: 'pricingMethod', value: 'fixed', type: 'text' }})}
+                                className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
+                                    formData.pricingMethod === 'fixed' 
+                                        ? 'border-[#8B6B4C] bg-amber-50 shadow-md' 
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="radio"
+                                        name="pricingMethod"
+                                        value="fixed"
+                                        checked={formData.pricingMethod === 'fixed'}
+                                        onChange={handleInputChange}
+                                        className="h-5 w-5 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 mt-0.5"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-5 h-5 text-[#8B6B4C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            <h4 className="font-semibold text-gray-900">Fixed Pricing</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mt-1">Set manual prices for this product</p>
+                                        <p className="text-xs text-gray-500 mt-2">Best for: Unique items, limited editions</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div 
+                                onClick={() => handleInputChange({ target: { name: 'pricingMethod', value: 'dynamic', type: 'text' }})}
+                                className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
+                                    formData.pricingMethod === 'dynamic' 
+                                        ? 'border-[#8B6B4C] bg-amber-50 shadow-md' 
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                            >
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="radio"
+                                        name="pricingMethod"
+                                        value="dynamic"
+                                        checked={formData.pricingMethod === 'dynamic'}
+                                        onChange={handleInputChange}
+                                        className="h-5 w-5 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 mt-0.5"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-5 h-5 text-[#8B6B4C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                            </svg>
+                                            <h4 className="font-semibold text-gray-900">Dynamic Pricing</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mt-1">Auto-calculate based on live metal rates</p>
+                                        <p className="text-xs text-gray-500 mt-2">Best for: Gold, silver jewelry with market prices</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Dynamic Pricing Fields - Show immediately below when selected */}
+                        {/* Dynamic Pricing Fields */}
                         {formData.pricingMethod === 'dynamic' && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 space-y-4 mt-4">
-                                <div className="flex items-center mb-4">
-                                    <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-6 space-y-6">
+                                <div className="flex items-center gap-2 pb-4 border-b border-yellow-200">
+                                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                     </svg>
-                                    <h3 className="text-lg font-medium text-yellow-800">Metal Specifications</h3>
+                                    <h4 className="text-lg font-semibold text-yellow-900">Metal Specifications</h4>
                                 </div>
 
                                 {/* Metal Type Selection */}
-                                <div className="mb-4">
+                                <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Metal Type *
                                     </label>
@@ -855,7 +907,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                         name="metalType"
                                         value={formData.metalType}
                                         onChange={handleInputChange}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                                         required={formData.pricingMethod === 'dynamic'}
                                     >
                                         {metalTypes.map((metal) => (
@@ -864,47 +916,38 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                             </option>
                                         ))}
                                     </select>
-                                    {(formData.metalType === 'platinum' || formData.metalType === 'mixed') && (
-                                        <p className="text-xs text-amber-600 mt-1 flex items-center">
-                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                            </svg>
-                                            Dynamic pricing not yet available for {formData.metalType}. Use fixed pricing method.
-                                        </p>
-                                    )}
                                 </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Gold Fields - Show only for gold or mixed metals */}
-                                    {(formData.metalType === 'gold' || formData.metalType === 'mixed') && (
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Gold Fields */}
+                                    {formData.metalType === 'gold' && (
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Gold Weight (grams) {formData.metalType === 'gold' ? '*' : ''}
+                                                    Gold Weight (grams) *
                                                 </label>
                                                 <input
                                                     type="number"
                                                     name="goldWeight"
                                                     value={formData.goldWeight}
                                                     onChange={handleInputChange}
-                                                    step="0.1"
+                                                    step="0.01"
                                                     min="0"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                                                     placeholder="e.g., 5.5"
-                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'gold'}
+                                                    required
                                                 />
-                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of gold in the jewelry</p>
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Gold Purity
+                                                    Gold Purity *
                                                 </label>
                                                 <select
                                                     name="goldPurity"
                                                     value={formData.goldPurity}
                                                     onChange={handleInputChange}
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                                                 >
                                                     {goldPurities.map((purity) => (
                                                         <option key={purity.value} value={purity.value}>
@@ -916,79 +959,37 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                         </>
                                     )}
 
-                                    {/* Silver Fields - Show only for silver or mixed metals */}
-                                    {(formData.metalType === 'silver' || formData.metalType === 'mixed') && (
+                                    {/* Silver Fields */}
+                                    {formData.metalType === 'silver' && (
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Silver Weight (grams) {formData.metalType === 'silver' ? '*' : ''}
+                                                    Silver Weight (grams) *
                                                 </label>
                                                 <input
                                                     type="number"
                                                     name="silverWeight"
                                                     value={formData.silverWeight}
                                                     onChange={handleInputChange}
-                                                    step="0.1"
+                                                    step="0.01"
                                                     min="0"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                                                     placeholder="e.g., 10.5"
-                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'silver'}
+                                                    required
                                                 />
-                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of silver in the jewelry</p>
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Silver Purity
+                                                    Silver Purity *
                                                 </label>
                                                 <select
                                                     name="silverPurity"
                                                     value={formData.silverPurity}
                                                     onChange={handleInputChange}
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                                                 >
                                                     {silverPurities.map((purity) => (
-                                                        <option key={purity.value} value={purity.value}>
-                                                            {purity.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {/* Platinum Fields - Show only for platinum or mixed metals */}
-                                    {(formData.metalType === 'platinum' || formData.metalType === 'mixed') && (
-                                        <>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Platinum Weight (grams) {formData.metalType === 'platinum' ? '*' : ''}
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    name="platinumWeight"
-                                                    value={formData.platinumWeight}
-                                                    onChange={handleInputChange}
-                                                    step="0.1"
-                                                    min="0"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                                    placeholder="e.g., 5.5"
-                                                    required={formData.pricingMethod === 'dynamic' && formData.metalType === 'platinum'}
-                                                />
-                                                <p className="text-xs text-gray-500 mt-1">Enter the total weight of platinum in the jewelry</p>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Platinum Purity
-                                                </label>
-                                                <select
-                                                    name="platinumPurity"
-                                                    value={formData.platinumPurity}
-                                                    onChange={handleInputChange}
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                                >
-                                                    {platinumPurities.map((purity) => (
                                                         <option key={purity.value} value={purity.value}>
                                                             {purity.label}
                                                         </option>
@@ -1010,7 +1011,8 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                             step="0.5"
                                             min="0"
                                             max="100"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+                                            placeholder="15"
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
                                             Typical: Gold 10-20%, Silver 15-25%
@@ -1019,7 +1021,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Total Stone/Diamond Value (₹ INR)
+                                            Total Stone Value (₹)
                                         </label>
                                         <input
                                             type="number"
@@ -1028,356 +1030,386 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                             onChange={handleInputChange}
                                             min="0"
                                             step="0.01"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent bg-gray-50"
-                                            placeholder="0"
+                                            className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 transition-all"
+                                            placeholder="Auto-calculated"
                                             readOnly
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            Calculated automatically from individual stones below
+                                            Calculated from stones below
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* Price Calculator Button */}
-                                <div className="flex items-center space-x-4">
+                                {/* Calculate Button */}
+                                <div className="flex items-center justify-between pt-4 border-t border-yellow-200">
                                     <button
                                         type="button"
                                         onClick={calculateDynamicPrice}
-                                        disabled={calculatingPrice || (formData.metalType === 'mixed')}
-                                        className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                                        disabled={calculatingPrice}
+                                        className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-500 text-white rounded-lg hover:from-yellow-700 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium shadow-md transition-all"
                                     >
                                         {calculatingPrice && (
-                                            <svg className="animate-spin h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="animate-spin h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                             </svg>
                                         )}
-                                        <span>
-                                            {formData.metalType === 'mixed' ? 'Mixed Metal Pricing Not Available' :
-                                             `Calculate ${formData.metalType.charAt(0).toUpperCase() + formData.metalType.slice(1)} Price`}
-                                        </span>
+                                        <span>Calculate Price</span>
                                     </button>
-                                    
-                                    {calculatedPrice && (
-                                        <div className="text-sm">
-                                            <span className="text-gray-600">Calculated Price: </span>
-                                            <span className="font-semibold text-green-600">
-                                                ₹{calculatedPrice.breakdown.finalPrice.toFixed(2)}
-                                            </span>
+
+                                    {calculatedPrice?.breakdown?.finalPrice && (
+                                        <div className="bg-white px-4 py-2 rounded-lg border-2 border-green-300">
+                                            <p className="text-xs text-gray-600">Calculated Price</p>
+                                            <p className="text-xl font-bold text-green-600">
+                                                ₹{Number(calculatedPrice.breakdown.finalPrice).toFixed(2)}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Price Breakdown */}
-                                {calculatedPrice && (
-                                    <div className="bg-white border border-gray-200 rounded-lg p-4 mt-4">
-                                        <h4 className="text-sm font-medium text-gray-900 mb-2">
-                                            {formData.metalType.charAt(0).toUpperCase() + formData.metalType.slice(1)} Price Breakdown
-                                        </h4>
-                                        <div className="space-y-1 text-xs">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">
-                                                    {formData.metalType === 'gold' ? 'Gold' : 
-                                                     formData.metalType === 'silver' ? 'Silver' : 'Platinum'} Value:
-                                                </span>
-                                                <span>
-                                                    ₹{(calculatedPrice.breakdown.pureGoldValue || 
-                                                       calculatedPrice.breakdown.pureSilverValue || 
-                                                       calculatedPrice.breakdown.purePlatinumValue).toFixed(2)}
-                                                </span>
+                                {calculatedPrice?.breakdown && (
+                                    <div className="bg-white border-2 border-gray-200 rounded-lg p-5 space-y-3">
+                                        <h5 className="font-semibold text-gray-900 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            Price Breakdown
+                                        </h5>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between py-1">
+                                                <span className="text-gray-600">Metal Value:</span>
+                                                <span className="font-medium">₹{Number(
+                                                    formData.metalType === 'gold' ? (calculatedPrice.breakdown.goldValue || 0) :
+                                                    formData.metalType === 'silver' ? (calculatedPrice.breakdown.silverValue || 0) : 0
+                                                ).toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between py-1">
                                                 <span className="text-gray-600">Making Charges:</span>
-                                                <span>₹{calculatedPrice.breakdown.makingCharges.toFixed(2)}</span>
+                                                <span className="font-medium">₹{Number(calculatedPrice.breakdown.makingCharges || 0).toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between py-1">
                                                 <span className="text-gray-600">GST (3%):</span>
-                                                <span>₹{calculatedPrice.breakdown.gstAmount.toFixed(2)}</span>
+                                                <span className="font-medium">₹{Number(calculatedPrice.breakdown.gstAmount || 0).toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Stone Value:</span>
-                                                <span>₹{parseFloat(formData.stoneValue || 0).toFixed(2)}</span>
-                                            </div>
-                                            <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
-                                                <span>Total:</span>
-                                                <span>₹{(calculatedPrice.breakdown.finalPrice + parseFloat(formData.stoneValue || 0)).toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Live Metal Rate Display */}
-                                        <div className="mt-3 pt-2 border-t border-gray-100">
-                                            <div className="flex justify-between text-xs text-gray-500">
-                                                <span>
-                                                    Live {formData.metalType === 'gold' ? 'Gold' : 
-                                                          formData.metalType === 'silver' ? 'Silver' : 'Platinum'} Rate:
-                                                </span>
-                                                <span>
-                                                    ₹{(formData.metalType === 'gold' ? 
-                                                        calculatedPrice.breakdown.goldPricePerGram : 
-                                                        formData.metalType === 'silver' ? 
-                                                        calculatedPrice.breakdown.silverPricePerGram :
-                                                        calculatedPrice.breakdown.platinumPricePerGram
-                                                    ).toFixed(2)}/gram
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between text-xs text-gray-500">
-                                                <span>Data Source:</span>
-                                                <span>{calculatedPrice.goldPriceData?.source || 
-                                                       calculatedPrice.silverPriceData?.source || 
-                                                       calculatedPrice.platinumPriceData?.source}</span>
+                                            <div className="flex justify-between py-1 border-t border-gray-200 pt-2">
+                                                <span className="font-semibold text-gray-900">Total Price:</span>
+                                                <span className="font-bold text-[#8B6B4C] text-lg">₹{Number(calculatedPrice.breakdown.finalPrice || 0).toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
-                    </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            MRP (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="mrp"
-                            value={formData.mrp}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Cost Price (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="costPrice"
-                            value={formData.costPrice}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Selling Price (₹ INR) *
-                        </label>
-                        <input
-                            type="number"
-                            name="sellingPrice"
-                            value={formData.sellingPrice}
-                            onChange={handleInputChange}
-                            min="0"
-                            step="0.01"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Product Image
-                        </label>
-                        <div className="space-y-4">
-                            {/* Image Preview */}
-                            {imagePreview && (
-                                <div className="relative">
-                                    <img 
-                                        src={imagePreview} 
-                                        alt="Product preview" 
-                                        className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200"
+                        {/* Fixed Pricing Fields */}
+                        {formData.pricingMethod === 'fixed' && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        MRP (₹) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="mrp"
+                                        value={formData.mrp}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        step="0.01"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                        placeholder="Maximum Retail Price"
+                                        required
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={removeImage}
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                                    >
-                                        ×
-                                    </button>
                                 </div>
-                            )}
-                            
-                            {/* File Input */}
-                            <div className="flex items-center space-x-4">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                    id="image-upload"
-                                />
-                                <label
-                                    htmlFor="image-upload"
-                                    className="cursor-pointer bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg px-6 py-4 text-center transition-colors"
-                                >
-                                    <div className="space-y-2">
-                                        <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18M13 12l4-4m0 0l-4-4m4 4H3" />
-                                        </svg>
-                                        <div className="text-sm text-gray-600">
-                                            <span className="font-medium text-[#8B6B4C]">Click to upload</span> or drag and drop
-                                        </div>
-                                        <div className="text-xs text-gray-400">
-                                            PNG, JPG, GIF up to 5MB
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
 
-                            {/* Manual URL Input */}
-                            <div>
-                                <label className="block text-xs text-gray-500 mb-1">
-                                    Or enter image URL manually:
-                                </label>
-                                <input
-                                    type="text"
-                                    name="image"
-                                    value={formData.image}
-                                    onChange={(e) => {
-                                        handleInputChange(e);
-                                        setImagePreview(e.target.value);
-                                    }}
-                                    className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                                    placeholder="/product1.jpg or https://example.com/image.jpg"
-                                />
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Enter a full URL (https://...) or relative path (/product1.jpg)
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Multiple Images Upload */}
-                <div className="border-t border-gray-200 pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">Additional Images</h3>
-                        <span className="text-sm text-gray-500">({imagePreviews.length}/10 images)</span>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        {/* Multiple Image Upload Input */}
-                        <div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleMultipleImageChange}
-                                className="hidden"
-                                id="multiple-image-upload"
-                            />
-                            <label
-                                htmlFor="multiple-image-upload"
-                                className="cursor-pointer bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg px-6 py-4 text-center transition-colors block"
-                            >
-                                <div className="space-y-2">
-                                    <svg className="mx-auto h-8 w-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    <div className="text-sm text-gray-600">
-                                        <span className="font-medium text-blue-600">Add multiple images</span>
-                                    </div>
-                                    <div className="text-xs text-gray-400">
-                                        Select multiple PNG, JPG, GIF files up to 5MB each (Max 10 images)
-                                    </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Cost Price (₹) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="costPrice"
+                                        value={formData.costPrice}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        step="0.01"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                        placeholder="Your Cost"
+                                        required
+                                    />
                                 </div>
-                            </label>
-                        </div>
 
-                        {/* Image Previews Grid */}
-                        {imagePreviews.length > 0 && (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {imagePreviews.map((preview, index) => (
-                                    <div key={index} className="relative group">
-                                        <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
-                                            <img
-                                                src={preview}
-                                                alt={`Preview ${index + 1}`}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        
-                                        {/* Image Controls */}
-                                        <div className="absolute top-2 right-2 flex space-x-1">
-                                            {/* Move Up */}
-                                            {index > 0 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => moveImage(index, 'up')}
-                                                    className="bg-white/80 hover:bg-white text-gray-600 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="Move up"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                                    </svg>
-                                                </button>
-                                            )}
-                                            
-                                            {/* Move Down */}
-                                            {index < imagePreviews.length - 1 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => moveImage(index, 'down')}
-                                                    className="bg-white/80 hover:bg-white text-gray-600 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="Move down"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-                                            )}
-                                            
-                                            {/* Remove */}
-                                            <button
-                                                type="button"
-                                                onClick={() => removeProductImage(index)}
-                                                className="bg-red-500/80 hover:bg-red-500 text-white rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Remove image"
-                                            >
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        
-                                        {/* Image Order */}
-                                        <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                                            {index + 1}
-                                        </div>
-                                        
-                                        {/* Primary Badge */}
-                                        {index === 0 && (
-                                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                                                Primary
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Selling Price (₹) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="sellingPrice"
+                                        value={formData.sellingPrice}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        step="0.01"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                        placeholder="Customer Price"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Dynamic Pricing - Cost and Discount */}
+                        {formData.pricingMethod === 'dynamic' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Cost Price (₹) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="costPrice"
+                                        value={formData.costPrice}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        step="0.01"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                        placeholder="Your actual cost"
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Your purchase/manufacturing cost</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Discount (%) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="discountPercent"
+                                        value={formData.discountPercent || 0}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                        placeholder="e.g., 10"
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Discount on calculated MRP</p>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Enhanced Stone/Gem Management */}
-                <div className="border-t border-gray-200 pt-6">
-                    <div className="border-t border-gray-200 pt-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center">
-                                <svg className="w-5 h-5 text-[#8B6B4C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Section 3: Product Images */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-[#8B6B4C] to-[#725939] px-6 py-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Product Images
+                        </h3>
+                    </div>
+                    <div className="p-6 space-y-6">
+                        {/* Primary Image Upload */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                Primary Product Image
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Image Preview */}
+                                {imagePreview && (
+                                    <div className="relative group">
+                                        <div className="aspect-square rounded-xl overflow-hidden border-2 border-[#8B6B4C] shadow-md">
+                                            <img 
+                                                src={imagePreview} 
+                                                alt="Product preview" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 shadow-lg transition-all"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                                            Primary
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Upload Area */}
+                                <div className="space-y-4">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                        id="image-upload"
+                                    />
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-[#F5F0EB] hover:to-[#EAE0D8] border-2 border-dashed border-gray-300 hover:border-[#8B6B4C] rounded-xl p-8 text-center transition-all block"
+                                    >
+                                        <div className="space-y-3">
+                                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            </svg>
+                                            <div className="text-sm text-gray-600">
+                                                <span className="font-semibold text-[#8B6B4C]">Click to upload</span> or drag and drop
+                                            </div>
+                                            <div className="text-xs text-gray-400">
+                                                PNG, JPG, GIF up to 5MB
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    {/* Manual URL Input */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-2">
+                                            Or enter image URL:
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="image"
+                                            value={formData.image}
+                                            onChange={(e) => {
+                                                handleInputChange(e);
+                                                setImagePreview(e.target.value);
+                                            }}
+                                            className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                            placeholder="https://example.com/image.jpg"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Multiple Images Section */}
+                        <div className="border-t border-gray-200 pt-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-base font-semibold text-gray-900">Additional Images</h4>
+                                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                    {imagePreviews.length}/10 images
+                                </span>
+                            </div>
+
+                            {/* Multiple Upload Button */}
+                            <div className="mb-4">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleMultipleImageChange}
+                                    className="hidden"
+                                    id="multiple-image-upload"
+                                />
+                                <label
+                                    htmlFor="multiple-image-upload"
+                                    className="cursor-pointer bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg px-6 py-4 text-center transition-all block"
+                                >
+                                    <div className="flex items-center justify-center gap-3">
+                                        <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-medium text-blue-600">Add Multiple Images</p>
+                                            <p className="text-xs text-gray-500 mt-1">Select up to 10 images</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Image Grid */}
+                            {imagePreviews.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="relative group">
+                                            <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group-hover:border-[#8B6B4C] transition-all">
+                                                <img
+                                                    src={preview}
+                                                    alt={`Preview ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            
+                                            {/* Controls Overlay */}
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-1">
+                                                {index > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveImage(index, 'up')}
+                                                        className="bg-white/90 hover:bg-white text-gray-700 rounded-full p-1.5 shadow-sm transition-all"
+                                                        title="Move left"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                {index < imagePreviews.length - 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveImage(index, 'down')}
+                                                        className="bg-white/90 hover:bg-white text-gray-700 rounded-full p-1.5 shadow-sm transition-all"
+                                                        title="Move right"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeProductImage(index)}
+                                                    className="bg-red-500/90 hover:bg-red-500 text-white rounded-full p-1.5 shadow-sm transition-all"
+                                                    title="Remove"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            {/* Image Number */}
+                                            <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                                #{index + 1}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p className="text-sm text-gray-500">No additional images</p>
+                                    <p className="text-xs text-gray-400 mt-1">Upload more images to showcase your product</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 4: Stone Specifications */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-[#8B6B4C] to-[#725939] px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
                                 </svg>
-                                <h3 className="text-lg font-medium text-gray-900">Stone & Gem Specifications</h3>
-                            </div>
+                                Stone & Gem Specifications
+                            </h3>
                             <button
                                 type="button"
                                 onClick={addStone}
-                                className="px-4 py-2 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#7A5D42] transition-colors flex items-center space-x-2"
+                                className="px-4 py-2 bg-white text-[#8B6B4C] rounded-lg hover:bg-gray-100 transition-all flex items-center gap-2 font-medium shadow-sm"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1385,44 +1417,57 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                 <span>Add Stone</span>
                             </button>
                         </div>
-
+                    </div>
+                    <div className="p-6">
                         {formData.stones.length === 0 ? (
-                            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+                                <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
                                 </svg>
-                                <p className="text-gray-500 text-sm mb-2">No stones added yet</p>
-                                <p className="text-gray-400 text-xs">Click "Add Stone" to specify diamonds, rubies, emeralds, and other gems</p>
+                                <p className="text-gray-600 font-medium mb-2">No stones added yet</p>
+                                <p className="text-gray-400 text-sm mb-4">Add diamonds, rubies, emeralds, and other precious gems</p>
+                                <button
+                                    type="button"
+                                    onClick={addStone}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-all font-medium shadow-sm"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span>Add Your First Stone</span>
+                                </button>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 {formData.stones.map((stone, index) => (
-                                    <div key={index} className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+                                    <div key={index} className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-6 shadow-sm">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h4 className="text-md font-medium text-gray-900">
-                                                Stone #{index + 1} - {stone.type}
-                                            </h4>
+                                            <div className="flex items-center gap-3">
+                                                <div className="bg-amber-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <h4 className="text-base font-semibold text-gray-900">
+                                                    {stone.type} - {stone.quality}
+                                                </h4>
+                                            </div>
                                             <button
                                                 type="button"
                                                 onClick={() => removeStone(index)}
-                                                className="text-red-600 hover:text-red-800 p-1"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
                                         </div>
-                                        
+
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {/* Stone Type */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Stone Type
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Stone Type</label>
                                                 <select
                                                     value={stone.type}
                                                     onChange={(e) => updateStone(index, 'type', e.target.value)}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                 >
                                                     {stoneTypes.map((type) => (
                                                         <option key={type} value={type}>{type}</option>
@@ -1430,15 +1475,12 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                                 </select>
                                             </div>
 
-                                            {/* Quality */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Quality/Grade
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Quality</label>
                                                 <select
                                                     value={stone.quality}
                                                     onChange={(e) => updateStone(index, 'quality', e.target.value)}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                 >
                                                     {stoneQualities.map((quality) => (
                                                         <option key={quality} value={quality}>{quality}</option>
@@ -1446,61 +1488,56 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                                 </select>
                                             </div>
 
-                                            {/* Weight */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Weight (Carats/Pieces)
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Weight (Carats)</label>
                                                 <input
                                                     type="number"
                                                     value={stone.weight}
                                                     onChange={(e) => updateStone(index, 'weight', e.target.value)}
                                                     step="0.01"
                                                     min="0"
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                     placeholder="0.50"
                                                 />
                                             </div>
 
-                                            {/* Price per Unit */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Price per Unit (₹)
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Price per Carat (₹)</label>
                                                 <input
                                                     type="number"
                                                     value={stone.pricePerUnit}
                                                     onChange={(e) => updateStone(index, 'pricePerUnit', e.target.value)}
                                                     step="0.01"
                                                     min="0"
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                     placeholder="50000"
                                                 />
                                             </div>
 
-                                            {/* Color */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Color
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
                                                 <input
                                                     type="text"
                                                     value={stone.color}
                                                     onChange={(e) => updateStone(index, 'color', e.target.value)}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                     placeholder="Colorless, Red, Blue..."
                                                 />
                                             </div>
 
-                                            {/* Cut */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Cut
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Total Value</label>
+                                                <div className="w-full p-2.5 bg-green-50 border-2 border-green-300 rounded-lg text-sm font-bold text-green-700">
+                                                    ₹{stone.totalValue?.toFixed(2) || '0.00'}
+                                                </div>
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Cut</label>
                                                 <select
                                                     value={stone.cut}
                                                     onChange={(e) => updateStone(index, 'cut', e.target.value)}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                 >
                                                     {stoneCuts.map((cut) => (
                                                         <option key={cut} value={cut}>{cut}</option>
@@ -1508,67 +1545,42 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                                 </select>
                                             </div>
 
-                                            {/* Setting */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Setting
-                                                </label>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Setting</label>
                                                 <select
                                                     value={stone.setting}
                                                     onChange={(e) => updateStone(index, 'setting', e.target.value)}
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-all"
                                                 >
                                                     {stoneSettings.map((setting) => (
                                                         <option key={setting} value={setting}>{setting}</option>
                                                     ))}
                                                 </select>
                                             </div>
-
-                                            {/* Total Value Display */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Total Value (₹)
-                                                </label>
-                                                <div className="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-green-700">
-                                                    ₹{stone.totalValue?.toFixed(2) || '0.00'}
-                                                </div>
-                                            </div>
-
-                                            {/* Quick Actions */}
-                                            <div className="md:col-span-3 pt-2">
-                                                <div className="flex flex-wrap gap-2">
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                                        {stone.type} - {stone.quality}
-                                                    </span>
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                                        {stone.weight} {stone.type === 'Pearl' ? 'pieces' : 'carats'}
-                                                    </span>
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                                        {stone.cut} Cut
-                                                    </span>
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                                        {stone.setting} Setting
-                                                    </span>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 ))}
-                                
+
                                 {/* Total Summary */}
                                 {formData.stones.length > 0 && (
-                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-5 shadow-sm">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center">
-                                                <svg className="w-5 h-5 text-[#8B6B4C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div className="flex items-center gap-3">
+                                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                <span className="text-sm font-medium text-gray-900">
-                                                    Total Stones: {formData.stones.length}
-                                                </span>
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-700">
+                                                        Total Stones: <span className="font-bold text-gray-900">{formData.stones.length}</span>
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-0.5">All stones configured</p>
+                                                </div>
                                             </div>
-                                            <div className="text-lg font-bold text-[#8B6B4C]">
-                                                Total Value: ₹{formData.stoneValue || '0.00'}
+                                            <div className="text-right">
+                                                <p className="text-xs text-gray-600">Combined Value</p>
+                                                <p className="text-2xl font-bold text-green-700">
+                                                    ₹{formData.stoneValue || '0.00'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -1578,57 +1590,38 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description *
-                    </label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        rows="4"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent"
-                        required
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <input
-                        type="checkbox"
-                        name="isActive"
-                        checked={formData.isActive}
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                        Product is active
-                    </label>
-                </div>
-
-                <div className="flex space-x-4">
-                    <button
-                        type="submit"
-                        disabled={loading || uploadingImage}
-                        className="bg-[#8B6B4C] text-white px-6 py-3 rounded-lg hover:bg-[#725939] transition-colors disabled:opacity-50 flex items-center space-x-2"
-                    >
-                        {(loading || uploadingImage) && (
-                            <svg className="animate-spin h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        )}
-                        <span>
-                            {uploadingImage ? 'Uploading Image...' : 
-                             loading ? 'Saving...' : 
-                             (product ? 'Update Product' : 'Add Product')}
-                        </span>
-                    </button>
+                {/* Form Actions */}
+                <div className="flex items-center justify-between gap-4 pt-6">
                     <button
                         type="button"
                         onClick={onCancel}
                         disabled={loading || uploadingImage}
-                        className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+                        className="px-8 py-3.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all disabled:opacity-50 font-medium flex items-center gap-2"
                     >
-                        Cancel
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Cancel</span>
+                    </button>
+
+                    <button
+                        type="submit"
+                        disabled={loading || uploadingImage}
+                        className="px-8 py-3.5 bg-gradient-to-r from-[#8B6B4C] to-[#725939] text-white rounded-lg hover:from-[#725939] hover:to-[#5F4A2F] transition-all disabled:opacity-50 font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+                    >
+                        {(loading || uploadingImage) && (
+                            <svg className="animate-spin h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        )}
+                        <span>
+                            {uploadingImage ? 'Uploading Images...' : 
+                             loading ? 'Saving Product...' : 
+                             (product ? 'Update Product' : 'Create Product')}
+                        </span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                     </button>
                 </div>
             </form>

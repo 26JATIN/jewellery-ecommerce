@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createPaymentOrder } from '@/lib/razorpay';
-import paymentConfig from '@/lib/payment-config';
+import config from '@/lib/config';
 
 export async function POST(req) {
     try {
-        if (!paymentConfig.razorpay.keyId || !paymentConfig.razorpay.keySecret) {
+        if (!config.razorpay.keyId || !config.razorpay.keySecret) {
             console.error('Missing Razorpay credentials:', {
-                keyId: !!paymentConfig.razorpay.keyId,
-                keySecret: !!paymentConfig.razorpay.keySecret
+                keyId: !!config.razorpay.keyId,
+                keySecret: !!config.razorpay.keySecret
             });
             return NextResponse.json(
                 { error: 'Payment gateway not configured' },

@@ -60,11 +60,11 @@ const couponSchema = new mongoose.Schema({
     },
     applicableCategories: [{
         type: String,
-        enum: ['Diamond', 'Gold', 'Silver', 'Platinum', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
+        enum: ['Diamond', 'Gold', 'Silver', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
     }],
     excludedCategories: [{
         type: String,
-        enum: ['Diamond', 'Gold', 'Silver', 'Platinum', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
+        enum: ['Diamond', 'Gold', 'Silver', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
     }],
     applicableProducts: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -100,13 +100,10 @@ const couponSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         },
-        discountApplied: {
-            type: Number,
-            required: true
-        }
+        discountApplied: Number
     }]
 }, {
-    timestamps: true
+    timestamps: true // Automatically adds createdAt and updatedAt
 });
 
 // Index for faster lookups

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const gallerySchema = new mongoose.Schema({
+const heroVideoSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true
@@ -9,20 +9,11 @@ const gallerySchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    mediaType: {
-        type: String,
-        enum: ['image', 'video'],
-        required: true
-    },
-    mediaUrl: {
+    videoUrl: {
         type: String,
         required: true
     },
     thumbnailUrl: {
-        type: String, // For video thumbnails
-        default: ''
-    },
-    alt: {
         type: String,
         default: ''
     },
@@ -34,11 +25,15 @@ const gallerySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    tags: [{
-        type: String
-    }]
+    duration: {
+        type: Number, // Duration in seconds
+        default: 0
+    }
 }, {
     timestamps: true // Automatically adds createdAt and updatedAt
 });
 
-export default mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
+// Create index for ordering
+heroVideoSchema.index({ order: 1, isActive: 1 });
+
+export default mongoose.models.HeroVideo || mongoose.model('HeroVideo', heroVideoSchema);

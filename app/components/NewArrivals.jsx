@@ -179,7 +179,7 @@ export default function NewArrivals() {
                                                 {product.name}
                                             </h3>
                                             <p className="text-[#2C2C2C] font-semibold text-lg">
-                                                ₹{(product.sellingPrice || product.price).toLocaleString('en-IN')}
+                                                ₹{product.sellingPrice.toLocaleString('en-IN')}
                                             </p>
                                         </div>
                                     </Link>

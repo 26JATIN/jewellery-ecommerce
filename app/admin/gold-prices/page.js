@@ -5,7 +5,7 @@ import AdminLayout from '@/app/components/AdminLayout';
 import GoldPriceDashboard from '@/app/components/GoldPriceDashboard';
 import JewelryPriceCalculator from '@/app/components/JewelryPriceCalculator';
 
-const GoldPriceManagement = () => {
+const MetalRatesManagement = () => {
   const [loading, setLoading] = useState({
     updatePrices: false,
     priceHistory: false,
@@ -44,22 +44,49 @@ const GoldPriceManagement = () => {
                   {result.errors > 0 && ` (${result.errors} errors)`}
                 </p>
                 <p className="text-sm text-green-600 mt-1">
-                  Current gold price: ₹{result.currentGoldPrice?.toFixed(2)}/gram
+                  Current metal rates: Gold ₹{result.currentGoldPrice?.toFixed(2)}/g, Silver ₹{result.currentSilverPrice?.toFixed(2)}/g
                 </p>
               </div>
               
               {result.details && result.details.length > 0 && (
-                <div className="max-h-48 overflow-y-auto">
+                <div className="max-h-64 overflow-y-auto">
                   <h5 className="font-medium text-gray-900 mb-2">Updated Products:</h5>
                   {result.details.filter(item => item.success).slice(0, 10).map((item, index) => (
-                    <div key={index} className="text-sm bg-gray-50 p-2 rounded mb-1">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-gray-600">
-                        ₹{item.oldPrice?.toFixed(2)} → ₹{item.newPrice?.toFixed(2)} 
-                        <span className={`ml-2 ${item.priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ({item.priceChange >= 0 ? '+' : ''}₹{item.priceChange?.toFixed(2)})
-                        </span>
+                    <div key={index} className="text-sm bg-white border border-gray-200 p-3 rounded-lg mb-2 shadow-sm">
+                      <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                      
+                      {/* MRP Update */}
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-gray-500">MRP:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-600">₹{item.oldMRP?.toFixed(2)}</span>
+                          <span className="text-gray-400">→</span>
+                          <span className="font-semibold text-gray-900">₹{item.newMRP?.toFixed(2)}</span>
+                          <span className={`ml-1 font-medium ${item.mrpChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            ({item.mrpChange >= 0 ? '+' : ''}₹{item.mrpChange?.toFixed(2)})
+                          </span>
+                        </div>
                       </div>
+                      
+                      {/* Selling Price Update */}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">Selling:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-600">₹{item.oldSellingPrice?.toFixed(2)}</span>
+                          <span className="text-gray-400">→</span>
+                          <span className="font-semibold text-blue-600">₹{item.newSellingPrice?.toFixed(2)}</span>
+                          <span className={`ml-1 font-medium ${item.sellingPriceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            ({item.sellingPriceChange >= 0 ? '+' : ''}₹{item.sellingPriceChange?.toFixed(2)})
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Discount Info */}
+                      {item.discountPercent > 0 && (
+                        <div className="text-xs text-purple-600 mt-1">
+                          Discount: {item.discountPercent}% off
+                        </div>
+                      )}
                     </div>
                   ))}
                   {result.details.filter(item => item.success).length > 10 && (
@@ -184,13 +211,13 @@ const GoldPriceManagement = () => {
     <AdminLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gold Price Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Metal Rates Management</h1>
           <p className="text-gray-600">
-            Monitor live precious metal prices and calculate jewelry pricing based on current market rates.
+            Monitor live gold & silver prices and calculate jewelry pricing based on current market rates.
           </p>
         </div>
 
-        {/* Live Gold Price Dashboard */}
+        {/* Live Metal Price Dashboard */}
         <section>
           <GoldPriceDashboard />
         </section>
@@ -297,11 +324,12 @@ const GoldPriceManagement = () => {
         <section className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-3">How Dynamic Pricing Works</h3>
           <div className="text-blue-800 space-y-2">
-            <p>• <strong>Live Rates:</strong> Gold prices are fetched from international markets in real-time</p>
-            <p>• <strong>Auto Calculation:</strong> Product prices are calculated based on gold weight, purity, and making charges</p>
+            <p>• <strong>Live Rates:</strong> Gold & Silver prices are fetched from Bullions.co.in in real-time</p>
+            <p>• <strong>Auto Calculation:</strong> Product prices are calculated based on metal weight, purity, and making charges</p>
+            <p>• <strong>Supported Metals:</strong> Gold (24K, 22K, 20K, 18K) and Silver (999 purity only)</p>
             <p>• <strong>INR Primary:</strong> All pricing optimized for Indian market with INR as primary currency</p>
             <p>• <strong>Caching:</strong> Prices are cached for 5 minutes to reduce API calls</p>
-            <p>• <strong>Fallback:</strong> If API is unavailable, system uses fallback prices</p>
+            <p>• <strong>Fallback:</strong> If scraper is unavailable, system uses fallback prices</p>
           </div>
         </section>
       </div>
@@ -457,4 +485,4 @@ const PricingSettingsForm = ({ settings, onSave }) => {
   );
 };
 
-export default withAdminAuth(GoldPriceManagement);
+export default withAdminAuth(MetalRatesManagement);

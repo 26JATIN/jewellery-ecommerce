@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const GoldPriceDashboard = () => {
-  const [goldData, setGoldData] = useState(null);
+  const [metalData, setMetalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currency, setCurrency] = useState('INR');
@@ -14,23 +14,25 @@ const GoldPriceDashboard = () => {
     { code: 'INR', symbol: '₹', name: 'Indian Rupee' }
   ];
 
-  const fetchGoldPrice = async (selectedCurrency = currency) => {
+  const fetchGoldPrice = async (selectedCurrency = currency, forceRefresh = false) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/gold-price?currency=${selectedCurrency}&cache=true`);
+      // Use cache for auto-refresh, but bypass cache for manual refresh button
+      const cacheParam = forceRefresh ? 'false' : 'true';
+      const response = await fetch(`/api/gold-price?currency=${selectedCurrency}&cache=${cacheParam}`);
       const result = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch gold price');
+        throw new Error(result.error || 'Failed to fetch metal prices');
       }
       
-      setGoldData(result.data);
+      setMetalData(result.data);
       setLastUpdated(new Date());
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching gold price:', err);
+      console.error('Error fetching metal prices:', err);
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ const GoldPriceDashboard = () => {
     );
   };
 
-  if (loading && !goldData) {
+  if (loading && !metalData) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="animate-pulse">
@@ -95,7 +97,7 @@ const GoldPriceDashboard = () => {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Gold Prices</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Metal Prices</h3>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => fetchGoldPrice()}
@@ -120,14 +122,14 @@ const GoldPriceDashboard = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Live Gold & Silver Prices (Per Gram)</h2>
           <p className="text-gray-600 text-sm">
             Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Loading...'} • All prices in Indian Rupees (₹/gram)
-            {goldData?.fallback && (
+            {metalData?.fallback && (
               <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
                 Fallback Data
               </span>
             )}
-            {goldData?.source && (
+            {metalData?.source && (
               <span className="ml-2 text-xs text-gray-500">
-                Source: {goldData.source}
+                Source: {metalData.source}
               </span>
             )}
           </p>
@@ -142,13 +144,13 @@ const GoldPriceDashboard = () => {
       </div>
 
       {/* Gold Purity Cards */}
-      {goldData && goldData.detailed && (
+      {metalData && metalData.detailed && (
         <>
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Gold Prices (Per Gram)</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               {/* 24K Gold */}
-              {goldData.detailed.gold['24k'] && (
+              {metalData.detailed.gold['24k'] && (
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-lg border-2 border-yellow-300 shadow-sm"
@@ -158,14 +160,14 @@ const GoldPriceDashboard = () => {
                     <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">99.99% Pure</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPrice(goldData.detailed.gold['24k'])}
+                    {formatPrice(metalData.detailed.gold['24k'])}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">per gram</p>
                 </motion.div>
               )}
 
               {/* 22K Gold */}
-              {goldData.detailed.gold['22k'] && (
+              {metalData.detailed.gold['22k'] && (
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-amber-50 to-amber-100 p-5 rounded-lg border-2 border-amber-300 shadow-sm"
@@ -175,14 +177,31 @@ const GoldPriceDashboard = () => {
                     <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded">91.67% Pure</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPrice(goldData.detailed.gold['22k'])}
+                    {formatPrice(metalData.detailed.gold['22k'])}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">per gram</p>
+                </motion.div>
+              )}
+              
+              {/* 20K Gold */}
+              {metalData.detailed.gold['20k'] && (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-yellow-50 to-orange-50 p-5 rounded-lg border-2 border-orange-200 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-700">20K Gold</h3>
+                    <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">83.33% Pure</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatPrice(metalData.detailed.gold['20k'])}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">per gram</p>
                 </motion.div>
               )}
 
               {/* 18K Gold */}
-              {goldData.detailed.gold['18k'] && (
+              {metalData.detailed.gold['18k'] && (
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-lg border-2 border-orange-300 shadow-sm"
@@ -192,7 +211,7 @@ const GoldPriceDashboard = () => {
                     <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">75.00% Pure</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPrice(goldData.detailed.gold['18k'])}
+                    {formatPrice(metalData.detailed.gold['18k'])}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">per gram</p>
                 </motion.div>
@@ -201,20 +220,20 @@ const GoldPriceDashboard = () => {
           </div>
 
           {/* Silver Price Card */}
-          {goldData.detailed.silver?.perGram && (
+          {metalData.detailed.silver?.['999'] && (
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Silver Price (Per Gram)</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-lg border-2 border-gray-300 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-semibold text-gray-700">Silver 999</h3>
-                    <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">99.99% Pure</span>
+                    <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">99.9% Pure</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPrice(goldData.detailed.silver.perGram)}
+                    {formatPrice(metalData.detailed.silver['999'])}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">per gram</p>
                 </motion.div>
@@ -227,7 +246,7 @@ const GoldPriceDashboard = () => {
       {/* Refresh Button */}
       <div className="flex justify-center">
         <button
-          onClick={() => fetchGoldPrice()}
+          onClick={() => fetchGoldPrice(currency, true)}
           disabled={loading}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
         >

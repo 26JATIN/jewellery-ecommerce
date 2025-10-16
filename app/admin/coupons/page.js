@@ -29,7 +29,7 @@ const CouponManagement = () => {
   });
 
   const categories = [
-    'Diamond', 'Gold', 'Silver', 'Platinum', 
+    'Diamond', 'Gold', 'Silver', 
     'Wedding', 'Vintage', 'Contemporary', 'Traditional'
   ];
 

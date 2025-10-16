@@ -4,6 +4,12 @@ import { verifyToken } from '@/lib/auth';
 import User from '@/models/User';
 import connectDB from '@/lib/mongodb';
 
+/**
+ * Auth Check Route
+ * Used by AuthContext to verify user authentication status on app load
+ * Validates JWT token from cookies and returns user data if valid
+ * This route is critical for maintaining authentication state across page reloads
+ */
 export async function GET() {
     try {
         const cookieStore = await cookies();

@@ -3,6 +3,7 @@ import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import User from '@/models/User';
 
 // Force Node.js runtime
 export const runtime = 'nodejs';
@@ -37,7 +38,6 @@ export async function GET(req, { params }) {
 
         // Connect to DB and fetch user to verify admin status
         await connectDB();
-        const User = require('@/models/User').default;
         const user = await User.findById(decoded.userId).select('isAdmin');
 
         console.log('User found:', !!user, 'isAdmin:', user?.isAdmin);
@@ -49,7 +49,7 @@ export async function GET(req, { params }) {
             );
         }
 
-        const { orderId } = params;
+        const { orderId } = await params;
         console.log('Fetching order with ID:', orderId);
 
         // Fetch the order with all details
@@ -75,6 +75,9 @@ export async function GET(req, { params }) {
 }
 
 // Update order status (Admin only)
+// NOTE: For orders with Shiprocket shipments, status is automatically updated via webhooks
+// See: app/api/webhooks/shiprocket/route.js and SHIPROCKET_ORDER_STATUS_AUTOMATION.md
+// Manual updates should only be used for exceptional cases (cancellations, refunds, etc.)
 export async function PUT(req, { params }) {
     try {
         // Verify admin authentication
@@ -98,7 +101,6 @@ export async function PUT(req, { params }) {
 
         // Connect to DB and fetch user to verify admin status
         await connectDB();
-        const User = require('@/models/User').default;
         const user = await User.findById(decoded.userId).select('isAdmin');
 
         if (!user || !user.isAdmin) {
@@ -108,7 +110,7 @@ export async function PUT(req, { params }) {
             );
         }
 
-        const { orderId } = params;
+        const { orderId } = await params;
         const { status } = await req.json();
 
         // Validate status
@@ -118,6 +120,22 @@ export async function PUT(req, { params }) {
                 { error: 'Invalid status' },
                 { status: 400 }
             );
+        }
+
+        // Fetch the order first
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return NextResponse.json(
+                { error: 'Order not found' },
+                { status: 404 }
+            );
+        }
+
+        // Warning: If order has active shipment, Shiprocket webhooks will override manual updates
+        let warning = null;
+        if (order.shipping?.shipmentId && order.shipping?.awbCode) {
+            warning = 'This order has an active Shiprocket shipment. Status may be overridden by automatic webhook updates.';
+            console.warn(`Manual status update for order ${orderId} with active shipment: ${order.shipping.awbCode}`);
         }
 
         // Update the order
@@ -130,14 +148,10 @@ export async function PUT(req, { params }) {
             { new: true }
         );
 
-        if (!updatedOrder) {
-            return NextResponse.json(
-                { error: 'Order not found' },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json(updatedOrder);
+        return NextResponse.json({
+            ...updatedOrder.toObject(),
+            warning
+        });
     } catch (error) {
         console.error('Admin order update error:', error);
         return NextResponse.json(

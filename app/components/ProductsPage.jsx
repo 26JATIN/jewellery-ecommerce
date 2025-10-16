@@ -15,6 +15,7 @@ export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('featured');
     const [viewMode, setViewMode] = useState('grid');
+    const [selectedTags, setSelectedTags] = useState([]);
     
     // Set initial search term and category from URL
     useEffect(() => {
@@ -67,7 +68,9 @@ export default function ProductsPage() {
                 product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
-            return matchesCategory && matchesSearch;
+            const matchesTags = selectedTags.length === 0 || 
+                (product.tags && product.tags.some(tag => selectedTags.includes(tag)));
+            return matchesCategory && matchesSearch && matchesTags;
         })
         .sort((a, b) => {
             switch (sortBy) {
@@ -225,6 +228,60 @@ export default function ProductsPage() {
                                 </span>
                             </motion.button>
                         ))}
+                    </div>
+                </motion.div>
+
+                {/* Tag Filters */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="mb-6 md:mb-8"
+                >
+                    <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100">
+                        <label className="block text-sm font-medium text-[#2C2C2C] mb-3">
+                            Filter by Target Audience
+                        </label>
+                        <div className="flex flex-wrap gap-2 md:gap-3">
+                            {['Men', 'Women', 'Kids'].map((tag) => (
+                                <motion.button
+                                    key={tag}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        if (selectedTags.includes(tag)) {
+                                            setSelectedTags(selectedTags.filter(t => t !== tag));
+                                        } else {
+                                            setSelectedTags([...selectedTags, tag]);
+                                        }
+                                    }}
+                                    className={`
+                                        px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
+                                        ${selectedTags.includes(tag)
+                                            ? 'bg-[#D4AF76] text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }
+                                    `}
+                                >
+                                    {tag}
+                                    {selectedTags.includes(tag) && (
+                                        <span className="ml-2">✓</span>
+                                    )}
+                                </motion.button>
+                            ))}
+                            {selectedTags.length > 0 && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setSelectedTags([])}
+                                    className="px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-300"
+                                >
+                                    Clear Tags ✕
+                                </motion.button>
+                            )}
+                        </div>
                     </div>
                 </motion.div>
 
@@ -424,7 +481,7 @@ function ProductListItem({ product, index }) {
                                 {product.name}
                             </h3>
                             <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-[#2C2C2C] font-medium">
-                                ₹{(product.sellingPrice || product.price).toLocaleString('en-IN')}
+                                ₹{product.sellingPrice.toLocaleString('en-IN')}
                             </p>
                         </div>
                     </div>

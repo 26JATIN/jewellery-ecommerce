@@ -82,12 +82,12 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                     <p className="text-[#D4AF76] text-sm mb-4">{product.category}</p>
                                     
                                     <div className="flex items-baseline gap-3 mb-6">
-                                        <span className="text-3xl font-light text-[#2C2C2C]">₹{product.sellingPrice || product.price}</span>
-                                        {product.mrp && product.mrp > (product.sellingPrice || product.price) && (
+                                        <span className="text-3xl font-light text-[#2C2C2C]">₹{product.sellingPrice}</span>
+                                        {product.mrp && product.mrp > product.sellingPrice && (
                                             <>
                                                 <span className="text-lg text-gray-400 line-through">₹{product.mrp}</span>
                                                 <span className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
-                                                    {Math.round(((product.mrp - (product.sellingPrice || product.price)) / product.mrp) * 100)}% off
+                                                    {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% off
                                                 </span>
                                             </>
                                         )}
@@ -123,12 +123,12 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                     <p className="text-[#D4AF76] mb-6">{product.category}</p>
                                     
                                     <div className="flex items-baseline gap-4 mb-8">
-                                        <span className="text-4xl font-light text-[#2C2C2C]">₹{product.sellingPrice || product.price}</span>
-                                        {product.mrp && product.mrp > (product.sellingPrice || product.price) && (
+                                        <span className="text-4xl font-light text-[#2C2C2C]">₹{product.sellingPrice}</span>
+                                        {product.mrp && product.mrp > product.sellingPrice && (
                                             <>
                                                 <span className="text-xl text-gray-400 line-through">₹{product.mrp}</span>
                                                 <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1.5 rounded-full">
-                                                    {Math.round(((product.mrp - (product.sellingPrice || product.price)) / product.mrp) * 100)}% off
+                                                    {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% off
                                                 </span>
                                             </>
                                         )}

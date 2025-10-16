@@ -44,25 +44,32 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const {
-      goldWeight,
+      goldWeight = 0,
       goldPurity = 22,
+      silverWeight = 0,
+      silverPurity = 999,
+      stoneValue = 0,
       makingChargePercent = 15,
       gstPercent = 3,
       currency = 'INR'
     } = body;
     
-    if (!goldWeight || goldWeight <= 0) {
+    // Validate that at least some weight is provided
+    if ((!goldWeight || goldWeight <= 0) && (!silverWeight || silverWeight <= 0)) {
       return NextResponse.json(
-        { error: 'Valid gold weight is required' },
+        { error: 'Valid gold weight or silver weight is required' },
         { status: 400 }
       );
     }
     
     const calculation = await calculateJewelryPrice({
-      goldWeight,
-      goldPurity,
-      makingChargePercent,
-      gstPercent,
+      goldWeight: parseFloat(goldWeight) || 0,
+      goldPurity: parseInt(goldPurity),
+      silverWeight: parseFloat(silverWeight) || 0,
+      silverPurity: parseInt(silverPurity),
+      stoneValue: parseFloat(stoneValue) || 0,
+      makingChargePercent: parseFloat(makingChargePercent),
+      gstPercent: parseFloat(gstPercent),
       currency
     });
     

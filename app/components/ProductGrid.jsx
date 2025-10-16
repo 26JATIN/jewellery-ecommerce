@@ -159,10 +159,10 @@ export default function ProductGrid({
                                     <p className="text-xs text-[#D4AF76] font-light tracking-widest uppercase mb-2">{product.category}</p>
                                     <h3 className="text-[#2C2C2C] font-light text-base mb-2 px-2">{product.name}</h3>
                                     <div className="flex justify-center items-center gap-2">
-                                        {product.mrp && product.mrp > (product.sellingPrice || product.price) && (
-                                            <span className="text-sm text-gray-400 line-through font-light">₹{product.mrp}</span>
+                                        {product.mrp && product.mrp > product.sellingPrice && (
+                                            <span className="line-through text-gray-400 text-sm mr-2">₹{product.mrp}</span>
                                         )}
-                                        <span className="text-[#2C2C2C] font-normal">₹{product.sellingPrice || product.price}</span>
+                                        <span className="text-[#2C2C2C] font-normal">₹{product.sellingPrice}</span>
                                     </div>
                                     {product.stock !== undefined && (
                                         <p className={`text-xs font-light mt-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>

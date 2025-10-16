@@ -40,7 +40,7 @@ export default function TermsAndConditions() {
             <p>
               All prices are listed in Indian Rupees (INR) and are subject to change without notice. 
               Prices for precious metal jewellery may fluctuate based on current market rates for 
-              gold, silver, and platinum. We reserve the right to limit quantities and discontinue 
+              gold and silver. We reserve the right to limit quantities and discontinue 
               products at any time.
             </p>
           </section>

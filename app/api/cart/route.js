@@ -67,9 +67,9 @@ export async function POST(req) {
 
         // Validate required product fields
         const productId = product._id || product.id;
-        if (!productId || !product.name || !product.price) {
+        if (!productId || !product.name || !product.sellingPrice) {
             return NextResponse.json(
-                { error: 'Invalid product data. Missing required fields.' }, 
+                { error: 'Invalid product data. Missing required fields (id, name, sellingPrice).' }, 
                 { status: 400 }
             );
         }
@@ -79,9 +79,9 @@ export async function POST(req) {
         let cart = await Cart.findOne({ user: decoded.userId });
         
         const cartItem = {
-            product: productId.toString(),
+            product: productId, // Store as ObjectId (mongoose will convert)
             name: product.name,
-            price: product.sellingPrice || product.price,
+            price: product.sellingPrice,
             image: product.image,
             quantity: 1
         };
@@ -93,7 +93,7 @@ export async function POST(req) {
             });
         } else {
             const existingItemIndex = cart.items.findIndex(
-                item => item.product === productId.toString()
+                item => item.product.toString() === productId.toString()
             );
 
             if (existingItemIndex > -1) {

@@ -33,7 +33,6 @@ export async function POST(req) {
         // Set defaults for missing pricing fields
         const productData = {
             ...data,
-            price: data.sellingPrice, // For backward compatibility
             mrp: data.mrp || data.sellingPrice,
             costPrice: data.costPrice || data.sellingPrice * 0.7, // Default 30% margin
             sku: data.sku || `SKU${Date.now()}`,

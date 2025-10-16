@@ -8,7 +8,8 @@ const orderSchema = new mongoose.Schema({
     },
     items: [{
         product: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
             required: true
         },
         name: String,
@@ -54,6 +55,23 @@ const orderSchema = new mongoose.Schema({
     totalAmount: {
         type: Number,
         required: true
+    },
+    coupon: {
+        code: {
+            type: String,
+            uppercase: true
+        },
+        discountAmount: {
+            type: Number,
+            default: 0
+        },
+        originalTotal: {
+            type: Number
+        },
+        appliedAt: {
+            type: Date,
+            default: Date.now
+        }
     },
     status: {
         type: String,

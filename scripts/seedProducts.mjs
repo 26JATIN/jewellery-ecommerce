@@ -126,7 +126,7 @@ const sampleProducts = [
     },
     {
         name: "Diamond Stud Earrings",
-        description: "Classic diamond stud earrings with brilliant cut diamonds in platinum setting",
+        description: "Classic diamond stud earrings with brilliant cut diamonds in gold setting",
         mrp: 1299,
         sellingPrice: 999,
         costPrice: 699,

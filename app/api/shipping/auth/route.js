@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getShiprocketToken } from '@/lib/shiprocketAuth';
+import { shiprocket } from '@/lib/shiprocket';
 
 export async function POST() {
     try {
-        const token = await getShiprocketToken();
+        const token = await shiprocket.authenticate();
         return NextResponse.json({ token });
     } catch (error) {
         return NextResponse.json(

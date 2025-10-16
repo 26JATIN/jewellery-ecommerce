@@ -9,10 +9,6 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    price: {
-        type: Number,
-        required: true
-    },
     mrp: {
         type: Number,
         required: true
@@ -47,7 +43,7 @@ const productSchema = new mongoose.Schema({
             default: 0
         }
     }],
-    // Backward compatibility - primary image URL
+    // Primary image URL (single image for backward compatibility with existing data)
     image: {
         type: String,
         required: false // Made optional since we have images array
@@ -72,8 +68,8 @@ const productSchema = new mongoose.Schema({
     },
     goldPurity: {
         type: Number,
-        default: 22, // 22K, 18K, etc.
-        enum: [10, 14, 18, 22, 24]
+        default: 22, // 22K is most common in India
+        enum: [18, 20, 22, 24]
     },
     // Silver specifications
     silverWeight: {
@@ -82,18 +78,8 @@ const productSchema = new mongoose.Schema({
     },
     silverPurity: {
         type: Number,
-        default: 925, // 925 for sterling silver, 999 for pure silver
-        enum: [800, 835, 900, 925, 950, 999]
-    },
-    // Platinum specifications
-    platinumWeight: {
-        type: Number,
-        default: 0 // Weight in grams
-    },
-    platinumPurity: {
-        type: Number,
-        default: 950, // 950 for jewelry grade platinum, 999 for pure platinum
-        enum: [850, 900, 950, 999]
+        default: 999, // Only 999 purity supported
+        enum: [999]
     },
     makingChargePercent: {
         type: Number,
@@ -114,9 +100,14 @@ const productSchema = new mongoose.Schema({
     // Metal type specification
     metalType: {
         type: String,
-        enum: ['gold', 'silver', 'platinum', 'mixed'],
+        enum: ['gold', 'silver', 'mixed'],
         default: 'gold'
     },
+    // Tags for target audience
+    tags: [{
+        type: String,
+        enum: ['Men', 'Women', 'Kids'],
+    }],
     // Enhanced stone/gem specifications
     stones: [{
         type: {
@@ -160,6 +151,12 @@ const productSchema = new mongoose.Schema({
         type: String,
         enum: ['fixed', 'dynamic'],
         default: 'fixed'
+    },
+    discountPercent: {
+        type: Number,
+        default: 0, // Discount percentage for dynamic pricing (MRP - discount% = Selling Price)
+        min: 0,
+        max: 100
     },
     lastPriceUpdate: {
         type: Date,

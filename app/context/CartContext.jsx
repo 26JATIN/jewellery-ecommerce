@@ -121,7 +121,7 @@ export function CartProvider({ children }) {
             const productData = {
                 ...product,
                 id: product._id || product.id,
-                price: product.sellingPrice || product.price
+                price: product.sellingPrice
             };
 
             const res = await fetch('/api/cart', {
