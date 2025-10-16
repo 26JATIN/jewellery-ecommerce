@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Order from '@/models/Order';
 import User from '@/models/User';
+import Return from '@/models/Return';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -45,7 +46,11 @@ export async function GET(req) {
             totalOrders,
             totalUsers,
             revenueData,
-            totalInventoryValue
+            totalInventoryValue,
+            totalReturns,
+            pendingReturns,
+            completedReturns,
+            refundAmount
         ] = await Promise.all([
             Product.countDocuments(),
             Product.countDocuments({ isActive: true }),
@@ -59,6 +64,15 @@ export async function GET(req) {
             ]),
             Product.aggregate([
                 { $group: { _id: null, total: { $sum: { $multiply: ['$costPrice', '$stock'] } } } }
+            ]),
+            Return.countDocuments(),
+            Return.countDocuments({ 
+                status: { $in: ['requested', 'pending_approval', 'approved', 'pickup_scheduled'] } 
+            }),
+            Return.countDocuments({ status: 'completed' }),
+            Return.aggregate([
+                { $match: { status: { $in: ['refund_processed', 'completed'] } } },
+                { $group: { _id: null, total: { $sum: '$refundDetails.refundAmount' } } }
             ])
         ]);
 
@@ -70,7 +84,11 @@ export async function GET(req) {
             totalOrders,
             totalUsers,
             revenue: revenueData[0]?.total || 0,
-            inventoryValue: totalInventoryValue[0]?.total || 0
+            inventoryValue: totalInventoryValue[0]?.total || 0,
+            totalReturns,
+            pendingReturns,
+            completedReturns,
+            totalRefunds: refundAmount[0]?.total || 0
         });
     } catch (error) {
         console.error('Stats fetch error:', error);

@@ -129,6 +129,24 @@ export default function OrderDetailsPage() {
                                     <span className="font-medium">₹{order.totalAmount}</span>
                                 </div>
                             </div>
+                            
+                            {/* Return Request Button */}
+                            {order.status === 'delivered' && (
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <Link
+                                        href={`/returns?orderId=${order._id}`}
+                                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#D4AF76] to-[#C19B61] text-white text-sm font-medium rounded-lg hover:from-[#C19B61] hover:to-[#B08850] transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                    >
+                                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                        </svg>
+                                        Request Return
+                                    </Link>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Hassle-free returns within 7 days of delivery
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Shipping Info */}

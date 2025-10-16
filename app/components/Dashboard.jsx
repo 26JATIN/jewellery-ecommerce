@@ -16,8 +16,6 @@ export default function Dashboard() {
     });
     const [loading, setLoading] = useState(true);
 
-
-
     const fetchStats = async () => {
         try {
             const res = await fetch('/api/admin/stats');
@@ -201,7 +199,7 @@ export default function Dashboard() {
                         <h2 className="text-lg font-semibold">Quick Actions</h2>
                     </div>
                     <div className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <Link 
                                 href="/admin/products"
                                 className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#8B6B4C] hover:bg-gray-50 transition-colors"
@@ -227,6 +225,15 @@ export default function Dashboard() {
                                 <div className="text-center">
                                     <div className="text-2xl mb-2">👥</div>
                                     <div className="font-medium">Manage Users</div>
+                                </div>
+                            </Link>
+                            <Link 
+                                href="/admin/returns"
+                                className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#8B6B4C] hover:bg-gray-50 transition-colors"
+                            >
+                                <div className="text-center">
+                                    <div className="text-2xl mb-2">🔄</div>
+                                    <div className="font-medium">Returns</div>
                                 </div>
                             </Link>
                         </div>

@@ -1,10 +1,93 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Return from '@/models/Return';
 import Coupon from '@/models/Coupon';
 import Product from '@/models/Product';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+
+// GET: Fetch user orders with filtering options
+export async function GET(req) {
+    try {
+        const cookieStore = await cookies();
+        const token = await cookieStore.get('token');
+
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const decoded = verifyToken(token.value);
+        if (!decoded || !decoded.userId) {
+            return NextResponse.json(
+                { error: 'Invalid token' },
+                { status: 401 }
+            );
+        }
+
+        const { searchParams } = new URL(req.url);
+        const status = searchParams.get('status');
+        const returnEligible = searchParams.get('returnEligible') === 'true';
+        const limit = parseInt(searchParams.get('limit')) || 20;
+
+        await connectDB();
+
+        let query = { user: decoded.userId };
+        
+        // If looking for return-eligible orders
+        if (returnEligible) {
+            // Include all orders except cancelled ones
+            query.status = { $ne: 'cancelled' };
+        } else if (status) {
+            // Filter by specific status
+            query.status = status;
+        }
+
+        const orders = await Order.find(query)
+            .sort({ createdAt: -1 })
+            .limit(limit);
+
+        // If fetching for returns, filter out orders that already have active returns
+        if (returnEligible) {
+            const orderIds = orders.map(order => order._id);
+            
+            // Find orders that already have active return requests
+            const existingReturns = await Return.find({
+                order: { $in: orderIds },
+                status: { $nin: ['cancelled', 'completed'] }
+            }).distinct('order');
+
+            // Filter out orders with existing returns
+            const eligibleOrders = orders.filter(order => 
+                !existingReturns.some(returnOrderId => 
+                    returnOrderId.toString() === order._id.toString()
+                )
+            );
+
+            return NextResponse.json({
+                success: true,
+                orders: eligibleOrders,
+                total: eligibleOrders.length
+            });
+        }
+
+        return NextResponse.json({
+            success: true,
+            orders,
+            total: orders.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch orders' },
+            { status: 500 }
+        );
+    }
+}
 
 export async function POST(req) {
     try {
