@@ -177,14 +177,3 @@ export async function POST(req) {
         );
     }
 }
-
-// Verify webhook is from Shiprocket (optional security measure)
-function verifyWebhookSignature(payload, signature, secret) {
-    const crypto = require('crypto');
-    const expectedSignature = crypto
-        .createHmac('sha256', secret)
-        .update(payload, 'utf8')
-        .digest('hex');
-    
-    return signature === expectedSignature;
-}
