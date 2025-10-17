@@ -25,7 +25,22 @@ export async function GET() {
         }
 
         await connectDB();
-        const cart = await Cart.findOne({ user: decoded.userId });
+        let cart = await Cart.findOne({ user: decoded.userId }).populate('items.product');
+
+        if (cart) {
+            // Filter out invalid products (where product is null)
+            const validItems = cart.items.filter(item => item.product !== null);
+            
+            // If any items were invalid, update the cart
+            if (validItems.length !== cart.items.length) {
+                console.log(`Removing ${cart.items.length - validItems.length} invalid products from cart`);
+                cart = await Cart.findOneAndUpdate(
+                    { user: decoded.userId },
+                    { $set: { items: validItems } },
+                    { new: true }
+                ).populate('items.product');
+            }
+        }
 
         return NextResponse.json(cart || { items: [] });
     } catch (error) {
@@ -117,6 +132,18 @@ export async function POST(req) {
                     { user: decoded.userId },
                     { $push: { items: cartItem } },
                     { new: true }
+                );
+            }
+        }
+
+        // Check if cart operation failed
+        if (!cart) {
+            // Fallback: fetch cart again
+            cart = await Cart.findOne({ user: decoded.userId });
+            if (!cart) {
+                return NextResponse.json(
+                    { error: 'Failed to update cart' },
+                    { status: 500 }
                 );
             }
         }

@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
     try {
         await connectDB();
         
-        const { slug } = params;
+        const { slug } = await params;
         const category = await Category.findOne({ slug, isActive: true });
         
         if (!category) {
@@ -41,7 +41,7 @@ export async function PUT(request, { params }) {
     try {
         await connectDB();
         
-        const { slug } = params;
+        const { slug } = await params;
         const data = await request.json();
         
         const category = await Category.findOneAndUpdate(
@@ -72,7 +72,7 @@ export async function DELETE(request, { params }) {
     try {
         await connectDB();
         
-        const { slug } = params;
+        const { slug } = await params;
         
         // Check if category has products
         const category = await Category.findOne({ slug });

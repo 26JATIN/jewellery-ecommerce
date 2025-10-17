@@ -52,16 +52,18 @@ function AdminReturnsPage() {
         }
     };
 
-    const handleStatusUpdate = async (returnId, newStatus, note = '') => {
+    const handleStatusUpdate = async (returnId, payload, note = '') => {
         try {
             setActionLoading(true);
+            // If payload is an object, use it directly; otherwise treat it as status
+            const requestBody = typeof payload === 'object' 
+                ? payload 
+                : { status: payload, note: note };
+            
             const response = await fetch(`/api/admin/returns/${returnId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    status: newStatus,
-                    note: note
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (response.ok) {
@@ -151,8 +153,8 @@ function AdminReturnsPage() {
             case 'requested':
             case 'pending_approval':
                 actions.push(
-                    { label: 'Approve', status: 'approved', color: 'green' },
-                    { label: 'Reject', status: 'rejected', color: 'red' }
+                    { label: 'Approve', action: 'approve', color: 'green' },
+                    { label: 'Reject', action: 'reject', color: 'red' }
                 );
                 break;
             case 'approved':
@@ -173,12 +175,12 @@ function AdminReturnsPage() {
                 break;
             case 'approved_refund':
                 actions.push(
-                    { label: 'Process Refund', status: 'refund_processed', color: 'green' }
+                    { label: 'Process Refund', action: 'process_refund', color: 'green' }
                 );
                 break;
             case 'refund_processed':
                 actions.push(
-                    { label: 'Complete Return', status: 'completed', color: 'green' }
+                    { label: 'Complete Return', action: 'complete', color: 'green' }
                 );
                 break;
         }
@@ -325,7 +327,7 @@ function AdminReturnsPage() {
                                                         <span className="font-medium">Customer:</span> {returnRequest.user?.name || 'N/A'}
                                                     </div>
                                                     <div>
-                                                        <span className="font-medium">Order:</span> {returnRequest.order?.orderNumber || 'N/A'}
+                                                        <span className="font-medium">Order:</span> #{returnRequest.order?._id?.toString().slice(-8).toUpperCase() || 'N/A'}
                                                     </div>
                                                     <div>
                                                         <span className="font-medium">Date:</span> {new Date(returnRequest.createdAt).toLocaleDateString()}
@@ -352,29 +354,33 @@ function AdminReturnsPage() {
                                                     View Details
                                                 </button>
                                                 
-                                                {getNextActions(returnRequest.status).map((action, index) => (
+                                                {getNextActions(returnRequest.status).map((actionItem, index) => (
                                                     <button
                                                         key={index}
                                                         onClick={() => {
-                                                            if (action.action === 'pickup') {
+                                                            if (actionItem.action === 'pickup') {
                                                                 handleSchedulePickup(returnRequest._id);
                                                             } else {
-                                                                const note = prompt(`Add a note for ${action.label}:`);
+                                                                const note = prompt(`Add a note for ${actionItem.label}:`);
                                                                 if (note !== null) {
-                                                                    handleStatusUpdate(returnRequest._id, action.status, note);
+                                                                    // Send action if available, otherwise send status
+                                                                    const payload = actionItem.action 
+                                                                        ? { action: actionItem.action, note }
+                                                                        : { status: actionItem.status, note };
+                                                                    handleStatusUpdate(returnRequest._id, payload, note);
                                                                 }
                                                             }
                                                         }}
                                                         disabled={actionLoading}
                                                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                                            action.color === 'green' 
+                                                            actionItem.color === 'green' 
                                                                 ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                                : action.color === 'red'
+                                                                : actionItem.color === 'red'
                                                                 ? 'bg-red-600 hover:bg-red-700 text-white'
                                                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
                                                         } disabled:opacity-50`}
                                                     >
-                                                        {actionLoading ? 'Processing...' : action.label}
+                                                        {actionLoading ? 'Processing...' : actionItem.label}
                                                     </button>
                                                 ))}
                                             </div>
@@ -426,7 +432,7 @@ function AdminReturnsPage() {
                                         <div className="space-y-2">
                                             <div><span className="text-gray-600">Name:</span> <span className="font-medium">{selectedReturn.user?.name}</span></div>
                                             <div><span className="text-gray-600">Email:</span> <span className="font-medium">{selectedReturn.user?.email}</span></div>
-                                            <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{selectedReturn.user?.phone || 'N/A'}</span></div>
+                                            <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{selectedReturn.user?.phone || selectedReturn.pickup?.address?.phone || selectedReturn.order?.shippingAddress?.phone || 'N/A'}</span></div>
                                         </div>
                                     </div>
                                     <div>
@@ -438,7 +444,7 @@ function AdminReturnsPage() {
                                                 </span>
                                             </div>
                                             <div><span className="text-gray-600">Date:</span> <span className="font-medium">{new Date(selectedReturn.createdAt).toLocaleDateString()}</span></div>
-                                            <div><span className="text-gray-600">Order:</span> <span className="font-medium">{selectedReturn.order?.orderNumber}</span></div>
+                                            <div><span className="text-gray-600">Order:</span> <span className="font-medium">#{selectedReturn.order?._id?.toString().slice(-8).toUpperCase() || 'N/A'}</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -501,29 +507,33 @@ function AdminReturnsPage() {
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-3">
-                                    {getNextActions(selectedReturn.status).map((action, index) => (
+                                    {getNextActions(selectedReturn.status).map((actionItem, index) => (
                                         <button
                                             key={index}
                                             onClick={() => {
-                                                if (action.action === 'pickup') {
+                                                if (actionItem.action === 'pickup') {
                                                     handleSchedulePickup(selectedReturn._id);
                                                 } else {
-                                                    const note = prompt(`Add a note for ${action.label}:`);
+                                                    const note = prompt(`Add a note for ${actionItem.label}:`);
                                                     if (note !== null) {
-                                                        handleStatusUpdate(selectedReturn._id, action.status, note);
+                                                        // Send action if available, otherwise send status
+                                                        const payload = actionItem.action 
+                                                            ? { action: actionItem.action, note }
+                                                            : { status: actionItem.status, note };
+                                                        handleStatusUpdate(selectedReturn._id, payload, note);
                                                     }
                                                 }
                                             }}
                                             disabled={actionLoading}
                                             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                                                action.color === 'green' 
+                                                actionItem.color === 'green' 
                                                     ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                    : action.color === 'red'
+                                                    : actionItem.color === 'red'
                                                     ? 'bg-red-600 hover:bg-red-700 text-white'
                                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                                             } disabled:opacity-50`}
                                         >
-                                            {actionLoading ? 'Processing...' : action.label}
+                                            {actionLoading ? 'Processing...' : actionItem.label}
                                         </button>
                                     ))}
                                 </div>

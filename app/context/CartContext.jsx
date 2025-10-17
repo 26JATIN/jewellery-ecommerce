@@ -156,14 +156,22 @@ export function CartProvider({ children }) {
     };
 
     const updateQuantity = async (productId, quantity) => {
+        // Extract the actual ID if productId is an object
+        const actualProductId = typeof productId === 'object' && productId !== null 
+            ? (productId._id || productId.id) 
+            : productId;
+
         if (!user) {
             // Handle guest cart
             setCartItems(prev => {
-                const newItems = prev.map(item =>
-                    item.id === productId
+                const newItems = prev.map(item => {
+                    const itemId = typeof item.product === 'object' 
+                        ? (item.product._id || item.product.id)
+                        : item.product;
+                    return itemId === actualProductId
                         ? { ...item, quantity }
-                        : item
-                );
+                        : item;
+                });
                 saveGuestCart(newItems);
                 return newItems;
             });
@@ -171,7 +179,8 @@ export function CartProvider({ children }) {
         }
 
         try {
-            const res = await fetch(`/api/cart/${productId}`, {
+            console.log('Updating quantity - productId:', actualProductId, 'quantity:', quantity);
+            const res = await fetch(`/api/cart/${actualProductId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ quantity })
@@ -179,16 +188,29 @@ export function CartProvider({ children }) {
 
             if (res.ok) {
                 fetchCartItems();
+            } else {
+                const errorData = await res.json();
+                console.error('Failed to update quantity - response:', res.status, errorData);
             }
         } catch (error) {
             console.error('Failed to update quantity:', error);
         }
     };
     const removeFromCart = async (productId) => {
+        // Extract the actual ID if productId is an object
+        const actualProductId = typeof productId === 'object' && productId !== null 
+            ? (productId._id || productId.id) 
+            : productId;
+
         if (!user) {
             // Handle guest cart
             setCartItems(prev => {
-                const newItems = prev.filter(item => item.id !== productId);
+                const newItems = prev.filter(item => {
+                    const itemId = typeof item.product === 'object' 
+                        ? (item.product._id || item.product.id)
+                        : item.product;
+                    return itemId !== actualProductId;
+                });
                 saveGuestCart(newItems);
                 return newItems;
             });
@@ -196,12 +218,16 @@ export function CartProvider({ children }) {
         }
 
         try {
-            const res = await fetch(`/api/cart/${productId}`, {
+            console.log('Removing from cart - productId:', actualProductId);
+            const res = await fetch(`/api/cart/${actualProductId}`, {
                 method: 'DELETE'
             });
 
             if (res.ok) {
                 fetchCartItems();
+            } else {
+                const errorData = await res.json();
+                console.error('Failed to remove item - response:', res.status, errorData);
             }
         } catch (error) {
             console.error('Failed to remove item:', error);
