@@ -1,10 +1,11 @@
 import { MongoClient } from 'mongodb';
 import * as dotenv from 'dotenv';
 
-// Load environment variables
+// Load environment variables - try .env first, then .env.local
+dotenv.config({ path: '.env' });
 dotenv.config({ path: '.env.local' });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jewellery_store';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nandikajewellers';
 const client = new MongoClient(MONGODB_URI);
 
 async function addMultipleImageProducts() {
@@ -12,7 +13,8 @@ async function addMultipleImageProducts() {
         await client.connect();
         console.log('Connected to MongoDB');
         
-        const db = client.db('jewellery_store');
+        // Use the database from connection string, or default to nandikajewellers
+        const db = client.db();
         const productsCollection = db.collection('products');
         const categoriesCollection = db.collection('categories');
 
