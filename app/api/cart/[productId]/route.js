@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Cart from '@/models/Cart';
+import Product from '@/models/Product';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -73,6 +74,50 @@ export async function PATCH(req, { params }) {
         }
         
         console.log('Found item at index:', itemIndex, 'Current quantity:', existingCart.items[itemIndex].quantity);
+        
+        // Fetch the actual product to check stock
+        const dbProduct = await Product.findById(productId);
+        if (!dbProduct) {
+            // Product was deleted, remove it from cart
+            existingCart.items.splice(itemIndex, 1);
+            await existingCart.save();
+            return NextResponse.json(
+                { error: 'Product no longer exists and has been removed from cart' },
+                { status: 404 }
+            );
+        }
+
+        // Check if product is active
+        if (!dbProduct.isActive) {
+            // Product is inactive, remove it from cart
+            existingCart.items.splice(itemIndex, 1);
+            await existingCart.save();
+            return NextResponse.json(
+                { error: 'Product is no longer available and has been removed from cart' },
+                { status: 400 }
+            );
+        }
+
+        // Check stock availability
+        if (quantity > dbProduct.stock) {
+            return NextResponse.json(
+                { 
+                    error: `Only ${dbProduct.stock} items available in stock`,
+                    availableStock: dbProduct.stock
+                },
+                { status: 400 }
+            );
+        }
+
+        if (dbProduct.stock <= 0) {
+            // Out of stock, remove from cart
+            existingCart.items.splice(itemIndex, 1);
+            await existingCart.save();
+            return NextResponse.json(
+                { error: 'Product is out of stock and has been removed from cart' },
+                { status: 400 }
+            );
+        }
         
         // Update the quantity directly on the found item
         existingCart.items[itemIndex].quantity = quantity;

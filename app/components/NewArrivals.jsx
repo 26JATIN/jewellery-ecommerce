@@ -23,6 +23,13 @@ export default function NewArrivals() {
     const handleAddToCart = async (e, product) => {
         e.preventDefault();
         e.stopPropagation();
+        
+        // Check stock before adding
+        if (!product.stock || product.stock <= 0) {
+            alert('This product is out of stock');
+            return;
+        }
+        
         const result = await addToCart(product);
         if (result !== false) {
             setIsCartOpen(true);
@@ -138,6 +145,28 @@ export default function NewArrivals() {
                                                     <span className="text-xs font-semibold tracking-wider">NEW</span>
                                                 </motion.div>
 
+                                                {/* Out of Stock Badge */}
+                                                {(!product.stock || product.stock <= 0) && (
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        className="absolute top-4 right-4 bg-red-500 text-white rounded-full px-3 py-1.5 shadow-lg z-10"
+                                                    >
+                                                        <span className="text-xs font-semibold tracking-wider">OUT OF STOCK</span>
+                                                    </motion.div>
+                                                )}
+
+                                                {/* Low Stock Badge */}
+                                                {product.stock > 0 && product.stock <= 5 && (
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        className="absolute top-4 right-4 bg-orange-500 text-white rounded-full px-3 py-1.5 shadow-lg z-10"
+                                                    >
+                                                        <span className="text-xs font-semibold tracking-wider">ONLY {product.stock} LEFT</span>
+                                                    </motion.div>
+                                                )}
+
                                                 {/* Quick View Badge */}
                                                 <AnimatePresence>
                                                     {hoveredProduct === product._id && (
@@ -158,13 +187,18 @@ export default function NewArrivals() {
                                                 {/* Add to Cart Button */}
                                                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                                                     <motion.button 
-                                                        whileHover={{ scale: 1.05 }}
-                                                        whileTap={{ scale: 0.95 }}
+                                                        whileHover={{ scale: product.stock > 0 ? 1.05 : 1 }}
+                                                        whileTap={{ scale: product.stock > 0 ? 0.95 : 1 }}
                                                         onClick={(e) => handleAddToCart(e, product)}
-                                                        className="w-full bg-white/95 backdrop-blur-sm text-[#2C2C2C] px-4 py-3 rounded-full hover:bg-[#D4AF76] hover:text-white transition-all duration-300 text-sm font-medium shadow-xl flex items-center justify-center gap-2"
+                                                        disabled={!product.stock || product.stock <= 0}
+                                                        className={`w-full px-4 py-3 rounded-full transition-all duration-300 text-sm font-medium shadow-xl flex items-center justify-center gap-2 ${
+                                                            !product.stock || product.stock <= 0
+                                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                                : 'bg-white/95 backdrop-blur-sm text-[#2C2C2C] hover:bg-[#D4AF76] hover:text-white'
+                                                        }`}
                                                     >
                                                         <ShoppingBag className="w-4 h-4" />
-                                                        Add to Cart
+                                                        {!product.stock || product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
                                                     </motion.button>
                                                 </div>
                                             </div>

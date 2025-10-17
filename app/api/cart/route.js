@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import Cart from '@/models/Cart';
+import Product from '@/models/Product';
 import connectDB from '@/lib/mongodb';
 
 export async function GET() {
@@ -28,12 +29,45 @@ export async function GET() {
         let cart = await Cart.findOne({ user: decoded.userId }).populate('items.product');
 
         if (cart) {
-            // Filter out invalid products (where product is null)
-            const validItems = cart.items.filter(item => item.product !== null);
+            let itemsModified = false;
             
-            // If any items were invalid, update the cart
-            if (validItems.length !== cart.items.length) {
-                console.log(`Removing ${cart.items.length - validItems.length} invalid products from cart`);
+            // Filter out invalid products and check stock
+            const validItems = [];
+            
+            for (const item of cart.items) {
+                // Skip if product doesn't exist (was deleted)
+                if (!item.product) {
+                    console.log('Removing deleted product from cart');
+                    itemsModified = true;
+                    continue;
+                }
+                
+                // Skip if product is inactive
+                if (!item.product.isActive) {
+                    console.log(`Removing inactive product: ${item.product.name}`);
+                    itemsModified = true;
+                    continue;
+                }
+                
+                // Check stock and adjust quantity if needed
+                if (item.product.stock <= 0) {
+                    console.log(`Removing out-of-stock product: ${item.product.name}`);
+                    itemsModified = true;
+                    continue;
+                }
+                
+                // If quantity exceeds stock, adjust it
+                if (item.quantity > item.product.stock) {
+                    console.log(`Adjusting quantity for ${item.product.name} from ${item.quantity} to ${item.product.stock}`);
+                    item.quantity = item.product.stock;
+                    itemsModified = true;
+                }
+                
+                validItems.push(item);
+            }
+            
+            // If any items were modified, update the cart
+            if (itemsModified) {
                 cart = await Cart.findOneAndUpdate(
                     { user: decoded.userId },
                     { $set: { items: validItems } },
@@ -91,6 +125,31 @@ export async function POST(req) {
 
         await connectDB();
 
+        // Fetch the actual product from database to check stock
+        const dbProduct = await Product.findById(productId);
+        if (!dbProduct) {
+            return NextResponse.json(
+                { error: 'Product not found' },
+                { status: 404 }
+            );
+        }
+
+        // Check if product is active
+        if (!dbProduct.isActive) {
+            return NextResponse.json(
+                { error: 'This product is no longer available' },
+                { status: 400 }
+            );
+        }
+
+        // Check stock availability
+        if (dbProduct.stock <= 0) {
+            return NextResponse.json(
+                { error: 'This product is out of stock' },
+                { status: 400 }
+            );
+        }
+
         let cart = await Cart.findOne({ user: decoded.userId });
         
         const cartItem = {
@@ -115,6 +174,14 @@ export async function POST(req) {
             );
 
             if (existingItem) {
+                // Check if adding one more would exceed stock
+                if (existingItem.quantity + 1 > dbProduct.stock) {
+                    return NextResponse.json(
+                        { error: `Only ${dbProduct.stock} items available in stock` },
+                        { status: 400 }
+                    );
+                }
+
                 // Use atomic $inc to increment quantity
                 cart = await Cart.findOneAndUpdate(
                     { 
