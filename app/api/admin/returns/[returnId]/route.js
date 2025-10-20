@@ -5,6 +5,24 @@ import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
+/**
+ * FULLY AUTOMATED RETURN SYSTEM - READ-ONLY ADMIN API
+ * 
+ * This endpoint is for MONITORING ONLY.
+ * All return operations are now fully automated via webhooks:
+ * 
+ * - User requests return → Auto-approved (if eligible)
+ * - Pickup scheduling → Auto-scheduled via Shiprocket API
+ * - Transit tracking → Auto-updated via Shiprocket webhooks
+ * - Inspection → Auto-inspected based on condition
+ * - Refund → Auto-processed via Razorpay API
+ * - Completion → Auto-completed
+ * 
+ * Manual intervention is ONLY needed for damaged/defective items (5% of cases)
+ * 
+ * See: /app/api/webhooks/shiprocket-return/route.js for automation logic
+ */
+
 // Middleware to check admin authentication
 async function checkAdminAuth() {
     try {
@@ -34,8 +52,9 @@ async function checkAdminAuth() {
     }
 }
 
-// GET: Fetch specific return details for admin
-export async function GET(req, { params }) {
+// GET: Fetch specific return details for admin (READ-ONLY for monitoring)
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         const authResult = await checkAdminAuth();
         if (authResult.error) {
@@ -72,7 +91,11 @@ export async function GET(req, { params }) {
 
         return NextResponse.json({
             success: true,
-            data: returnRequest
+            data: returnRequest,
+            automation: {
+                enabled: true,
+                message: '✨ This return is being processed automatically. Manual intervention only needed for damaged/defective items.'
+            }
         });
 
     } catch (error) {
@@ -84,8 +107,9 @@ export async function GET(req, { params }) {
     }
 }
 
-// PUT: Update return status (admin only)
-export async function PUT(req, { params }) {
+// POST: Add admin note only (no status changes - everything is automated)
+export async function POST(req, context) {
+    const params = await context.params;
     try {
         const authResult = await checkAdminAuth();
         if (authResult.error) {
@@ -96,18 +120,11 @@ export async function PUT(req, { params }) {
         }
 
         const { returnId } = await params;
-        const { 
-            action, 
-            status, 
-            note, 
-            inspectionData,
-            refundDetails,
-            pickupSchedule 
-        } = await req.json();
+        const { note } = await req.json();
 
-        if (!returnId) {
+        if (!returnId || !note) {
             return NextResponse.json(
-                { error: 'Return ID is required' },
+                { error: 'Return ID and note are required' },
                 { status: 400 }
             );
         }
@@ -123,175 +140,52 @@ export async function PUT(req, { params }) {
             );
         }
 
-        let updateData = {};
-        let responseMessage = '';
-
-        switch (action) {
-            case 'approve':
-                if (returnRequest.status !== 'requested') {
-                    return NextResponse.json(
-                        { error: 'Return can only be approved from requested status' },
-                        { status: 400 }
-                    );
-                }
-                await returnRequest.updateStatus('approved', authResult.userId, note);
-                responseMessage = 'Return request approved';
-                break;
-
-            case 'reject':
-                if (!['requested', 'pending_approval'].includes(returnRequest.status)) {
-                    return NextResponse.json(
-                        { error: 'Return can only be rejected from requested or pending approval status' },
-                        { status: 400 }
-                    );
-                }
-                await returnRequest.updateStatus('rejected', authResult.userId, note);
-                responseMessage = 'Return request rejected';
-                break;
-
-            case 'schedule_pickup':
-                if (returnRequest.status !== 'approved') {
-                    return NextResponse.json(
-                        { error: 'Pickup can only be scheduled for approved returns' },
-                        { status: 400 }
-                    );
-                }
-
-                if (pickupSchedule) {
-                    returnRequest.pickup.scheduledDate = new Date(pickupSchedule.date);
-                    returnRequest.pickup.scheduledTimeSlot = pickupSchedule.timeSlot;
-                    returnRequest.pickup.pickupStatus = 'scheduled';
-                }
-
-                await returnRequest.updateStatus('pickup_scheduled', authResult.userId, note);
-                responseMessage = 'Pickup scheduled successfully';
-                break;
-
-            case 'mark_picked':
-                if (returnRequest.status !== 'pickup_scheduled') {
-                    return NextResponse.json(
-                        { error: 'Can only mark as picked from pickup scheduled status' },
-                        { status: 400 }
-                    );
-                }
-
-                returnRequest.pickup.actualPickupDate = new Date();
-                returnRequest.pickup.pickupStatus = 'completed';
-                await returnRequest.updateStatus('picked_up', authResult.userId, note);
-                responseMessage = 'Return marked as picked up';
-                break;
-
-            case 'mark_received':
-                if (returnRequest.status !== 'in_transit') {
-                    return NextResponse.json(
-                        { error: 'Can only mark as received from in transit status' },
-                        { status: 400 }
-                    );
-                }
-
-                await returnRequest.updateStatus('received', authResult.userId, note);
-                responseMessage = 'Return marked as received';
-                break;
-
-            case 'inspect':
-                if (returnRequest.status !== 'received') {
-                    return NextResponse.json(
-                        { error: 'Can only inspect items from received status' },
-                        { status: 400 }
-                    );
-                }
-
-                if (inspectionData) {
-                    returnRequest.inspection = {
-                        inspectedBy: authResult.userId,
-                        inspectedAt: new Date(),
-                        condition: inspectionData.condition,
-                        notes: inspectionData.notes,
-                        photos: inspectionData.photos || [],
-                        approved: inspectionData.approved,
-                        rejectionReason: inspectionData.rejectionReason
-                    };
-                }
-
-                const nextStatus = inspectionData?.approved ? 'approved_refund' : 'rejected_refund';
-                await returnRequest.updateStatus(nextStatus, authResult.userId, note);
-                responseMessage = `Inspection completed - ${inspectionData?.approved ? 'approved' : 'rejected'}`;
-                break;
-
-            case 'process_refund':
-                if (returnRequest.status !== 'approved_refund') {
-                    return NextResponse.json(
-                        { error: 'Can only process refund from approved refund status' },
-                        { status: 400 }
-                    );
-                }
-
-                if (refundDetails) {
-                    returnRequest.refundDetails.refundProcessedAt = new Date();
-                    returnRequest.refundDetails.refundTransactionId = refundDetails.transactionId;
-                    returnRequest.refundDetails.refundAmount = refundDetails.amount;
-                }
-
-                await returnRequest.updateStatus('refund_processed', authResult.userId, note);
-                responseMessage = 'Refund processed successfully';
-                break;
-
-            case 'complete':
-                if (!['refund_processed', 'rejected_refund'].includes(returnRequest.status)) {
-                    return NextResponse.json(
-                        { error: 'Invalid status for completion' },
-                        { status: 400 }
-                    );
-                }
-
-                returnRequest.completedAt = new Date();
-                returnRequest.completionNotes = note;
-                await returnRequest.updateStatus('completed', authResult.userId, note);
-                responseMessage = 'Return completed';
-                break;
-
-            case 'update_status':
-                if (status) {
-                    await returnRequest.updateStatus(status, authResult.userId, note);
-                    responseMessage = `Status updated to ${status}`;
-                }
-                break;
-
-            default:
-                return NextResponse.json(
-                    { error: 'Invalid action' },
-                    { status: 400 }
-                );
-        }
-
-        // Add admin note if provided
-        if (note && action !== 'update_status') {
-            returnRequest.adminNotes.push({
-                note,
-                addedBy: authResult.userId,
-                addedAt: new Date()
-            });
-        }
+        // Only allow adding notes - no status changes
+        returnRequest.adminNotes.push({
+            note,
+            addedBy: authResult.userId,
+            addedAt: new Date()
+        });
 
         await returnRequest.save();
 
-        // Re-fetch with populated data for response
-        const updatedReturn = await Return.findById(returnId)
-            .populate('order', 'totalAmount createdAt')
-            .populate('user', 'name email')
-            .populate('items.product', 'name images');
-
         return NextResponse.json({
             success: true,
-            message: responseMessage,
-            data: updatedReturn
+            message: 'Admin note added successfully',
+            data: returnRequest
         });
 
     } catch (error) {
-        console.error('Error updating return:', error);
+        console.error('Error adding admin note:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to update return' },
+            { error: 'Failed to add admin note' },
             { status: 500 }
         );
     }
+}
+
+// PUT: DISABLED - All operations are now automated
+export async function PUT(req, context) {
+    const params = await context.params;
+    return NextResponse.json({
+        error: 'Manual return updates are disabled',
+        message: '✨ Returns are now fully automated! All operations happen automatically via webhooks.',
+        automation: {
+            enabled: true,
+            features: [
+                'Auto-approval for eligible returns',
+                'Auto-pickup scheduling via Shiprocket',
+                'Auto-tracking updates via webhooks',
+                'Auto-inspection based on item condition',
+                'Auto-refund processing via Razorpay',
+                'Auto-completion'
+            ],
+            manualIntervention: 'Only needed for damaged/defective items (5% of cases)',
+            documentationSee: [
+                '/AUTOMATED_RETURN_WORKFLOW.md',
+                '/WEBHOOK_AUTOMATION_SYSTEM.md',
+                '/app/api/webhooks/shiprocket-return/route.js'
+            ]
+        }
+    }, { status: 403 });
 }

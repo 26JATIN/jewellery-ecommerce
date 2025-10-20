@@ -105,6 +105,275 @@ function AdminReturnsPage() {
         }
     };
 
+    // Direct refund processing from warehouse received status
+    const handleDirectRefund = async (returnId) => {
+        if (!confirm('Process automatic refund and complete this return?\n\nThis will:\n1. Mark item as inspected & approved\n2. Process refund through Razorpay\n3. Complete the return\n\nContinue?')) {
+            return;
+        }
+
+        try {
+            setActionLoading(true);
+
+            // Step 1: Mark as inspected
+            let response = await fetch(`/api/admin/returns/${returnId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_status',
+                    status: 'inspected',
+                    note: 'Auto-marked as inspected for direct refund processing'
+                })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to mark as inspected');
+            }
+
+            // Small delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // Step 2: Approve refund (which triggers automatic refund)
+            response = await fetch(`/api/admin/returns/${returnId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_status',
+                    status: 'approved_refund',
+                    note: 'Auto-approved refund - Direct processing from warehouse'
+                })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to approve refund');
+            }
+
+            fetchReturns();
+            setSelectedReturn(null);
+            alert('✅ Refund processed successfully! The money will be returned to the customer automatically.');
+
+        } catch (error) {
+            console.error('Error processing direct refund:', error);
+            alert('Failed to process refund: ' + error.message);
+            fetchReturns(); // Refresh to see current state
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Testing function to simulate warehouse return process
+    const handleSimulateWarehouseReturn = async (returnId, currentStatus) => {
+        try {
+            setActionLoading(true);
+            
+            let action = '';
+            let inspectionData = null;
+            let note = '[TEST] Simulated warehouse process';
+
+            // Determine next step based on current status
+            switch (currentStatus) {
+                case 'approved':
+                    action = 'schedule_pickup';
+                    note = '[TEST] Auto-scheduled pickup';
+                    break;
+                case 'pickup_scheduled':
+                    action = 'mark_picked';
+                    note = '[TEST] Auto-marked as picked up';
+                    break;
+                case 'picked_up':
+                    action = 'update_status';
+                    note = '[TEST] Auto-marked as in transit';
+                    await handleStatusUpdate(returnId, { 
+                        action: 'update_status',
+                        status: 'in_transit',
+                        note 
+                    });
+                    setTimeout(() => fetchReturns(), 500);
+                    return;
+                case 'in_transit':
+                    action = 'mark_received';
+                    note = '[TEST] Auto-marked as received at warehouse';
+                    break;
+                case 'received':
+                    // First move to inspected status
+                    action = 'update_status';
+                    note = '[TEST] Auto-marked as inspected';
+                    await handleStatusUpdate(returnId, { 
+                        action: 'update_status',
+                        status: 'inspected',
+                        note 
+                    });
+                    setTimeout(() => fetchReturns(), 500);
+                    return;
+                case 'inspected':
+                    // Then approve the refund
+                    action = 'update_status';
+                    note = '[TEST] Auto-approved refund after inspection';
+                    await handleStatusUpdate(returnId, { 
+                        action: 'update_status',
+                        status: 'approved_refund',
+                        note 
+                    });
+                    setTimeout(() => fetchReturns(), 500);
+                    return;
+                case 'approved_refund':
+                    action = 'process_refund';
+                    note = '[TEST] Processing refund automatically';
+                    break;
+                case 'refund_processed':
+                    action = 'complete';
+                    note = '[TEST] Return completed';
+                    break;
+                default:
+                    alert('Cannot simulate from current status');
+                    setActionLoading(false);
+                    return;
+            }
+
+            const payload = {
+                action,
+                note,
+                ...(inspectionData && { inspectionData })
+            };
+
+            const response = await fetch(`/api/admin/returns/${returnId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Simulation step completed:', data);
+                fetchReturns();
+                setSelectedReturn(null);
+                
+                // Show success message with what happened
+                const messages = {
+                    'schedule_pickup': 'Pickup scheduled! ✓',
+                    'mark_picked': 'Item picked up! ✓',
+                    'update_status': currentStatus === 'picked_up' ? 'Marked in transit! ✓' : 
+                                    currentStatus === 'received' ? 'Marked as inspected! ✓' :
+                                    currentStatus === 'inspected' ? 'Refund approved! Auto-refund will process... ✓' : 
+                                    'Status updated! ✓',
+                    'mark_received': 'Item received at warehouse! ✓',
+                    'inspect': 'Item inspected & approved! Refund processing... ✓',
+                    'process_refund': 'Refund processed! ✓',
+                    'complete': 'Return completed! ✓'
+                };
+                alert(messages[action] || 'Step completed!');
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Failed to simulate step');
+            }
+        } catch (error) {
+            console.error('Error simulating warehouse return:', error);
+            alert('Failed to simulate step: ' + error.message);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Quick test - simulate entire return process
+    const handleQuickTestRefund = async (returnId, currentStatus) => {
+        if (!confirm('This will simulate the ENTIRE warehouse return process from current status to refund completion. Continue?')) {
+            return;
+        }
+
+        try {
+            setActionLoading(true);
+            
+            const steps = [];
+            
+            // Build step sequence based on current status
+            if (currentStatus === 'approved' || currentStatus === 'requested') {
+                if (currentStatus === 'requested') {
+                    steps.push({ action: 'approve', note: '[TEST] Auto-approved' });
+                }
+                steps.push({ action: 'schedule_pickup', note: '[TEST] Auto-scheduled pickup' });
+                steps.push({ action: 'mark_picked', note: '[TEST] Auto-marked picked up' });
+                steps.push({ 
+                    action: 'update_status', 
+                    status: 'in_transit',
+                    note: '[TEST] Auto-marked in transit' 
+                });
+                steps.push({ action: 'mark_received', note: '[TEST] Auto-received at warehouse' });
+            } else if (currentStatus === 'pickup_scheduled') {
+                steps.push({ action: 'mark_picked', note: '[TEST] Auto-marked picked up' });
+                steps.push({ 
+                    action: 'update_status', 
+                    status: 'in_transit',
+                    note: '[TEST] Auto-marked in transit' 
+                });
+                steps.push({ action: 'mark_received', note: '[TEST] Auto-received at warehouse' });
+            } else if (currentStatus === 'picked_up') {
+                steps.push({ 
+                    action: 'update_status', 
+                    status: 'in_transit',
+                    note: '[TEST] Auto-marked in transit' 
+                });
+                steps.push({ action: 'mark_received', note: '[TEST] Auto-received at warehouse' });
+            } else if (currentStatus === 'in_transit') {
+                steps.push({ action: 'mark_received', note: '[TEST] Auto-received at warehouse' });
+            } else if (currentStatus === 'received') {
+                // Already at received, just need inspection
+            } else if (currentStatus === 'inspected') {
+                // Already inspected, just need to approve refund
+            }
+
+            // Add inspection steps - need to go through inspected -> approved_refund
+            if (!['inspected', 'approved_refund'].includes(currentStatus)) {
+                // First mark as inspected
+                steps.push({ 
+                    action: 'update_status',
+                    status: 'inspected',
+                    note: '[TEST] Auto-marked as inspected' 
+                });
+            }
+            
+            // Then approve refund (which will trigger automatic refund)
+            if (currentStatus !== 'approved_refund') {
+                steps.push({ 
+                    action: 'update_status',
+                    status: 'approved_refund',
+                    note: '[TEST] Auto-approved refund - triggering automatic refund processing' 
+                });
+            }
+
+            // Execute steps sequentially
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                console.log(`Executing step ${i + 1}/${steps.length}:`, step.action);
+
+                const response = await fetch(`/api/admin/returns/${returnId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(step)
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || `Failed at step: ${step.action}`);
+                }
+
+                // Small delay between steps
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+
+            fetchReturns();
+            setSelectedReturn(null);
+            alert('🎉 Complete test successful! Return processed and refund initiated automatically!');
+            
+        } catch (error) {
+            console.error('Error in quick test:', error);
+            alert('Test failed: ' + error.message);
+            fetchReturns(); // Refresh to see current state
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleManualReturn = async () => {
         // Basic validation
         if (!manualReturnData.orderId || !manualReturnData.customerId) {
@@ -163,14 +432,15 @@ function AdminReturnsPage() {
                 );
                 break;
             case 'received':
+                // Direct refund option from warehouse received
                 actions.push(
-                    { label: 'Mark Inspected', status: 'inspected', color: 'blue' }
+                    { label: '✨ Process Refund & Complete', action: 'auto_refund_complete', color: 'green' }
                 );
                 break;
             case 'inspected':
                 actions.push(
-                    { label: 'Approve Refund', status: 'approved_refund', color: 'green' },
-                    { label: 'Reject Refund', status: 'rejected_refund', color: 'red' }
+                    { label: 'Approve Refund', action: 'update_status', status: 'approved_refund', color: 'green' },
+                    { label: 'Reject Refund', action: 'update_status', status: 'rejected_refund', color: 'red' }
                 );
                 break;
             case 'approved_refund':
@@ -225,6 +495,39 @@ function AdminReturnsPage() {
                         >
                             Refresh
                         </button>
+                    </div>
+                </div>
+
+                {/* Testing Guide Banner */}
+                <div className="bg-gradient-to-r from-purple-50 to-orange-50 border-2 border-purple-300 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                        <span className="text-4xl">🧪</span>
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Automatic Refund Testing Tools</h3>
+                            <p className="text-sm text-gray-700 mb-3">
+                                Test the automatic refund system by simulating warehouse returns. Two options available:
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div className="bg-white rounded-lg p-3 border border-purple-200">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="px-2 py-1 bg-purple-600 text-white rounded text-xs font-bold">🧪 Next Step</span>
+                                        <span className="font-semibold text-gray-900">Step-by-Step Testing</span>
+                                    </div>
+                                    <p className="text-gray-600">Simulate one step at a time through the warehouse return process</p>
+                                </div>
+                                <div className="bg-white rounded-lg p-3 border border-orange-200">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="px-2 py-1 bg-orange-600 text-white rounded text-xs font-bold">⚡ Quick Test</span>
+                                        <span className="font-semibold text-gray-900">Full Process Testing</span>
+                                    </div>
+                                    <p className="text-gray-600">Automatically run through all steps from current status to refund completion</p>
+                                </div>
+                            </div>
+                            <div className="mt-3 text-xs text-gray-600 bg-white rounded px-3 py-2 border border-gray-200">
+                                <strong>📋 Simplified Flow:</strong> Approved → Pickup → In Transit → Warehouse Received → 
+                                <strong className="text-green-700"> ✨ Direct Refund Button</strong> → Auto Refund → Completed
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -347,6 +650,31 @@ function AdminReturnsPage() {
                                             </div>
 
                                             <div className="flex flex-col sm:flex-row gap-2">
+                                                {/* Testing Buttons - Simulate Warehouse Return */}
+                                                {['approved', 'pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected', 'approved_refund', 'refund_processed'].includes(returnRequest.status) && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleSimulateWarehouseReturn(returnRequest._id, returnRequest.status)}
+                                                            disabled={actionLoading}
+                                                            className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1"
+                                                            title="Simulate next step in warehouse return process"
+                                                        >
+                                                            🧪 Next Step
+                                                        </button>
+                                                        
+                                                        {['approved', 'requested', 'pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected'].includes(returnRequest.status) && (
+                                                            <button
+                                                                onClick={() => handleQuickTestRefund(returnRequest._id, returnRequest.status)}
+                                                                disabled={actionLoading}
+                                                                className="px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1"
+                                                                title="Simulate entire return process to refund"
+                                                            >
+                                                                ⚡ Quick Test
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+                                                
                                                 <button
                                                     onClick={() => setSelectedReturn(returnRequest)}
                                                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -360,13 +688,20 @@ function AdminReturnsPage() {
                                                         onClick={() => {
                                                             if (actionItem.action === 'pickup') {
                                                                 handleSchedulePickup(returnRequest._id);
+                                                            } else if (actionItem.action === 'auto_refund_complete') {
+                                                                handleDirectRefund(returnRequest._id);
                                                             } else {
                                                                 const note = prompt(`Add a note for ${actionItem.label}:`);
                                                                 if (note !== null) {
-                                                                    // Send action if available, otherwise send status
-                                                                    const payload = actionItem.action 
-                                                                        ? { action: actionItem.action, note }
-                                                                        : { status: actionItem.status, note };
+                                                                    // Build payload with action and status if both exist
+                                                                    const payload = {
+                                                                        action: actionItem.action,
+                                                                        note
+                                                                    };
+                                                                    // Add status if it exists
+                                                                    if (actionItem.status) {
+                                                                        payload.status = actionItem.status;
+                                                                    }
                                                                     handleStatusUpdate(returnRequest._id, payload, note);
                                                                 }
                                                             }
@@ -506,36 +841,88 @@ function AdminReturnsPage() {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex flex-wrap gap-3">
-                                    {getNextActions(selectedReturn.status).map((actionItem, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => {
-                                                if (actionItem.action === 'pickup') {
-                                                    handleSchedulePickup(selectedReturn._id);
-                                                } else {
-                                                    const note = prompt(`Add a note for ${actionItem.label}:`);
-                                                    if (note !== null) {
-                                                        // Send action if available, otherwise send status
-                                                        const payload = actionItem.action 
-                                                            ? { action: actionItem.action, note }
-                                                            : { status: actionItem.status, note };
-                                                        handleStatusUpdate(selectedReturn._id, payload, note);
+                                <div className="border-t border-gray-200 pt-6 mt-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+                                    
+                                    {/* Testing Buttons */}
+                                    {['approved', 'pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected', 'approved_refund', 'refund_processed'].includes(selectedReturn.status) && (
+                                        <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4 mb-4">
+                                            <div className="flex items-start gap-3 mb-3">
+                                                <span className="text-2xl">🧪</span>
+                                                <div className="flex-1">
+                                                    <h4 className="font-semibold text-purple-900 mb-1">Testing Tools</h4>
+                                                    <p className="text-sm text-purple-700">Simulate warehouse return process for testing the automatic refund system</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-3">
+                                                <button
+                                                    onClick={() => {
+                                                        handleSimulateWarehouseReturn(selectedReturn._id, selectedReturn.status);
+                                                    }}
+                                                    disabled={actionLoading}
+                                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                                                >
+                                                    🧪 Simulate Next Step
+                                                </button>
+                                                
+                                                {['approved', 'requested', 'pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected'].includes(selectedReturn.status) && (
+                                                    <button
+                                                        onClick={() => {
+                                                            handleQuickTestRefund(selectedReturn._id, selectedReturn.status);
+                                                        }}
+                                                        disabled={actionLoading}
+                                                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                                                    >
+                                                        ⚡ Quick Test (Full Process)
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="mt-3 text-xs text-purple-600">
+                                                <strong>Next Step:</strong> Simulates one step forward • 
+                                                <strong className="ml-2">Quick Test:</strong> Runs entire process from current status to refund completion
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Regular Action Buttons */}
+                                    <div className="flex flex-wrap gap-3">
+                                        {getNextActions(selectedReturn.status).map((actionItem, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => {
+                                                    if (actionItem.action === 'pickup') {
+                                                        handleSchedulePickup(selectedReturn._id);
+                                                    } else if (actionItem.action === 'auto_refund_complete') {
+                                                        handleDirectRefund(selectedReturn._id);
+                                                    } else {
+                                                        const note = prompt(`Add a note for ${actionItem.label}:`);
+                                                        if (note !== null) {
+                                                            // Build payload with action and status if both exist
+                                                            const payload = {
+                                                                action: actionItem.action,
+                                                                note
+                                                            };
+                                                            // Add status if it exists
+                                                            if (actionItem.status) {
+                                                                payload.status = actionItem.status;
+                                                            }
+                                                            handleStatusUpdate(selectedReturn._id, payload, note);
+                                                        }
                                                     }
-                                                }
-                                            }}
-                                            disabled={actionLoading}
-                                            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                                                actionItem.color === 'green' 
-                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                    : actionItem.color === 'red'
-                                                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            } disabled:opacity-50`}
-                                        >
-                                            {actionLoading ? 'Processing...' : actionItem.label}
-                                        </button>
-                                    ))}
+                                                }}
+                                                disabled={actionLoading}
+                                                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                                                    actionItem.color === 'green' 
+                                                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                        : actionItem.color === 'red'
+                                                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                } disabled:opacity-50`}
+                                            >
+                                                {actionLoading ? 'Processing...' : actionItem.label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

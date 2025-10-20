@@ -4,7 +4,8 @@ import Product from '@/models/Product';
 import connectDB from '@/lib/mongodb';
 
 // GET single category
-export async function GET(request, { params }) {
+export async function GET(request, context) {
+    const params = await context.params;
     try {
         await connectDB();
         
@@ -37,7 +38,8 @@ export async function GET(request, { params }) {
 }
 
 // PUT update category
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
+    const params = await context.params;
     try {
         await connectDB();
         
@@ -68,7 +70,8 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE category
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
+    const params = await context.params;
     try {
         await connectDB();
         

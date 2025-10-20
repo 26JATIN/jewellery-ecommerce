@@ -21,6 +21,15 @@ const nextConfig = {
             bodySizeLimit: '2mb'
         }
     },
+    // Disable all caching for development
+    onDemandEntries: {
+        maxInactiveAge: 0,
+        pagesBufferLength: 0,
+    },
+    // Disable static optimization
+    ...(process.env.NODE_ENV === 'development' && {
+        staticPageGenerationTimeout: 0,
+    }),
 };
 
 export default nextConfig;

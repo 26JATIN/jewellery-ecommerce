@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Return from '@/models/Return';
 import Order from '@/models/Order';
+import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { returnAutomationService } from '@/lib/returnAutomationService';
 
 // GET: Fetch user's returns
 export async function GET(req) {
@@ -32,11 +34,16 @@ export async function GET(req) {
         const page = parseInt(searchParams.get('page')) || 1;
         const limit = parseInt(searchParams.get('limit')) || 10;
         const status = searchParams.get('status');
+        const filterOrderId = searchParams.get('orderId'); // Add orderId filter
 
         // Build query
         const query = { user: decoded.userId };
         if (status && status !== 'all') {
             query.status = status;
+        }
+        // Filter by specific order if orderId is provided
+        if (filterOrderId) {
+            query.order = filterOrderId;
         }
 
         // Fetch returns with pagination
@@ -76,10 +83,15 @@ export async function GET(req) {
 // POST: Create new return request
 export async function POST(req) {
     try {
+        console.log('🔴 ========================================');
+        console.log('🔴 RETURN CREATION ENDPOINT CALLED');
+        console.log('🔴 ========================================');
+        
         const cookieStore = await cookies();
         const token = cookieStore.get('token');
 
         if (!token) {
+            console.error('❌ No token provided for return creation');
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
@@ -88,6 +100,7 @@ export async function POST(req) {
 
         const decoded = verifyToken(token.value);
         if (!decoded || !decoded.userId) {
+            console.error('❌ Invalid token for return creation');
             return NextResponse.json(
                 { error: 'Invalid token' },
                 { status: 401 }
@@ -101,8 +114,18 @@ export async function POST(req) {
             specialInstructions 
         } = await req.json();
 
+        console.log(`🔵 Return creation requested:`, {
+            orderId,
+            userId: decoded.userId,
+            itemCount: items?.length,
+            timestamp: new Date().toISOString(),
+            referer: req.headers.get('referer'),
+            userAgent: req.headers.get('user-agent')
+        });
+
         // Validate required fields
         if (!orderId || !items || !Array.isArray(items) || items.length === 0) {
+            console.error(`❌ Invalid return request - missing required fields`);
             return NextResponse.json(
                 { error: 'Order ID and items are required' },
                 { status: 400 }
@@ -250,9 +273,22 @@ export async function POST(req) {
             .populate('order', 'totalAmount createdAt')
             .populate('user', 'name email');
 
+        // ✨ AUTOMATIC RETURN APPROVAL & PICKUP SCHEDULING
+        // Process the return automatically - no admin intervention needed
+        try {
+            console.log(`✨ Auto-processing return ${returnRequest._id} for order ${orderId}...`);
+            console.log(`📋 Return created by user ${decoded.userId} via ${returnRequest.source || 'website'}`);
+            await returnAutomationService.processNewReturn(returnRequest._id);
+            console.log(`✅ Return ${returnRequest._id} processed automatically`);
+        } catch (automationError) {
+            console.error(`❌ Return automation failed for ${returnRequest._id}:`, automationError);
+            // Don't fail the return creation if automation fails
+            // Return is already created, automation can be retried
+        }
+
         return NextResponse.json({
             success: true,
-            message: 'Return request created successfully',
+            message: 'Return request created and automatically approved',
             data: populatedReturn
         });
 

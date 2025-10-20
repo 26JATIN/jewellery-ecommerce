@@ -32,26 +32,8 @@ function AdminOrdersPage() {
         }
     };
 
-    const createShipment = async (orderId) => {
-        try {
-            const res = await fetch('/api/shipping/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId, automate: true })
-            });
-
-            if (res.ok) {
-                await fetchOrders(); // Refresh orders
-                alert('Shipment created successfully!');
-            } else {
-                const error = await res.json();
-                alert(`Failed to create shipment: ${error.error}`);
-            }
-        } catch (error) {
-            console.error('Failed to create shipment:', error);
-            alert('Failed to create shipment');
-        }
-    };
+    // Manual shipment creation removed - fully automated after payment
+    // Shipments are created automatically via orderAutomationService
 
     const updateTracking = async (orderId) => {
         try {
@@ -230,13 +212,11 @@ function AdminOrdersPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex flex-col gap-2">
+                                                {/* Manual shipment creation removed - fully automated */}
                                                 {!order.shipping?.shipmentId && order.payment?.status === 'completed' && (
-                                                    <button
-                                                        onClick={() => createShipment(order._id)}
-                                                        className="text-[#8B6B4C] hover:text-[#725939] bg-[#8B6B4C]/10 hover:bg-[#8B6B4C]/20 px-3 py-1 rounded text-xs"
-                                                    >
-                                                        Create Shipment
-                                                    </button>
+                                                    <div className="text-xs text-purple-600 bg-purple-50 px-3 py-1 rounded">
+                                                        🤖 Auto-creating shipment...
+                                                    </div>
                                                 )}
                                                 {order.shipping?.awbCode && (
                                                     <button

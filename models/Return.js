@@ -53,6 +53,7 @@ const returnSchema = new mongoose.Schema({
                 'no_longer_needed',
                 'delivery_delayed',
                 'admin_initiated', // Added for admin-initiated returns
+                'manual_refund', // Added for manual refunds
                 'other'
             ],
             required: true
@@ -62,7 +63,7 @@ const returnSchema = new mongoose.Schema({
         // Condition of item being returned
         itemCondition: {
             type: String,
-            enum: ['unused', 'lightly_used', 'damaged', 'defective', 'unknown'], // Added 'unknown' for admin cases
+            enum: ['unused', 'lightly_used', 'damaged', 'defective', 'unknown', 'not_applicable'], // Added 'not_applicable' for manual refunds
             default: 'unused'
         }
     }],
@@ -128,7 +129,23 @@ const returnSchema = new mongoose.Schema({
             default: 'original_payment'
         },
         refundProcessedAt: Date,
-        refundTransactionId: String
+        refundTransactionId: String,
+        refundStatus: {
+            type: String,
+            enum: ['pending', 'processing', 'processed', 'failed'],
+            default: 'pending'
+        },
+        razorpayRefundData: {
+            id: String,
+            entity: String,
+            amount: Number,
+            currency: String,
+            payment_id: String,
+            status: String,
+            speed_requested: String,
+            speed_processed: String,
+            created_at: Number
+        }
     },
     
     // Pickup and logistics

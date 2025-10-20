@@ -1,530 +1,560 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import TrackingTimeline from '@/app/components/tracking/TrackingTimeline';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderDetailsPage() {
     const { orderId } = useParams();
+    const router = useRouter();
     const [order, setOrder] = useState(null);
+    const [returnData, setReturnData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        const fetchOrderDetails = async () => {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`);
-                if (!res.ok) throw new Error('Failed to fetch order');
-                const data = await res.json();
-                setOrder(data);
-            } catch (error) {
-                console.error('Error:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrderDetails();
-    }, [orderId]);
-
-    const createShipment = async () => {
+    const fetchOrderDetails = async () => {
         try {
-            const res = await fetch('/api/shipping/track', {
-                method: 'POST',
+            const timestamp = new Date().getTime();
+            const res = await fetch(`/api/orders/${orderId}?t=${timestamp}`, {
+                cache: 'no-store',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ orderId })
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
             });
+            if (!res.ok) throw new Error('Failed to fetch order');
+            const data = await res.json();
+            setOrder(data);
 
-            if (!res.ok) throw new Error('Failed to create shipment');
-            
-            const updatedOrder = await res.json();
-            setOrder(updatedOrder);
+            // Fetch return data if exists
+            const returnRes = await fetch(`/api/returns?orderId=${orderId}&t=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+            if (returnRes.ok) {
+                const returnDataRes = await returnRes.json();
+                if (returnDataRes.success && returnDataRes.data.returns.length > 0) {
+                    setReturnData(returnDataRes.data.returns[0]);
+                }
+            }
         } catch (error) {
-            console.error('Error creating shipment:', error);
-            alert('Failed to create shipment. Please try again.');
+            console.error('Error:', error);
+            setError('Failed to load order details');
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
         }
     };
 
-    const ShippingActions = () => {
-        if (!order.shipping?.shipmentId) {
-            return (
-                <button
-                    onClick={createShipment}
-                    className="mt-4 bg-[#8B6L4C] text-white px-6 py-2 rounded-md hover:bg-[#725939] transition-colors"
-                >
-                    Create Shipment
-                </button>
-            );
-        }
-        return null;
+    useEffect(() => {
+        fetchOrderDetails();
+        // Auto-refresh every 30 seconds for real-time updates
+        const interval = setInterval(() => {
+            setRefreshing(true);
+            fetchOrderDetails();
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [orderId]);
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-24 bg-gray-50">
-                <div className="max-w-4xl mx-auto p-6">
-                    <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-                        <div className="h-32 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!order) {
-        return (
-            <div className="min-h-screen pt-24 bg-gray-50">
-                <div className="max-w-4xl mx-auto p-6">
-                    <h1 className="text-2xl font-bold text-red-600">Order not found</h1>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-screen pt-24 bg-gray-50">
-            <div className="max-w-4xl mx-auto p-6">
-                {/* Order Header */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-2xl font-semibold">Order #{orderId.slice(-8)}</h1>
-                            <p className="text-gray-600">
-                                Placed on {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
-                        </div>
-                        <div className={`px-4 py-2 rounded-full ${getStatusColor(order.status)}`}>
-                            {formatStatus(order.status)}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Order Status and Shipping Info */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Order Status</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Order Info */}
-                        <div>
-                            <h3 className="font-medium text-gray-900 mb-3">Order Information</h3>
-                            <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Status:</span>
-                                    <span className={`px-2 py-1 rounded text-sm ${getStatusColor(order.status)}`}>
-                                        {formatStatus(order.status)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Payment:</span>
-                                    <span className={`px-2 py-1 rounded text-sm ${
-                                        order.payment?.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                        {order.payment?.status || 'pending'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Total Amount:</span>
-                                    <span className="font-medium">₹{order.totalAmount}</span>
-                                </div>
-                            </div>
-                            
-                            {/* Return Request Button */}
-                            {order.status === 'delivered' && (
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <Link
-                                        href={`/returns?orderId=${order._id}`}
-                                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#D4AF76] to-[#C19B61] text-white text-sm font-medium rounded-lg hover:from-[#C19B61] hover:to-[#B08850] transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                                    >
-                                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                                        </svg>
-                                        Request Return
-                                    </Link>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Hassle-free returns within 7 days of delivery
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Shipping Info */}
-                        <div>
-                            <h3 className="font-medium text-gray-900 mb-3">Shipping Information</h3>
-                            {order.shipping?.awb_code || order.shipping?.awbCode ? (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">AWB Code:</span>
-                                        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                                            {order.shipping.awb_code || order.shipping.awbCode}
-                                        </span>
-                                    </div>
-                                    {(order.shipping.courier_name || order.shipping.courier) && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Courier:</span>
-                                            <span className="font-medium">{order.shipping.courier_name || order.shipping.courier}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Shipping Status:</span>
-                                        <span className={`px-2 py-1 rounded text-sm ${getShippingStatusColor(order.shipping.current_status || order.shipping.status)}`}>
-                                            {formatShippingStatus(order.shipping.current_status || order.shipping.status)}
-                                        </span>
-                                    </div>
-                                    {order.shipping.expected_delivery_date && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Expected Delivery:</span>
-                                            <span className="text-sm font-medium text-green-600">
-                                                {new Date(order.shipping.expected_delivery_date).toLocaleDateString('en-IN', {
-                                                    weekday: 'short',
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric'
-                                                })}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {(order.shipping.last_location || order.shipping.currentLocation) && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Last Location:</span>
-                                            <span className="text-sm">{order.shipping.last_location || order.shipping.currentLocation}</span>
-                                        </div>
-                                    )}
-                                    <div className="border-t pt-3 mt-3">
-                                        <div className="flex gap-2">
-                                            {order.shipping.tracking_url && (
-                                                <a
-                                                    href={order.shipping.tracking_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center px-3 py-2 bg-[#8B6B4C] text-white text-sm rounded-md hover:bg-[#725939] transition-colors"
-                                                >
-                                                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                    </svg>
-                                                    Track Live
-                                                </a>
-                                            )}
-                                            
-                                            {(order.shipping.awb_code || order.shipping.awbCode) && (
-                                                <a
-                                                    href={`https://shiprocket.in/tracking/${order.shipping.awb_code || order.shipping.awbCode}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                                                >
-                                                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                                    </svg>
-                                                    Shiprocket
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : order.shipping?.shipmentId || order.shipping?.shipment_id ? (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                    <div className="flex items-center">
-                                        <svg className="h-5 w-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <div>
-                                            <p className="text-yellow-800 font-medium">Shipment Created</p>
-                                            <p className="text-yellow-700 text-sm">
-                                                Shipment ID: {order.shipping.shipmentId || order.shipping.shipment_id}
-                                            </p>
-                                            <p className="text-yellow-600 text-sm">
-                                                Waiting for courier assignment and AWB generation...
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                    <div className="flex items-center">
-                                        <svg className="h-5 w-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                        </svg>
-                                        <div>
-                                            <p className="text-gray-800 font-medium">Preparing for Shipment</p>
-                                            <p className="text-gray-600 text-sm">
-                                                {order.payment?.status === 'completed' 
-                                                    ? 'Payment confirmed. Shipment will be created shortly.'
-                                                    : 'Shipment will be created after payment confirmation.'
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Shiprocket Details Section */}
-                {(order.shipping?.awb_code || order.shipping?.awbCode || order.shipping?.shipmentId) && (
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h2 className="text-xl font-semibold mb-4 flex items-center text-blue-700">
-                            <svg className="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            Shiprocket Tracking Details
-                        </h2>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Order Information */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-medium text-gray-900 mb-3">Order Information</h3>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Order ID:</span>
-                                        <span className="font-mono">{order._id.slice(-8)}</span>
-                                    </div>
-                                    {order.shipping?.shipmentId && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Shipment ID:</span>
-                                            <span className="font-mono">{order.shipping.shipmentId}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Order Date:</span>
-                                        <span>{new Date(order.createdAt).toLocaleDateString('en-IN')}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Shipping Information */}
-                            {(order.shipping?.awb_code || order.shipping?.awbCode) && (
-                                <div className="bg-blue-50 p-4 rounded-lg">
-                                    <h3 className="font-medium text-gray-900 mb-3">Shipping Details</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">AWB Code:</span>
-                                            <span className="font-mono font-medium">
-                                                {order.shipping.awb_code || order.shipping.awbCode}
-                                            </span>
-                                        </div>
-                                        {order.shipping.courier_name && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Courier:</span>
-                                                <span className="font-medium">{order.shipping.courier_name}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Status:</span>
-                                            <span className={`px-2 py-1 rounded text-xs ${getShippingStatusColor(order.shipping.current_status || order.shipping.status)}`}>
-                                                {formatShippingStatus(order.shipping.current_status || order.shipping.status)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Delivery Information */}
-                            <div className="bg-green-50 p-4 rounded-lg">
-                                <h3 className="font-medium text-gray-900 mb-3">Delivery Details</h3>
-                                <div className="space-y-2 text-sm">
-                                    {order.shipping?.expected_delivery_date ? (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Expected:</span>
-                                            <span className="font-medium text-green-700">
-                                                {new Date(order.shipping.expected_delivery_date).toLocaleDateString('en-IN', {
-                                                    day: 'numeric',
-                                                    month: 'short'
-                                                })}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Expected:</span>
-                                            <span className="text-gray-500">Calculating...</span>
-                                        </div>
-                                    )}
-                                    
-                                    {order.shipping?.last_location && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Last Location:</span>
-                                            <span className="text-right text-xs">{order.shipping.last_location}</span>
-                                        </div>
-                                    )}
-                                    
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Address:</span>
-                                        <span className="text-right text-xs">
-                                            {order.shippingAddress.city}, {order.shippingAddress.state}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div className="mt-6 pt-4 border-t border-gray-200">
-                            <div className="flex flex-wrap gap-3">
-                                {order.shipping?.tracking_url && (
-                                    <a
-                                        href={order.shipping.tracking_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center px-4 py-2 bg-[#8B6B4C] text-white rounded-md hover:bg-[#725939] transition-colors"
-                                    >
-                                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        Track Real-time
-                                    </a>
-                                )}
-                                
-                                {(order.shipping?.awb_code || order.shipping?.awbCode) && (
-                                    <a
-                                        href={`https://shiprocket.in/tracking/${order.shipping.awb_code || order.shipping.awbCode}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                                    >
-                                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                        </svg>
-                                        Shiprocket Portal
-                                    </a>
-                                )}
-
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-                                >
-                                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Refresh Status
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Tracking Timeline Component */}
-                <TrackingTimeline 
-                    orderId={order._id}
-                    order={order}
-                />
-
-                {/* Order Items */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h2 className="text-xl font-semibold mb-4">Order Items</h2>
-                    <div className="divide-y">
-                        {order.items.map((item) => (
-                            <div key={item._id} className="py-4 flex items-center">
-                                <div className="relative h-20 w-20">
-                                    <Image
-                                        src={item.image}
-                                        alt={item.name}
-                                        fill
-                                        className="object-cover rounded"
-                                        sizes="80px"
-                                    />
-                                </div>
-                                <div className="ml-4 flex-1">
-                                    <h3 className="font-medium">{item.name}</h3>
-                                    <p className="text-sm text-gray-600">
-                                        Quantity: {item.quantity}
-                                    </p>
-                                </div>
-                                <p className="font-medium">
-                                    ₹{(item.price * item.quantity)}
-                                </p>
+            <div className="min-h-screen pt-24 bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="animate-pulse space-y-6">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="bg-white p-8 rounded-xl shadow-md">
+                                <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                                <div className="h-32 bg-gray-200 rounded"></div>
                             </div>
                         ))}
                     </div>
-                    
-                    <div className="mt-4 pt-4 border-t">
-                        <div className="flex justify-between text-lg font-semibold">
-                            <span>Total</span>
-                            <span>₹{order.totalAmount}</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <div className="min-h-screen pt-24 bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white p-12 rounded-xl shadow-md text-center"
+                    >
+                        <div className="text-6xl mb-4">❌</div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                            {error || 'Order not found'}
+                        </h1>
+                        <p className="text-gray-600 mb-6">
+                            The order you're looking for doesn't exist or you don't have access to it
+                        </p>
+                        <Link
+                            href="/orders"
+                            className="inline-block bg-[#8B6B4C] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#6D5539] transition-colors"
+                        >
+                            Back to Orders
+                        </Link>
+                    </motion.div>
+                </div>
+            </div>
+        );
+    }
+
+    const isReturnEligible = order.status === 'delivered' && !returnData;
+    const daysSinceOrder = Math.floor((new Date() - new Date(order.createdAt)) / (1000 * 60 * 60 * 24));
+    const withinReturnWindow = daysSinceOrder <= 7;
+
+    return (
+        <div className="min-h-screen pt-24 bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Back Button & Refresh Indicator */}
+                <div className="flex justify-between items-center mb-6">
+                    <Link
+                        href="/orders"
+                        className="inline-flex items-center text-[#8B6B4C] hover:text-[#6D5539] font-semibold transition-colors"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to Orders
+                    </Link>
+                    {refreshing && (
+                        <span className="text-sm text-gray-600 flex items-center">
+                            <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Refreshing...
+                        </span>
+                    )}
+                </div>
+
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white p-6 rounded-xl shadow-md mb-6"
+                >
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    Order #{order._id.slice(-8).toUpperCase()}
+                                </h1>
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                    order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                    order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                    order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                                    order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                    order.status === 'refunded' ? 'bg-purple-100 text-purple-700' :
+                                    'bg-gray-100 text-gray-700'
+                                }`}>
+                                    {order.status.toUpperCase()}
+                                </span>
+                                {returnData && (
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        returnData.status === 'approved' || returnData.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                        returnData.status === 'requested' || returnData.status === 'pickup_scheduled' ? 'bg-blue-100 text-blue-700' :
+                                        returnData.status === 'refund_processed' ? 'bg-purple-100 text-purple-700' :
+                                        returnData.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        'bg-gray-100 text-gray-700'
+                                    }`}>
+                                        ↩️ RETURN {returnData.status.toUpperCase().replace(/_/g, ' ')}
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-gray-600 text-sm">Placed on {formatDate(order.createdAt)}</p>
+                            {order.payment?.paidAt && (
+                                <p className="text-gray-600 text-sm">Paid on {formatDate(order.payment.paidAt)}</p>
+                            )}
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+                            <p className="text-3xl font-bold text-gray-900">
+                                ₹{order.totalAmount.toLocaleString()}
+                            </p>
+                            {order.coupon?.code && (
+                                <p className="text-xs text-green-600 mt-1">
+                                    Coupon Applied: {order.coupon.code} (-₹{order.coupon.discountAmount?.toLocaleString()})
+                                </p>
+                            )}
                         </div>
                     </div>
+                </motion.div>
 
-                    {/* Add this right after the total amount display */}
-                    <div className="mt-6 flex justify-end">
-                        <Link
-                            href={`/orders/${order._id}`}
-                            className="inline-flex items-center px-4 py-2 bg-[#8B6B4C] text-white rounded-md hover:bg-[#725939] transition-colors"
-                        >
-                            <span>View Order Details</span>
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                className="h-5 w-5 ml-2" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
-                                stroke="currentColor"
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Return Information (if exists) */}
+                        {returnData && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 p-6 rounded-xl shadow-md"
                             >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={2} 
-                                    d="M9 5l7 7-7 7" 
-                                />
-                            </svg>
-                        </Link>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <span className="mr-2">↩️</span>
+                                    Return Request Status
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="bg-white p-4 rounded-lg">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <p className="font-semibold text-gray-900">Return #{returnData._id.slice(-8).toUpperCase()}</p>
+                                                <p className="text-sm text-gray-600">Requested on {formatDate(returnData.createdAt)}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                returnData.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                returnData.status === 'refund_processed' ? 'bg-purple-100 text-purple-700' :
+                                                returnData.status === 'picked_up' || returnData.status === 'in_transit' ? 'bg-yellow-100 text-yellow-700' :
+                                                returnData.status === 'approved' || returnData.status === 'requested' ? 'bg-blue-100 text-blue-700' :
+                                                returnData.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-gray-100 text-gray-700'
+                                            }`}>
+                                                {returnData.status.toUpperCase().replace(/_/g, ' ')}
+                                            </span>
+                                        </div>
+
+                                        {/* Return Timeline */}
+                                        <div className="mt-4 space-y-3">
+                                            <h4 className="font-semibold text-gray-900 text-sm">Return Progress</h4>
+                                            <div className="relative">
+                                                {/* Timeline */}
+                                                <div className="space-y-4">
+                                                    {[
+                                                        { status: 'requested', label: 'Return Requested', icon: '📝', completed: true },
+                                                        { status: 'approved', label: 'Approved by Admin', icon: '✅', completed: ['approved', 'pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected', 'approved_refund', 'refund_processed', 'completed'].includes(returnData.status) },
+                                                        { status: 'pickup_scheduled', label: 'Pickup Scheduled', icon: '📦', completed: ['pickup_scheduled', 'picked_up', 'in_transit', 'received', 'inspected', 'approved_refund', 'refund_processed', 'completed'].includes(returnData.status) },
+                                                        { status: 'picked_up', label: 'Item Picked Up', icon: '🚚', completed: ['picked_up', 'in_transit', 'received', 'inspected', 'approved_refund', 'refund_processed', 'completed'].includes(returnData.status) },
+                                                        { status: 'received', label: 'Received at Warehouse', icon: '🏭', completed: ['received', 'inspected', 'approved_refund', 'refund_processed', 'completed'].includes(returnData.status) },
+                                                        { status: 'refund_processed', label: 'Refund Processed', icon: '💰', completed: ['refund_processed', 'completed'].includes(returnData.status) },
+                                                        { status: 'completed', label: 'Return Completed', icon: '🎉', completed: returnData.status === 'completed' }
+                                                    ].map((step, idx) => (
+                                                        <div key={idx} className="flex items-center gap-3">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                                                                step.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                                                            }`}>
+                                                                {step.completed ? '✓' : step.icon}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className={`text-sm font-medium ${step.completed ? 'text-gray-900' : 'text-gray-500'}`}>
+                                                                    {step.label}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Refund Information */}
+                                        {returnData.refundDetails && (
+                                            <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                                                <h4 className="font-semibold text-gray-900 text-sm mb-2">Refund Information</h4>
+                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-600">Refund Amount</p>
+                                                        <p className="font-bold text-gray-900">₹{returnData.refundDetails.refundAmount?.toLocaleString()}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-600">Refund Status</p>
+                                                        <p className="font-semibold capitalize">{returnData.refundDetails.refundStatus}</p>
+                                                    </div>
+                                                    {returnData.refundDetails.refundProcessedAt && (
+                                                        <div className="col-span-2">
+                                                            <p className="text-gray-600">Processed On</p>
+                                                            <p className="font-semibold">{formatDate(returnData.refundDetails.refundProcessedAt)}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Pickup Information */}
+                                        {returnData.pickup && returnData.pickup.awbCode && (
+                                            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                                                <h4 className="font-semibold text-gray-900 text-sm mb-2">Pickup Tracking</h4>
+                                                <div className="space-y-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-600">Tracking Number</p>
+                                                        <p className="font-mono font-semibold">{returnData.pickup.awbCode}</p>
+                                                    </div>
+                                                    {returnData.pickup.courier && (
+                                                        <div>
+                                                            <p className="text-gray-600">Courier</p>
+                                                            <p className="font-semibold">{returnData.pickup.courier}</p>
+                                                        </div>
+                                                    )}
+                                                    {returnData.pickup.trackingUrl && (
+                                                        <a
+                                                            href={returnData.pickup.trackingUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+                                                        >
+                                                            Track Return Shipment
+                                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                            </svg>
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Items */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-white p-6 rounded-xl shadow-md"
+                        >
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <span className="mr-2">📦</span>
+                                Order Items
+                            </h3>
+                            <div className="space-y-4">
+                                {order.items.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div className="relative w-20 h-20 flex-shrink-0">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover rounded-lg"
+                                                sizes="80px"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                                            <p className="text-sm text-gray-600">
+                                                Quantity: {item.quantity} × ₹{item.price.toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <p className="font-bold text-gray-900">
+                                            ₹{(item.price * item.quantity).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Order Summary */}
+                            <div className="mt-6 pt-6 border-t border-gray-200">
+                                <div className="space-y-2">
+                                    {order.coupon?.originalTotal && (
+                                        <>
+                                            <div className="flex justify-between text-sm text-gray-600">
+                                                <span>Subtotal</span>
+                                                <span>₹{order.coupon.originalTotal.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm text-green-600">
+                                                <span>Discount ({order.coupon.code})</span>
+                                                <span>-₹{order.coupon.discountAmount.toLocaleString()}</span>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
+                                        <span>Total</span>
+                                        <span>₹{order.totalAmount.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Shipping */}
+                        {order.shipping && (order.shipping.awb_code || order.shipping.awbCode) && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="bg-white p-6 rounded-xl shadow-md"
+                            >
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <span className="mr-2">🚚</span>
+                                    Shipping & Tracking
+                                </h3>
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <p className="text-xs text-gray-600 mb-1">Tracking Number</p>
+                                            <p className="font-mono font-semibold text-sm">{order.shipping.awb_code || order.shipping.awbCode}</p>
+                                        </div>
+                                        {(order.shipping.courier_name || order.shipping.courier) && (
+                                            <div>
+                                                <p className="text-xs text-gray-600 mb-1">Courier</p>
+                                                <p className="font-semibold text-sm">{order.shipping.courier_name || order.shipping.courier}</p>
+                                            </div>
+                                        )}
+                                        {order.shipping.current_status && (
+                                            <div>
+                                                <p className="text-xs text-gray-600 mb-1">Current Status</p>
+                                                <p className="font-semibold text-sm capitalize">{order.shipping.current_status.replace(/_/g, ' ')}</p>
+                                            </div>
+                                        )}
+                                        {order.shipping.expected_delivery_date && (
+                                            <div>
+                                                <p className="text-xs text-gray-600 mb-1">Expected Delivery</p>
+                                                <p className="font-semibold text-sm">{formatDate(order.shipping.expected_delivery_date)}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {order.shipping.tracking_url && (
+                                        <a
+                                            href={order.shipping.tracking_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                        >
+                                            Track Live Shipment
+                                            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </a>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Payment Information */}
+                        {order.payment && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="bg-white p-6 rounded-xl shadow-md"
+                            >
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <span className="mr-2">💳</span>
+                                    Payment Information
+                                </h3>
+                                <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Payment Method</span>
+                                        <span className="font-semibold capitalize">{order.paymentMethod.replace(/_/g, ' ')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Payment Status</span>
+                                        <span className={`font-semibold ${
+                                            order.payment.status === 'completed' ? 'text-green-600' :
+                                            order.payment.status === 'failed' ? 'text-red-600' :
+                                            'text-yellow-600'
+                                        }`}>
+                                            {order.payment.status.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    {order.payment.id && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Transaction ID</span>
+                                            <span className="font-mono font-semibold text-xs">{order.payment.id}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="space-y-6">
+                        {/* Address */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-white p-6 rounded-xl shadow-md"
+                        >
+                            <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                                <span className="mr-2">📍</span>
+                                Shipping Address
+                            </h3>
+                            <div className="text-sm text-gray-700 space-y-1">
+                                <p className="font-semibold text-gray-900">{order.shippingAddress.fullName}</p>
+                                <p>{order.shippingAddress.addressLine1}</p>
+                                {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
+                                <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}</p>
+                                <p>{order.shippingAddress.country}</p>
+                                <p className="pt-2 mt-2 border-t font-semibold flex items-center">
+                                    <span className="mr-2">📞</span>
+                                    {order.shippingAddress.phone}
+                                </p>
+                            </div>
+                        </motion.div>
+
+                        {/* Actions */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-white p-6 rounded-xl shadow-md"
+                        >
+                            <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
+                            <div className="space-y-3">
+                                {isReturnEligible && withinReturnWindow && (
+                                    <Link
+                                        href="/orders"
+                                        className="block bg-[#8B6B4C] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6D5539] transition-colors text-center"
+                                    >
+                                        Request Return
+                                    </Link>
+                                )}
+                                <Link
+                                    href="/orders"
+                                    className="block bg-gray-100 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-center"
+                                >
+                                    View All Orders
+                                </Link>
+                                <button
+                                    onClick={() => window.print()}
+                                    className="w-full bg-white border-2 border-gray-300 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                                >
+                                    Print Invoice
+                                </button>
+                            </div>
+                        </motion.div>
+
+                        {/* Help */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl shadow-md border-2 border-blue-100"
+                        >
+                            <h3 className="font-bold text-gray-900 mb-2 flex items-center">
+                                <span className="mr-2">❓</span>
+                                Need Help?
+                            </h3>
+                            <p className="text-sm text-gray-700 mb-4">
+                                Have questions about your order? We're here to help!
+                            </p>
+                            <Link
+                                href="/contact"
+                                className="block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center text-sm"
+                            >
+                                Contact Support
+                            </Link>
+                        </motion.div>
                     </div>
                 </div>
             </div>
         </div>
     );
-}
-
-// Helper functions
-function getStatusColor(status) {
-    switch (status?.toLowerCase()) {
-        case 'delivered':
-            return 'bg-green-100 text-green-800';
-        case 'shipped':
-            return 'bg-blue-100 text-blue-800';
-        case 'processing':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'cancelled':
-            return 'bg-red-100 text-red-800';
-        case 'completed':
-            return 'bg-green-100 text-green-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-}
-
-function getShippingStatusColor(status) {
-    if (!status) return 'bg-gray-100 text-gray-800';
-    
-    const statusLower = status.toLowerCase();
-    
-    if (statusLower.includes('delivered')) {
-        return 'bg-green-100 text-green-800';
-    } else if (statusLower.includes('out for delivery') || statusLower.includes('dispatched')) {
-        return 'bg-blue-100 text-blue-800';
-    } else if (statusLower.includes('in transit') || statusLower.includes('shipped')) {
-        return 'bg-yellow-100 text-yellow-800';
-    } else if (statusLower.includes('picked') || statusLower.includes('pickup')) {
-        return 'bg-purple-100 text-purple-800';
-    } else if (statusLower.includes('cancelled') || statusLower.includes('rto')) {
-        return 'bg-red-100 text-red-800';
-    } else {
-        return 'bg-gray-100 text-gray-800';
-    }
-}
-
-function formatStatus(status) {
-    if (!status) return 'Pending';
-    return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
-}
-
-function formatShippingStatus(status) {
-    if (!status) return 'Pending';
-    
-    // Handle common Shiprocket status formats
-    const formatted = status
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-    
-    return formatted;
 }

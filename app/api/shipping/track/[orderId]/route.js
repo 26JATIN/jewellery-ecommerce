@@ -6,7 +6,8 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 
 // Get tracking information for an order
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         const { orderId } = params;
         
@@ -49,7 +50,8 @@ export async function GET(req, { params }) {
 }
 
 // Update tracking information for an order
-export async function POST(req, { params }) {
+export async function POST(req, context) {
+    const params = await context.params;
     try {
         const cookieStore = await cookies();
         const token = await cookieStore.get('token');

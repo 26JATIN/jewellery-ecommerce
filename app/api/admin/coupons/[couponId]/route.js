@@ -3,7 +3,8 @@ import connectDB from '@/lib/mongodb';
 import Coupon from '@/models/Coupon';
 
 // GET /api/admin/coupons/[couponId] - Get specific coupon
-export async function GET(request, { params }) {
+export async function GET(request, context) {
+    const params = await context.params;
   try {
     await connectDB();
     
@@ -36,7 +37,8 @@ export async function GET(request, { params }) {
 }
 
 // PUT /api/admin/coupons/[couponId] - Update coupon
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
+    const params = await context.params;
   try {
     await connectDB();
     
@@ -110,7 +112,8 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE /api/admin/coupons/[couponId] - Delete coupon
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
+    const params = await context.params;
   try {
     await connectDB();
     

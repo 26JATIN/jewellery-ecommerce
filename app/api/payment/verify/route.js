@@ -89,13 +89,16 @@ export async function POST(req) {
             }
         }
 
-        // Trigger automatic shipping process
+        // ✨ INSTANT AUTOMATIC SHIPMENT CREATION
+        // No delay, no admin action needed
         try {
+            console.log(`✨ Payment verified for order ${orderId} - Creating shipment instantly...`);
             await orderAutomationService.processNewOrder(orderId);
-            console.log(`Automatic shipping initiated for order: ${orderId}`);
+            console.log(`✅ Shipment creation completed for order: ${orderId}`);
         } catch (automationError) {
-            console.error(`Automation failed for order ${orderId}:`, automationError);
+            console.error(`❌ Shipment automation failed for order ${orderId}:`, automationError);
             // Don't fail the payment verification if automation fails
+            // Payment is already successful, shipment can be retried
         }
 
         return NextResponse.json({

@@ -3,11 +3,12 @@ import Product from '@/models/Product';
 import connectDB from '@/lib/mongodb';
 
 // GET products by category
-export async function GET(request, { params }) {
+export async function GET(request, context) {
     try {
         await connectDB();
         
-        const { slug } = await params;
+        const params = await context.params;
+        const { slug } = params;
         const { searchParams } = new URL(request.url);
         
         const page = parseInt(searchParams.get('page')) || 1;

@@ -5,7 +5,8 @@ import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 // GET: Fetch specific return details
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get('token');
@@ -66,7 +67,8 @@ export async function GET(req, { params }) {
 }
 
 // PUT: Update return request (customer can only cancel)
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
+    const params = await context.params;
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get('token');

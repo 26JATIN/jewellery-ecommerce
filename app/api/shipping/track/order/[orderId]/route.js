@@ -3,7 +3,8 @@ import { shiprocket } from '@/lib/shiprocket';
 import Order from '@/models/Order';
 import connectDB from '@/lib/mongodb';
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         await connectDB();
         const order = await Order.findById(params.orderId);

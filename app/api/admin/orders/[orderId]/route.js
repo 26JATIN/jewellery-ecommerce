@@ -9,8 +9,9 @@ import User from '@/models/User';
 export const runtime = 'nodejs';
 
 // Get specific order details (Admin only)
-export async function GET(req, { params }) {
+export async function GET(req, context) {
     try {
+        const params = await context.params;
         console.log('Admin order API called for orderId:', params.orderId);
         
         // Verify admin authentication
@@ -78,7 +79,8 @@ export async function GET(req, { params }) {
 // NOTE: For orders with Shiprocket shipments, status is automatically updated via webhooks
 // See: app/api/webhooks/shiprocket/route.js and SHIPROCKET_ORDER_STATUS_AUTOMATION.md
 // Manual updates should only be used for exceptional cases (cancellations, refunds, etc.)
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
+    const params = await context.params;
     try {
         // Verify admin authentication
         const cookieStore = await cookies();

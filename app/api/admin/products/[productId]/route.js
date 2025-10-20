@@ -35,7 +35,8 @@ async function checkAdminAccess() {
     }
 }
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         const authError = await checkAdminAccess();
         if (authError) {
@@ -67,7 +68,8 @@ export async function GET(req, { params }) {
     }
 }
 
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
+    const params = await context.params;
     try {
         const authError = await checkAdminAccess();
         if (authError) {
@@ -234,7 +236,8 @@ export async function PUT(req, { params }) {
     }
 }
 
-export async function DELETE(req, { params }) {
+export async function DELETE(req, context) {
+    const params = await context.params;
     try {
         const authError = await checkAdminAccess();
         if (authError) {

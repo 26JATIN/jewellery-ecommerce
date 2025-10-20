@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { shiprocket } from '@/lib/shiprocket';
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+    const params = await context.params;
     try {
         const { id } = params;
         const tracking = await shiprocket.trackByShipmentId(id);
