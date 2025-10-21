@@ -108,7 +108,7 @@ const orderSchema = new mongoose.Schema({
         trackingUrl: String,
         status: {
             type: String,
-            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'pending_courier', 'pending_balance'],
             default: 'pending'
         },
         currentLocation: String,
@@ -119,8 +119,34 @@ const orderSchema = new mongoose.Schema({
             timestamp: Date,
             statusCode: String
         }],
-        lastUpdateAt: Date
-    }
+        lastUpdateAt: Date,
+        errorMessage: String
+    },
+    // Inventory management log
+    inventoryLog: [{
+        action: {
+            type: String,
+            enum: ['reserve', 'restore'],
+            required: true
+        },
+        reason: String, // 'payment_failed', 'refund', 'order_cancelled'
+        totalItemsReserved: Number,
+        totalItemsRestored: Number,
+        timestamp: {
+            type: Date,
+            default: Date.now
+        },
+        details: [{
+            productId: mongoose.Schema.Types.ObjectId,
+            productName: String,
+            sku: String,
+            quantityReserved: Number,
+            quantityRestored: Number,
+            previousStock: Number,
+            newStock: Number
+        }],
+        errors: mongoose.Schema.Types.Mixed
+    }]
 }, {
     timestamps: true
 });

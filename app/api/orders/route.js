@@ -6,6 +6,7 @@ import Coupon from '@/models/Coupon';
 import Product from '@/models/Product';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { inventoryService } from '@/lib/inventoryService';
 
 // GET: Fetch user orders with filtering options
 export async function GET(req) {
@@ -326,15 +327,20 @@ export async function POST(req) {
 
         await order.save();
         
-        // Decrement stock for all ordered items (atomic operation)
+        // Reserve inventory - decrement stock for all ordered items (atomic operation)
+        console.log(`📦 Reserving inventory for order ${order._id}...`);
         for (const item of enrichedItems) {
+            const previousStock = await Product.findById(item.product).then(p => p.stock);
             await Product.findByIdAndUpdate(
                 item.product,
                 { $inc: { stock: -item.quantity } },
                 { new: true }
             );
-            console.log(`Decremented stock for product ${item.product} by ${item.quantity}`);
+            console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Stock: ${previousStock} → ${previousStock - item.quantity})`);
         }
+        
+        // Log inventory reservation in order
+        await inventoryService.reserveInventory(order._id);
 
         return NextResponse.json(order);
     } catch (error) {
