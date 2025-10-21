@@ -8,6 +8,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
+// CORS headers for webhook accessibility
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, x-shiprocket-signature',
+};
+
 // Verify webhook signature for security
 function verifyWebhookSignature(payload, signature, secret) {
     if (!secret) {
@@ -30,6 +37,16 @@ function verifyWebhookSignature(payload, signature, secret) {
     );
 }
 
+/**
+ * OPTIONS endpoint for CORS preflight
+ */
+export async function OPTIONS(req) {
+    return new NextResponse(null, {
+        status: 200,
+        headers: corsHeaders
+    });
+}
+
 // Shiprocket webhook handler for automatic tracking updates
 export async function POST(req) {
     try {
@@ -44,7 +61,7 @@ export async function POST(req) {
             console.error('❌ Invalid webhook signature');
             return NextResponse.json(
                 { error: 'Invalid signature' },
-                { status: 401 }
+                { status: 401, headers: corsHeaders }
             );
         }
         
@@ -74,7 +91,7 @@ export async function POST(req) {
         if (!awb && !shipment_id) {
             return NextResponse.json(
                 { error: 'AWB or Shipment ID required' },
-                { status: 400 }
+                { status: 400, headers: corsHeaders }
             );
         }
 
@@ -172,13 +189,31 @@ export async function POST(req) {
         return NextResponse.json({
             success: true,
             message: 'Webhook processed successfully'
+        }, {
+            headers: corsHeaders
         });
 
     } catch (error) {
         console.error('Webhook processing error:', error);
         return NextResponse.json(
             { error: 'Webhook processing failed' },
-            { status: 500 }
+            { status: 500, headers: corsHeaders }
         );
     }
+}
+
+/**
+ * GET endpoint for webhook health check and verification
+ */
+export async function GET() {
+    return NextResponse.json({
+        status: 'active',
+        webhook: 'shiprocket-order-tracking',
+        description: 'Handles Shiprocket order tracking updates',
+        timestamp: new Date().toISOString(),
+        endpoint: '/api/webhooks/shiprocket',
+        methods: ['GET', 'POST', 'OPTIONS']
+    }, {
+        headers: corsHeaders
+    });
 }
