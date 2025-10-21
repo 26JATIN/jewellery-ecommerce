@@ -4,6 +4,11 @@ import { verifyTokenEdge } from './lib/auth';
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
 
+    // Skip middleware for webhook routes - they need to be publicly accessible
+    if (pathname.startsWith('/api/webhooks/')) {
+        return NextResponse.next();
+    }
+
     // Protect admin routes
     if (pathname.startsWith('/admin')) {
         try {
@@ -63,5 +68,7 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*']
+    matcher: [
+        '/admin/:path*'
+    ]
 };

@@ -5,6 +5,11 @@ import Return from '@/models/Return';
 import Order from '@/models/Order';
 import { processAutomaticRefund } from '@/lib/refundService';
 
+// Route segment config - make webhook publicly accessible
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 /**
  * AUTOMATED RETURN WORKFLOW WEBHOOK
  * 

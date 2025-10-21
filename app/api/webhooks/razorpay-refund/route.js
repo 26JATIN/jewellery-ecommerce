@@ -3,6 +3,11 @@ import connectDB from '@/lib/mongodb';
 import Return from '@/models/Return';
 import crypto from 'crypto';
 
+// Route segment config - make webhook publicly accessible
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 /**
  * Webhook handler for Razorpay refund events
  * Handles: refund.processed, refund.failed, refund.speed_changed

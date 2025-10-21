@@ -3,6 +3,11 @@ import crypto from 'crypto';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 
+// Route segment config - make webhook publicly accessible
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 // Verify webhook signature for security
 function verifyWebhookSignature(payload, signature, secret) {
     if (!secret) {
