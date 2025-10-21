@@ -3,15 +3,6 @@ import crypto from 'crypto';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 
-// Handle GET requests for webhook verification
-export async function GET(req) {
-    return NextResponse.json({
-        status: 'active',
-        endpoint: 'shiprocket-forward-webhook',
-        message: 'Webhook endpoint is ready to receive POST requests'
-    }, { status: 200 });
-}
-
 // Verify webhook signature for security
 function verifyWebhookSignature(payload, signature, secret) {
     if (!secret) {
@@ -54,83 +45,74 @@ export async function POST(req) {
         
         console.log('✅ Webhook signature verified');
         
-        // Extract relevant data from webhook (Shiprocket format)
+        // Extract relevant data from webhook
         const {
             awb,
             current_status,
-            current_status_id,      // This is what Shiprocket sends
-            shipment_status,
-            shipment_status_id,     // This is what Shiprocket sends
-            sr_order_id,            // Shiprocket's internal order ID
-            order_id,               // Your order reference
+            current_status_code,
+            shipment_id,
+            order_id,
             courier_name,
             pickup_scheduled_date,
-            awb_assigned_date,
             delivered_date,
             rto_delivered_date,
             current_timestamp,
-            scans,                  // Array of tracking scans
-            etd,                    // Expected delivery date
-            pod_status,             // Proof of delivery status
-            pod                     // Proof of delivery
+            location,
+            consignee_name,
+            origin,
+            destination,
+            pickup_token_number,
+            pod_available,
+            tracking_data
         } = webhookData;
-        
-        // Use current_status_id as the status code (Shiprocket's format)
-        const current_status_code = current_status_id || shipment_status_id;
 
-        if (!awb && !sr_order_id) {
+        if (!awb && !shipment_id) {
             return NextResponse.json(
-                { error: 'AWB or Order ID required' },
+                { error: 'AWB or Shipment ID required' },
                 { status: 400 }
             );
         }
 
         await connectDB();
 
-        // Find order by AWB code or Shiprocket order ID
+        // Find order by AWB code or shipment ID
         let order;
         if (awb) {
             order = await Order.findOne({ 'shipping.awbCode': awb });
-        }
-        
-        // Fallback: Try to find by Shiprocket order ID
-        if (!order && sr_order_id) {
-            order = await Order.findOne({ 'shipping.shipmentId': sr_order_id.toString() });
+        } else if (shipment_id) {
+            order = await Order.findOne({ 'shipping.shipmentId': shipment_id });
         }
 
         if (!order) {
-            console.log(`Order not found for AWB: ${awb}, SR Order ID: ${sr_order_id}`);
+            console.log(`Order not found for AWB: ${awb}, Shipment ID: ${shipment_id}`);
             return NextResponse.json(
                 { message: 'Order not found' },
                 { status: 404 }
             );
         }
 
-        // Status mapping for order updates (based on Shiprocket status IDs)
+        // Status mapping for order updates
         const statusMapping = {
-            5: { shipping: 'processing', order: 'processing' },  // Manifest Generated
-            42: { shipping: 'shipped', order: 'shipped' },       // Picked Up
-            6: { shipping: 'shipped', order: 'shipped' },        // Shipped
-            18: { shipping: 'shipped', order: 'shipped' },       // In Transit
-            17: { shipping: 'shipped', order: 'shipped' },       // Out for Delivery
-            7: { shipping: 'delivered', order: 'delivered' },    // Delivered
-            8: { shipping: 'cancelled', order: 'cancelled' },    // Cancelled
-            9: { shipping: 'cancelled', order: 'cancelled' },    // RTO Initiated
-            10: { shipping: 'cancelled', order: 'cancelled' },   // RTO Delivered
-            11: { shipping: 'cancelled', order: 'cancelled' },   // Lost
-            12: { shipping: 'cancelled', order: 'cancelled' },   // Damaged
+            1: { shipping: 'processing', order: 'processing' }, // Order Confirmed
+            2: { shipping: 'processing', order: 'processing' }, // Pickup Scheduled
+            3: { shipping: 'shipped', order: 'shipped' },       // Picked Up
+            4: { shipping: 'shipped', order: 'shipped' },       // In Transit
+            5: { shipping: 'shipped', order: 'shipped' },       // Out for Delivery
+            6: { shipping: 'delivered', order: 'delivered' },   // Delivered
+            7: { shipping: 'cancelled', order: 'cancelled' },   // RTO Initiated
+            8: { shipping: 'cancelled', order: 'cancelled' },   // RTO Delivered
+            9: { shipping: 'cancelled', order: 'cancelled' },   // Lost
+            10: { shipping: 'cancelled', order: 'cancelled' },  // Damaged
+            11: { shipping: 'cancelled', order: 'cancelled' },  // Cancelled
+            38: { shipping: 'shipped', order: 'shipped' },      // Reached Destination Hub
+            13: { shipping: 'shipped', order: 'shipped' },      // Pickup Rescheduled
+            25: { shipping: 'shipped', order: 'shipped' },      // Reached Origin Hub
         };
-
-        // Get latest location from scans array
-        const latestScan = scans && scans.length > 0 ? scans[scans.length - 1] : null;
-        const location = latestScan?.location || current_status;
 
         // Prepare update data
         const updateData = {
-            'shipping.currentLocation': location,
-            'shipping.lastUpdateAt': new Date(current_timestamp ? 
-                current_timestamp.split(' ').reverse().join('-').replace(/\s/g, 'T') : 
-                Date.now())
+            'shipping.currentLocation': current_status || location,
+            'shipping.lastUpdateAt': new Date(current_timestamp || Date.now())
         };
 
         // Update status based on status code
@@ -145,52 +127,33 @@ export async function POST(req) {
         }
 
         // Add delivery date if delivered
-        if (delivered_date && current_status_code === 7) {
+        if (delivered_date && current_status_code === 6) {
             updateData['shipping.deliveredAt'] = new Date(delivered_date);
         }
 
         // Add pickup date if picked up
-        if (pickup_scheduled_date && [5, 42].includes(current_status_code)) {
+        if (pickup_scheduled_date && [2, 3].includes(current_status_code)) {
             updateData['shipping.pickedUpAt'] = new Date(pickup_scheduled_date);
         }
 
-        if (awb_assigned_date && !order.shipping.awbCode) {
-            updateData['shipping.awbAssignedAt'] = new Date(awb_assigned_date);
-        }
+        // Add tracking history entry
+        const trackingEntry = {
+            activity: current_status,
+            location: location || origin || destination,
+            timestamp: new Date(current_timestamp || Date.now()),
+            statusCode: current_status_code?.toString()
+        };
 
-        if (etd) {
-            updateData['shipping.estimatedDelivery'] = new Date(etd);
-        }
+        // Add to tracking history if not already present
+        const existingEntry = order.shipping.trackingHistory?.find(
+            entry => entry.timestamp.getTime() === trackingEntry.timestamp.getTime() &&
+                    entry.statusCode === trackingEntry.statusCode
+        );
 
-        // Add proof of delivery if available
-        if (pod && pod !== 'Not Available') {
-            updateData['shipping.podUrl'] = pod;
-        }
-
-        // Add tracking history from scans array
-        if (scans && scans.length > 0) {
-            const newScans = scans.map(scan => ({
-                activity: scan.activity || scan.status,
-                location: scan.location,
-                timestamp: new Date(scan.date.split(' ').reverse().join('-').replace(/\s/g, 'T')),
-                statusCode: scan['sr-status'] || scan.status,
-                statusLabel: scan['sr-status-label']
-            }));
-
-            // Only add new scans that don't exist
-            const existingTimestamps = new Set(
-                order.shipping.trackingHistory?.map(t => t.timestamp.getTime()) || []
-            );
-
-            const uniqueNewScans = newScans.filter(scan => 
-                !existingTimestamps.has(scan.timestamp.getTime())
-            );
-
-            if (uniqueNewScans.length > 0) {
-                updateData['$push'] = {
-                    'shipping.trackingHistory': { $each: uniqueNewScans }
-                };
-            }
+        if (!existingEntry) {
+            updateData['$push'] = {
+                'shipping.trackingHistory': trackingEntry
+            };
         }
 
         // Update the order

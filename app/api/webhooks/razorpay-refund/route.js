@@ -7,16 +7,6 @@ import crypto from 'crypto';
  * Webhook handler for Razorpay refund events
  * Handles: refund.processed, refund.failed, refund.speed_changed
  */
-
-// Handle GET requests for webhook verification
-export async function GET(req) {
-    return NextResponse.json({
-        status: 'active',
-        endpoint: 'razorpay-refund-webhook',
-        message: 'Webhook endpoint is ready to receive POST requests'
-    }, { status: 200 });
-}
-
 export async function POST(req) {
     try {
         const body = await req.text();

@@ -20,15 +20,6 @@ import { processAutomaticRefund } from '@/lib/refundService';
  * 9. Refund completed → Status: 'completed'
  */
 
-// Handle GET requests for webhook verification
-export async function GET(req) {
-    return NextResponse.json({
-        status: 'active',
-        endpoint: 'shiprocket-return-webhook',
-        message: 'Webhook endpoint is ready to receive POST requests'
-    }, { status: 200 });
-}
-
 // Verify webhook signature
 function verifyWebhookSignature(payload, signature, secret) {
     if (!secret) {
@@ -74,56 +65,45 @@ export async function POST(req) {
         
         console.log('✅ Return webhook signature verified');
         
-        // Extract webhook data (Shiprocket format)
+        // Extract webhook data
         const {
             awb,
             current_status,
-            current_status_id,      // This is what Shiprocket sends
-            shipment_status,
-            shipment_status_id,     // This is what Shiprocket sends
-            sr_order_id,            // Shiprocket's internal order ID
-            order_id,               // Your order reference
+            current_status_code,
+            shipment_id,
+            order_id,
             courier_name,
             pickup_scheduled_date,
-            awb_assigned_date,
             delivered_date,
             current_timestamp,
-            scans,                  // Array of tracking scans
-            is_return,              // 0 or 1 to indicate return shipment
-            etd,                    // Expected delivery date
-            pod_status,             // Proof of delivery status
-            pod                     // Proof of delivery
+            location,
+            tracking_data,
+            shipment_type
         } = webhookData;
-        
-        // Use current_status_id as the status code (Shiprocket's format)
-        const current_status_code = current_status_id || shipment_status_id;
 
-        if (!awb && !sr_order_id) {
+        if (!awb && !shipment_id) {
             return NextResponse.json(
-                { error: 'AWB or Order ID required' },
+                { error: 'AWB or Shipment ID required' },
                 { status: 400 }
             );
         }
 
         await connectDB();
 
-        // Find return by AWB code or Shiprocket order ID
+        // Find return by AWB code or shipment ID
         let returnRequest;
         if (awb) {
             returnRequest = await Return.findOne({ 'pickup.awbCode': awb })
                 .populate('order')
                 .populate('user');
-        }
-        
-        // Fallback: Try to find by Shiprocket order ID in pickup.shipmentId
-        if (!returnRequest && sr_order_id) {
-            returnRequest = await Return.findOne({ 'pickup.shipmentId': sr_order_id.toString() })
+        } else if (shipment_id) {
+            returnRequest = await Return.findOne({ 'pickup.shipmentId': shipment_id })
                 .populate('order')
                 .populate('user');
         }
 
         if (!returnRequest) {
-            console.log(`Return not found for AWB: ${awb}, SR Order ID: ${sr_order_id}`);
+            console.log(`Return not found for AWB: ${awb}, Shipment ID: ${shipment_id}`);
             return NextResponse.json(
                 { message: 'Return not found' },
                 { status: 404 }
@@ -135,32 +115,43 @@ export async function POST(req) {
         /**
          * AUTOMATED STATUS MAPPING FOR RETURN WORKFLOW
          * 
-         * Shiprocket Status ID → Automated Return Status
-         * Based on actual Shiprocket webhook format
+         * Shiprocket Status Code → Automated Return Status
          */
         const returnStatusMapping = {
             // Pickup phase
-            5: {  // Manifest Generated
+            2: {  // Pickup Scheduled
                 returnStatus: 'pickup_scheduled',
                 pickupStatus: 'scheduled',
                 action: 'update',
                 automate: true
             },
-            42: { // Picked Up
-                returnStatus: 'picked_up',
-                pickupStatus: 'completed',
+            13: { // Pickup Rescheduled
+                returnStatus: 'pickup_scheduled',
+                pickupStatus: 'scheduled',
                 action: 'update',
                 automate: true
             },
             
             // Transit phase
-            6: {  // Shipped
+            3: {  // Picked Up
+                returnStatus: 'picked_up',
+                pickupStatus: 'completed',
+                action: 'update',
+                automate: true
+            },
+            4: {  // In Transit
                 returnStatus: 'in_transit',
                 pickupStatus: 'completed',
                 action: 'update',
                 automate: true
             },
-            18: { // In Transit
+            25: { // Reached Origin Hub
+                returnStatus: 'in_transit',
+                pickupStatus: 'completed',
+                action: 'update',
+                automate: true
+            },
+            38: { // Reached Destination Hub
                 returnStatus: 'in_transit',
                 pickupStatus: 'completed',
                 action: 'update',
@@ -168,7 +159,7 @@ export async function POST(req) {
             },
             
             // Delivery to warehouse
-            7: {  // Delivered
+            6: {  // Delivered (to warehouse)
                 returnStatus: 'received',
                 pickupStatus: 'completed',
                 action: 'trigger_inspection',
@@ -176,31 +167,19 @@ export async function POST(req) {
             },
             
             // Failed scenarios
-            8: {  // Cancelled
+            7: {  // RTO Initiated (Return failed)
                 returnStatus: 'pickup_failed',
                 pickupStatus: 'failed',
                 action: 'notify_admin',
                 automate: false
             },
-            9: {  // RTO Initiated
+            9: {  // Lost
                 returnStatus: 'pickup_failed',
                 pickupStatus: 'failed',
                 action: 'notify_admin',
                 automate: false
             },
-            10: { // RTO Delivered
-                returnStatus: 'pickup_failed',
-                pickupStatus: 'failed',
-                action: 'notify_admin',
-                automate: false
-            },
-            11: { // Lost
-                returnStatus: 'pickup_failed',
-                pickupStatus: 'failed',
-                action: 'notify_admin',
-                automate: false
-            },
-            12: { // Damaged
+            10: { // Damaged in Transit
                 returnStatus: 'pickup_failed',
                 pickupStatus: 'failed',
                 action: 'notify_admin',
@@ -213,38 +192,25 @@ export async function POST(req) {
         if (!statusAction) {
             console.log(`⚠️  Unmapped status code ${current_status_code}: ${current_status}`);
             // Update tracking info but don't change status
+            statusAction = { action: 'update', automate: true };
         }
-
-        // Get latest location from scans array
-        const latestScan = scans && scans.length > 0 ? scans[scans.length - 1] : null;
-        const location = latestScan?.location || current_status;
 
         // Prepare update data for tracking
         const updateData = {
-            'pickup.currentLocation': location,
-            'pickup.lastUpdateAt': new Date(current_timestamp ? 
-                current_timestamp.split(' ').reverse().join('-').replace(/\s/g, 'T') : 
-                Date.now())
+            'pickup.currentLocation': location || current_status,
+            'pickup.lastUpdateAt': new Date(current_timestamp || Date.now())
         };
 
         if (courier_name) {
             updateData['pickup.courier'] = courier_name;
         }
 
-        if (delivered_date && current_status_code === 7) {
+        if (delivered_date && current_status_code === 6) {
             updateData['pickup.deliveredToWarehouse'] = new Date(delivered_date);
         }
 
-        if (pickup_scheduled_date && current_status_code === 5) {
+        if (pickup_scheduled_date && [2, 13].includes(current_status_code)) {
             updateData['pickup.scheduledDate'] = new Date(pickup_scheduled_date);
-        }
-
-        if (awb_assigned_date && !returnRequest.pickup.awbCode) {
-            updateData['pickup.awbAssignedAt'] = new Date(awb_assigned_date);
-        }
-
-        if (etd) {
-            updateData['pickup.estimatedDelivery'] = new Date(etd);
         }
 
         // Update pickup status if mapped
@@ -252,31 +218,24 @@ export async function POST(req) {
             updateData['pickup.pickupStatus'] = statusAction.pickupStatus;
         }
 
-        // Add tracking history from scans array
-        if (scans && scans.length > 0) {
-            const newScans = scans.map(scan => ({
-                activity: scan.activity || scan.status,
-                location: scan.location,
-                timestamp: new Date(scan.date.split(' ').reverse().join('-').replace(/\s/g, 'T')),
-                statusCode: scan['sr-status'] || scan.status,
-                statusLabel: scan['sr-status-label']
-            }));
+        // Add to tracking history
+        const trackingEntry = {
+            activity: current_status,
+            location: location,
+            timestamp: new Date(current_timestamp || Date.now()),
+            statusCode: current_status_code?.toString()
+        };
 
-            // Only add new scans that don't exist
-            const existingTimestamps = new Set(
-                returnRequest.pickup.trackingHistory?.map(t => t.timestamp.getTime()) || []
-            );
+        const existingEntry = returnRequest.pickup.trackingHistory?.find(
+            entry => entry.timestamp.getTime() === trackingEntry.timestamp.getTime() &&
+                    entry.statusCode === trackingEntry.statusCode
+        );
 
-            const uniqueNewScans = newScans.filter(scan => 
-                !existingTimestamps.has(scan.timestamp.getTime())
-            );
-
-            if (uniqueNewScans.length > 0) {
-                if (!updateData['$push']) {
-                    updateData['$push'] = {};
-                }
-                updateData['$push']['pickup.trackingHistory'] = { $each: uniqueNewScans };
+        if (!existingEntry) {
+            if (!updateData['$push']) {
+                updateData['$push'] = {};
             }
+            updateData['$push']['pickup.trackingHistory'] = trackingEntry;
         }
 
         // Update the return request with tracking data
@@ -382,11 +341,7 @@ export async function POST(req) {
                         // TODO: Send notification to admin
                         break;
                 }
-            } else {
-                console.log(`ℹ️  Status already ${returnRequest.status} - no change needed`);
             }
-        } else if (!statusAction) {
-            console.log('ℹ️  Status code not mapped for automation - tracking updated only');
         }
 
         // Send response
@@ -406,4 +361,15 @@ export async function POST(req) {
             { status: 500 }
         );
     }
+}
+
+/**
+ * GET endpoint for webhook health check
+ */
+export async function GET() {
+    return NextResponse.json({
+        status: 'active',
+        webhook: 'automated-return-workflow',
+        description: 'Handles automated return processing with Shiprocket integration'
+    });
 }
