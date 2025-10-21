@@ -20,10 +20,10 @@ const corsHeaders = {
  * SHIPMENT TRACKING WEBHOOK
  * 
  * ⚠️ IMPORTANT: Shiprocket URL Naming Requirement
- * This endpoint is named "tracking" instead of "shiprocket-tracking" because Shiprocket 
- * does NOT allow keywords like "shiprocket", "kartrocket", "sr", or "kr" in webhook URLs.
+ * This endpoint is named "order-updates" because Shiprocket does NOT allow certain
+ * keywords in webhook URLs including: "shiprocket", "kartrocket", "sr", "kr", "return", "tracking"
  * 
- * Webhook URL: https://www.nandikajewellers.in/api/webhooks/tracking
+ * Webhook URL: https://www.nandikajewellers.in/api/webhooks/order-updates
  * 
  * This webhook receives automatic tracking updates from Shiprocket for order shipments.
  */
@@ -229,9 +229,9 @@ export async function GET() {
         webhook: 'order-tracking',
         description: 'Handles shipment tracking updates for orders',
         timestamp: new Date().toISOString(),
-        endpoint: '/api/webhooks/tracking',
+        endpoint: '/api/webhooks/order-updates',
         methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
-        note: 'URL does not contain restricted keywords (shiprocket, kartrocket, sr, kr)'
+        note: 'URL avoids restricted keywords: shiprocket, kartrocket, sr, kr, return, tracking'
     }, {
         headers: corsHeaders
     });

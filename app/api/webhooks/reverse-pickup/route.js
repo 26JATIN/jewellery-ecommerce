@@ -22,10 +22,10 @@ const corsHeaders = {
  * AUTOMATED RETURN WORKFLOW WEBHOOK
  * 
  * ⚠️ IMPORTANT: Shiprocket URL Naming Requirement
- * This endpoint is named "return" instead of "shiprocket-return" because Shiprocket 
- * does NOT allow keywords like "shiprocket", "kartrocket", "sr", or "kr" in webhook URLs.
+ * This endpoint is named "reverse-pickup" because Shiprocket does NOT allow certain 
+ * keywords in webhook URLs including: "shiprocket", "kartrocket", "sr", "kr", "return", "tracking"
  * 
- * Webhook URL: https://www.nandikajewellers.in/api/webhooks/return
+ * Webhook URL: https://www.nandikajewellers.in/api/webhooks/reverse-pickup
  * 
  * This webhook handles the complete automated return process:
  * 1. User requests return → Status: 'requested'
@@ -403,9 +403,9 @@ export async function GET() {
         webhook: 'automated-return-workflow',
         description: 'Handles automated return processing and tracking',
         timestamp: new Date().toISOString(),
-        endpoint: '/api/webhooks/return',
+        endpoint: '/api/webhooks/reverse-pickup',
         methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
-        note: 'URL does not contain restricted keywords (shiprocket, kartrocket, sr, kr)'
+        note: 'URL avoids restricted keywords: shiprocket, kartrocket, sr, kr, return, tracking'
     }, {
         headers: corsHeaders
     });
