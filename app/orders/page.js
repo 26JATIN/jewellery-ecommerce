@@ -524,7 +524,7 @@ export default function OrdersPage() {
                                 No return requests found
                             </h3>
                             <p className="text-gray-500">
-                                You haven't initiated any return requests yet
+                                You haven&apos;t initiated any return requests yet
                             </p>
                         </motion.div>
                     ) : (

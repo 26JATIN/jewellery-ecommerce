@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ export default function OrderDetailsPage() {
     const [error, setError] = useState('');
     const [refreshing, setRefreshing] = useState(false);
 
-    const fetchOrderDetails = async () => {
+    const fetchOrderDetails = useCallback(async () => {
         try {
             const timestamp = new Date().getTime();
             const res = await fetch(`/api/orders/${orderId}?t=${timestamp}`, {
@@ -49,7 +49,7 @@ export default function OrderDetailsPage() {
             setLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [orderId]);
 
     useEffect(() => {
         fetchOrderDetails();
@@ -59,7 +59,7 @@ export default function OrderDetailsPage() {
             fetchOrderDetails();
         }, 30000);
         return () => clearInterval(interval);
-    }, [orderId]);
+    }, [orderId, fetchOrderDetails]);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -102,7 +102,7 @@ export default function OrderDetailsPage() {
                             {error || 'Order not found'}
                         </h1>
                         <p className="text-gray-600 mb-6">
-                            The order you're looking for doesn't exist or you don't have access to it
+                            The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it
                         </p>
                         <Link
                             href="/orders"
@@ -543,7 +543,7 @@ export default function OrderDetailsPage() {
                                 Need Help?
                             </h3>
                             <p className="text-sm text-gray-700 mb-4">
-                                Have questions about your order? We're here to help!
+                                Have questions about your order? We&apos;re here to help!
                             </p>
                             <Link
                                 href="/contact"
