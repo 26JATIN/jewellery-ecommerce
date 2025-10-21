@@ -85,7 +85,8 @@ const returnSchema = new mongoose.Schema({
             'rejected_refund',  // Refund rejected after inspection
             'refund_processed', // Refund completed
             'completed',        // Return process completed
-            'cancelled'         // Return cancelled
+            'cancelled',        // Return cancelled
+            'pickup_failed'     // Pickup failed/RTO/Lost/Damaged in transit
         ],
         default: 'requested'
     },
@@ -152,7 +153,9 @@ const returnSchema = new mongoose.Schema({
     pickup: {
         // Shiprocket integration
         shipmentId: String,
+        shiprocketOrderId: String,  // sr_order_id from webhook
         awbCode: String,
+        awbAssignedDate: Date,
         courier: String,
         trackingUrl: String,
         
@@ -191,7 +194,9 @@ const returnSchema = new mongoose.Schema({
             activity: String,
             location: String,
             timestamp: Date,
-            statusCode: String
+            statusCode: String,
+            statusLabel: String,
+            scanStatus: String
         }]
     },
     

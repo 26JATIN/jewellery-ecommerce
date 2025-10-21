@@ -301,18 +301,62 @@ export default function OrderDetailsPage() {
                                                             <p className="font-semibold">{returnData.pickup.courier}</p>
                                                         </div>
                                                     )}
+                                                    {returnData.pickup.currentLocation && (
+                                                        <div>
+                                                            <p className="text-gray-600">Current Location</p>
+                                                            <p className="font-semibold">{returnData.pickup.currentLocation}</p>
+                                                        </div>
+                                                    )}
+                                                    {returnData.pickup.lastUpdateAt && (
+                                                        <div>
+                                                            <p className="text-gray-600 text-xs">Last updated: {formatDate(returnData.pickup.lastUpdateAt)}</p>
+                                                        </div>
+                                                    )}
                                                     {returnData.pickup.trackingUrl && (
                                                         <a
                                                             href={returnData.pickup.trackingUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+                                                            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold mt-2"
                                                         >
                                                             Track Return Shipment
                                                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                                             </svg>
                                                         </a>
+                                                    )}
+                                                    
+                                                    {/* Pickup Tracking History */}
+                                                    {returnData.pickup.trackingHistory && returnData.pickup.trackingHistory.length > 0 && (
+                                                        <div className="mt-4 pt-3 border-t border-yellow-200">
+                                                            <p className="text-gray-700 font-semibold mb-2 text-xs">Recent Updates</p>
+                                                            <div className="space-y-2">
+                                                                {returnData.pickup.trackingHistory
+                                                                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                                                                    .slice(0, 3)
+                                                                    .map((event, idx) => (
+                                                                    <div key={idx} className="flex items-start gap-2 bg-white p-2 rounded">
+                                                                        <div className={`w-1.5 h-1.5 mt-1.5 rounded-full flex-shrink-0 ${
+                                                                            idx === 0 ? 'bg-yellow-600' : 'bg-gray-300'
+                                                                        }`}></div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="text-xs font-medium text-gray-900">{event.activity}</p>
+                                                                            {event.location && (
+                                                                                <p className="text-xs text-gray-600">{event.location}</p>
+                                                                            )}
+                                                                            <p className="text-xs text-gray-500">
+                                                                                {new Date(event.timestamp).toLocaleString()}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            {returnData.pickup.trackingHistory.length > 3 && (
+                                                                <p className="text-xs text-gray-500 mt-2">
+                                                                    +{returnData.pickup.trackingHistory.length - 3} more updates
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -405,16 +449,21 @@ export default function OrderDetailsPage() {
                                                 <p className="font-semibold text-sm">{order.shipping.courier_name || order.shipping.courier}</p>
                                             </div>
                                         )}
-                                        {order.shipping.current_status && (
+                                        {(order.shipping.current_status || order.shipping.currentLocation) && (
                                             <div>
                                                 <p className="text-xs text-gray-600 mb-1">Current Status</p>
-                                                <p className="font-semibold text-sm capitalize">{order.shipping.current_status.replace(/_/g, ' ')}</p>
+                                                <p className="font-semibold text-sm capitalize">{(order.shipping.current_status || order.shipping.currentLocation || '').replace(/_/g, ' ')}</p>
                                             </div>
                                         )}
-                                        {order.shipping.expected_delivery_date && (
+                                        {(order.shipping.expected_delivery_date || order.shipping.estimatedDelivery || order.shipping.eta) && (
                                             <div>
                                                 <p className="text-xs text-gray-600 mb-1">Expected Delivery</p>
-                                                <p className="font-semibold text-sm">{formatDate(order.shipping.expected_delivery_date)}</p>
+                                                <p className="font-semibold text-sm">{formatDate(order.shipping.expected_delivery_date || order.shipping.estimatedDelivery || order.shipping.eta)}</p>
+                                            </div>
+                                        )}
+                                        {order.shipping.lastUpdateAt && (
+                                            <div className="col-span-2">
+                                                <p className="text-xs text-gray-500">Last updated: {formatDate(order.shipping.lastUpdateAt)}</p>
                                             </div>
                                         )}
                                     </div>
@@ -430,6 +479,42 @@ export default function OrderDetailsPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
                                         </a>
+                                    )}
+                                    
+                                    {/* Tracking History */}
+                                    {order.shipping.trackingHistory && order.shipping.trackingHistory.length > 0 && (
+                                        <div className="mt-6 pt-6 border-t border-blue-200">
+                                            <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                                                <span className="mr-2">📍</span>
+                                                Tracking History
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {order.shipping.trackingHistory
+                                                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                                                    .slice(0, 5)
+                                                    .map((event, index) => (
+                                                    <div key={index} className="flex items-start gap-3 bg-white p-3 rounded-lg">
+                                                        <div className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${
+                                                            index === 0 ? 'bg-blue-600' : 'bg-gray-300'
+                                                        }`}></div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900">{event.activity}</p>
+                                                            {event.location && (
+                                                                <p className="text-xs text-gray-600 mt-0.5">{event.location}</p>
+                                                            )}
+                                                            <p className="text-xs text-gray-500 mt-1">
+                                                                {new Date(event.timestamp).toLocaleString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {order.shipping.trackingHistory.length > 5 && (
+                                                <p className="text-xs text-gray-500 mt-3 text-center">
+                                                    Showing latest 5 of {order.shipping.trackingHistory.length} updates
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </motion.div>

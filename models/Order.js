@@ -103,7 +103,11 @@ const orderSchema = new mongoose.Schema({
     },
     shipping: {
         shipmentId: String,
+        shiprocketOrderId: String,  // sr_order_id from webhook
         awbCode: String,
+        awbAssignedDate: Date,
+        scheduledPickupDate: Date,
+        estimatedDelivery: Date,
         courier: String,
         trackingUrl: String,
         status: {
@@ -117,7 +121,9 @@ const orderSchema = new mongoose.Schema({
             activity: String,
             location: String,
             timestamp: Date,
-            statusCode: String
+            statusCode: String,
+            statusLabel: String,
+            scanStatus: String
         }],
         lastUpdateAt: Date,
         errorMessage: String
