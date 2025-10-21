@@ -77,7 +77,7 @@ export async function GET(req, context) {
 
 // Update order status (Admin only)
 // NOTE: For orders with Shiprocket shipments, status is automatically updated via webhooks
-// See: app/api/webhooks/tracking/route.js and SHIPROCKET_ORDER_STATUS_AUTOMATION.md
+// See: app/api/webhooks/order-updates/route.js and SHIPROCKET_ORDER_STATUS_AUTOMATION.md
 // Manual updates should only be used for exceptional cases (cancellations, refunds, etc.)
 export async function PUT(req, context) {
     const params = await context.params;

@@ -14,16 +14,18 @@ export const fetchCache = 'force-no-store';
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
-    'Access-Control-Allow-Headers': 'Content-Type, x-shiprocket-signature, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, anx-api-key, Authorization',
     'Content-Type': 'application/json',
 };
 
 /**
  * AUTOMATED RETURN WORKFLOW WEBHOOK
  * 
- * ⚠️ IMPORTANT: Shiprocket URL Naming Requirement
- * This endpoint is named "reverse-pickup" because Shiprocket does NOT allow certain 
- * keywords in webhook URLs including: "shiprocket", "kartrocket", "sr", "kr", "return", "tracking"
+ * ⚠️ IMPORTANT: Shiprocket Webhook Requirements
+ * - URL must NOT contain: "shiprocket", "kartrocket", "sr", "kr", "return", "tracking"
+ * - Content-Type header: application/json
+ * - Security token header: anx-api-key
+ * - Must always return HTTP 200 (even for errors)
  * 
  * Webhook URL: https://www.nandikajewellers.in/api/webhooks/reverse-pickup
  * 
@@ -80,62 +82,75 @@ export async function POST(req) {
         const webhookData = await req.json();
         console.log('🔄 Return Webhook received:', JSON.stringify(webhookData, null, 2));
 
-        // Verify webhook authenticity
-        const signature = req.headers.get('x-shiprocket-signature');
+        // Verify webhook authenticity using anx-api-key
+        const apiKey = req.headers.get('anx-api-key');
         const webhookSecret = process.env.SHIPROCKET_WEBHOOK_SECRET;
         
-        if (!verifyWebhookSignature(webhookData, signature, webhookSecret)) {
-            console.error('❌ Invalid webhook signature for return');
+        if (!verifyWebhookSignature(webhookData, apiKey, webhookSecret)) {
+            console.error('❌ Invalid webhook API key for return');
+            // Still return 200 as per Shiprocket requirement
             return NextResponse.json(
-                { error: 'Invalid signature' },
-                { status: 401, headers: corsHeaders }
+                { success: false, message: 'Invalid API key' },
+                { status: 200, headers: corsHeaders }
             );
         }
         
-        console.log('✅ Return webhook signature verified');
+        console.log('✅ Return webhook API key verified');
         
-        // Extract webhook data
+        // Extract webhook data (matching Shiprocket's actual format)
         const {
             awb,
-            current_status,
-            current_status_code,
-            shipment_id,
-            order_id,
             courier_name,
-            pickup_scheduled_date,
-            delivered_date,
+            current_status,
+            current_status_id,
+            shipment_status,
+            shipment_status_id,
             current_timestamp,
-            location,
-            tracking_data,
-            shipment_type
+            order_id,
+            sr_order_id,
+            awb_assigned_date,
+            pickup_scheduled_date,
+            etd,
+            scans = [],
+            is_return,
+            channel_id,
+            pod_status,
+            pod
         } = webhookData;
 
-        if (!awb && !shipment_id) {
+        // Use shipment_status_id as the primary status indicator
+        const statusCode = shipment_status_id || current_status_id;
+        const statusLabel = shipment_status || current_status;
+
+        if (!awb && !sr_order_id) {
+            // Return 200 as per Shiprocket requirement
             return NextResponse.json(
-                { error: 'AWB or Shipment ID required' },
-                { status: 400, headers: corsHeaders }
+                { success: false, message: 'AWB or SR Order ID required' },
+                { status: 200, headers: corsHeaders }
             );
         }
 
         await connectDB();
 
-        // Find return by AWB code or shipment ID
+        // Find return by AWB code or Shiprocket order ID
         let returnRequest;
         if (awb) {
             returnRequest = await Return.findOne({ 'pickup.awbCode': awb })
                 .populate('order')
                 .populate('user');
-        } else if (shipment_id) {
-            returnRequest = await Return.findOne({ 'pickup.shipmentId': shipment_id })
+        }
+        if (!returnRequest && sr_order_id) {
+            returnRequest = await Return.findOne({ 'pickup.shiprocketOrderId': sr_order_id })
                 .populate('order')
                 .populate('user');
         }
 
         if (!returnRequest) {
-            console.log(`Return not found for AWB: ${awb}, Shipment ID: ${shipment_id}`);
+            console.log(`Return not found for AWB: ${awb}, SR Order ID: ${sr_order_id}`);
+            // Return 200 as per Shiprocket requirement
             return NextResponse.json(
-                { message: 'Return not found' },
-                { status: 404, headers: corsHeaders }
+                { success: false, message: 'Return not found' },
+                { status: 200, headers: corsHeaders }
             );
         }
 
@@ -143,80 +158,37 @@ export async function POST(req) {
 
         /**
          * AUTOMATED STATUS MAPPING FOR RETURN WORKFLOW
-         * 
-         * Shiprocket Status Code → Automated Return Status
+         * (Using Shiprocket's actual status IDs)
          */
         const returnStatusMapping = {
-            // Pickup phase
-            2: {  // Pickup Scheduled
-                returnStatus: 'pickup_scheduled',
-                pickupStatus: 'scheduled',
-                action: 'update',
-                automate: true
-            },
-            13: { // Pickup Rescheduled
-                returnStatus: 'pickup_scheduled',
-                pickupStatus: 'scheduled',
-                action: 'update',
-                automate: true
-            },
+            // Initial/Processing phase
+            1: { returnStatus: 'approved', pickupStatus: 'pending', action: 'update', automate: true },           // New
+            2: { returnStatus: 'pickup_scheduled', pickupStatus: 'scheduled', action: 'update', automate: true }, // Pickup Scheduled
+            3: { returnStatus: 'pickup_scheduled', pickupStatus: 'scheduled', action: 'update', automate: true }, // AWB Assigned
+            4: { returnStatus: 'pickup_scheduled', pickupStatus: 'scheduled', action: 'update', automate: true }, // Pickup Generated
+            5: { returnStatus: 'pickup_scheduled', pickupStatus: 'scheduled', action: 'update', automate: true }, // Manifest Generated
+            13: { returnStatus: 'pickup_scheduled', pickupStatus: 'scheduled', action: 'update', automate: true },// Out For Pickup
             
             // Transit phase
-            3: {  // Picked Up
-                returnStatus: 'picked_up',
-                pickupStatus: 'completed',
-                action: 'update',
-                automate: true
-            },
-            4: {  // In Transit
-                returnStatus: 'in_transit',
-                pickupStatus: 'completed',
-                action: 'update',
-                automate: true
-            },
-            25: { // Reached Origin Hub
-                returnStatus: 'in_transit',
-                pickupStatus: 'completed',
-                action: 'update',
-                automate: true
-            },
-            38: { // Reached Destination Hub
-                returnStatus: 'in_transit',
-                pickupStatus: 'completed',
-                action: 'update',
-                automate: true
-            },
+            6: { returnStatus: 'picked_up', pickupStatus: 'completed', action: 'update', automate: true },        // Shipped (actually picked up for returns)
+            42: { returnStatus: 'picked_up', pickupStatus: 'completed', action: 'update', automate: true },       // Picked Up
+            18: { returnStatus: 'in_transit', pickupStatus: 'completed', action: 'update', automate: true },      // In Transit
+            19: { returnStatus: 'in_transit', pickupStatus: 'completed', action: 'update', automate: true },      // Out For Delivery
+            38: { returnStatus: 'in_transit', pickupStatus: 'completed', action: 'update', automate: true },      // Reached Destination Hub
             
             // Delivery to warehouse
-            6: {  // Delivered (to warehouse)
-                returnStatus: 'received',
-                pickupStatus: 'completed',
-                action: 'trigger_inspection',
-                automate: true
-            },
+            7: { returnStatus: 'received', pickupStatus: 'completed', action: 'trigger_inspection', automate: true }, // Delivered
             
             // Failed scenarios
-            7: {  // RTO Initiated (Return failed)
-                returnStatus: 'pickup_failed',
-                pickupStatus: 'failed',
-                action: 'notify_admin',
-                automate: false
-            },
-            9: {  // Lost
-                returnStatus: 'pickup_failed',
-                pickupStatus: 'failed',
-                action: 'notify_admin',
-                automate: false
-            },
-            10: { // Damaged in Transit
-                returnStatus: 'pickup_failed',
-                pickupStatus: 'failed',
-                action: 'notify_admin',
-                automate: false
-            }
+            9: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },     // RTO Initiated
+            10: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },    // RTO Delivered
+            11: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },    // Lost
+            12: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },    // Damaged
+            15: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },    // Undelivered
+            21: { returnStatus: 'pickup_failed', pickupStatus: 'failed', action: 'notify_admin', automate: false },    // Unsuccessfully Delivered
         };
 
-        const statusAction = returnStatusMapping[current_status_code];
+        const statusAction = returnStatusMapping[statusCode];
 
         if (!statusAction) {
             console.log(`⚠️  Unmapped status code ${current_status_code}: ${current_status}`);
@@ -273,7 +245,7 @@ export async function POST(req) {
         /**
          * AUTOMATED WORKFLOW ACTIONS
          */
-        let workflowMessage = `Tracking updated: ${current_status}`;
+        let workflowMessage = `Tracking updated: ${statusLabel}`;
         let triggeredAutomation = null;
 
         if (statusAction?.automate && statusAction.returnStatus) {
@@ -285,7 +257,7 @@ export async function POST(req) {
                 await returnRequest.updateStatus(
                     statusAction.returnStatus,
                     'system_automation',
-                    `Automated update from Shiprocket: ${current_status}`
+                    `Automated update from Shiprocket: ${statusLabel}`
                 );
 
                 workflowMessage = `Status automatically updated to ${statusAction.returnStatus}`;
@@ -373,23 +345,24 @@ export async function POST(req) {
             }
         }
 
-        // Send response
+        // Send response - Always return 200 as per Shiprocket requirement
         return NextResponse.json({
             success: true,
             message: workflowMessage,
             returnNumber: returnRequest.returnNumber,
             currentStatus: returnRequest.status,
-            automation: triggeredAutomation,
-            shiprocketStatus: current_status
+            automation: triggeredAutomation
         }, {
+            status: 200,
             headers: corsHeaders
         });
 
     } catch (error) {
         console.error('❌ Return webhook processing error:', error);
+        // Return 200 even on error as per Shiprocket requirement
         return NextResponse.json(
-            { error: 'Webhook processing failed', details: error.message },
-            { status: 500, headers: corsHeaders }
+            { success: false, message: 'Webhook processing failed', error: error.message },
+            { status: 200, headers: corsHeaders }
         );
     }
 }
@@ -405,8 +378,14 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         endpoint: '/api/webhooks/reverse-pickup',
         methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
-        note: 'URL avoids restricted keywords: shiprocket, kartrocket, sr, kr, return, tracking'
+        requirements: {
+            contentType: 'application/json',
+            securityHeader: 'anx-api-key',
+            responseCode: 'Always returns 200',
+            restrictedKeywords: ['shiprocket', 'kartrocket', 'sr', 'kr', 'return', 'tracking']
+        }
     }, {
+        status: 200,
         headers: corsHeaders
     });
 }

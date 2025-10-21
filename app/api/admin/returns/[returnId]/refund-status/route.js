@@ -12,7 +12,7 @@ import { checkRefundStatus } from '@/lib/refundService';
  * This endpoint only CHECKS refund status (read-only).
  * Refunds are automatically processed via webhooks - no manual processing needed.
  * 
- * See: /app/api/webhooks/return/route.js for auto-refund logic
+ * See: /app/api/webhooks/reverse-pickup/route.js for auto-refund logic
  * See: /app/api/webhooks/razorpay-refund/route.js for refund status updates
  */
 

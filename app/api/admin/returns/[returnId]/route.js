@@ -20,7 +20,7 @@ import { cookies } from 'next/headers';
  * 
  * Manual intervention is ONLY needed for damaged/defective items (5% of cases)
  * 
- * See: /app/api/webhooks/return/route.js for automation logic
+ * See: /app/api/webhooks/reverse-pickup/route.js for automation logic
  */
 
 // Middleware to check admin authentication
@@ -184,7 +184,7 @@ export async function PUT(req, context) {
             documentationSee: [
                 '/AUTOMATED_RETURN_WORKFLOW.md',
                 '/WEBHOOK_AUTOMATION_SYSTEM.md',
-                '/app/api/webhooks/return/route.js'
+                '/app/api/webhooks/reverse-pickup/route.js'
             ]
         }
     }, { status: 403 });
