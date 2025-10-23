@@ -172,9 +172,140 @@ const productSchema = new mongoose.Schema({
         goldPrice: Number,
         calculatedPrice: Number,
         finalPrice: Number
-    }]
+    }],
+    
+    // Product Variants System
+    hasVariants: {
+        type: Boolean,
+        default: false // If true, use variants for inventory, if false use main stock
+    },
+    
+    // Variant Options (e.g., Size, Color, Stone Color, etc.)
+    variantOptions: [{
+        name: {
+            type: String,
+            required: true // e.g., "Size", "Color", "Stone Color"
+        },
+        displayName: {
+            type: String,
+            required: true // e.g., "Ring Size", "Stone Color"
+        },
+        type: {
+            type: String,
+            enum: ['select', 'color', 'size'],
+            default: 'select'
+        },
+        required: {
+            type: Boolean,
+            default: true // If user must select this option
+        },
+        values: [{
+            name: {
+                type: String,
+                required: true // e.g., "6", "7", "8" or "Red", "Blue"
+            },
+            displayName: {
+                type: String,
+                required: true // e.g., "Size 6", "Ruby Red"
+            },
+            colorCode: {
+                type: String, // For color options: "#FF0000"
+                default: null
+            },
+            priceAdjustment: {
+                type: Number,
+                default: 0 // Additional price for this option
+            },
+            isAvailable: {
+                type: Boolean,
+                default: true
+            }
+        }]
+    }],
+    
+    // Product Variants (combinations of options)
+    variants: [{
+        sku: {
+            type: String,
+            required: true
+            // Note: Unique constraint removed to avoid conflicts with non-variant products
+        },
+        optionCombination: {
+            type: Object,
+            default: {} // e.g., {"Size": "6", "Color": "Red"}
+        },
+        price: {
+            mrp: Number,
+            costPrice: Number,
+            sellingPrice: Number
+        },
+        stock: {
+            type: Number,
+            default: 0
+        },
+        isActive: {
+            type: Boolean,
+            default: true
+        },
+        images: [{
+            url: String,
+            alt: String,
+            isPrimary: Boolean,
+            order: Number
+        }],
+        // Weight adjustments for variants (if applicable)
+        weightAdjustment: {
+            gold: { type: Number, default: 0 },
+            silver: { type: Number, default: 0 }
+        }
+    }],
+    
+    // Total stock across all variants (computed field)
+    totalStock: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
 });
+
+// Middleware to calculate total stock
+productSchema.pre('save', function(next) {
+    if (this.hasVariants && this.variants && this.variants.length > 0) {
+        this.totalStock = this.variants.reduce((total, variant) => total + (variant.stock || 0), 0);
+    } else {
+        this.totalStock = this.stock || 0;
+    }
+    next();
+});
+
+// Method to get available variants
+productSchema.methods.getAvailableVariants = function() {
+    if (!this.hasVariants) return null;
+    return this.variants.filter(variant => variant.isActive && variant.stock > 0);
+};
+
+// Method to find variant by options
+productSchema.methods.findVariantByOptions = function(options) {
+    if (!this.hasVariants) return null;
+    return this.variants.find(variant => {
+        const combination = variant.optionCombination || {};
+        return Object.keys(options).every(key => 
+            combination[key] === options[key]
+        );
+    });
+};
+
+// Method to check if product is in stock
+productSchema.methods.isInStock = function(variantId = null) {
+    if (this.hasVariants) {
+        if (variantId) {
+            const variant = this.variants.id(variantId);
+            return variant && variant.isActive && variant.stock > 0;
+        }
+        return this.variants.some(variant => variant.isActive && variant.stock > 0);
+    }
+    return this.isActive && this.stock > 0;
+};
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);

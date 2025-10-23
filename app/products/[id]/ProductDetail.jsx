@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SafeImage from '../../components/SafeImage';
+import ProductVariantSelector from '../../components/ProductVariantSelector';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
+import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
 
 export default function ProductDetail({ productId }) {
     const router = useRouter();
@@ -19,6 +21,8 @@ export default function ProductDetail({ productId }) {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [addingToCart, setAddingToCart] = useState(false);
+    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [variantImages, setVariantImages] = useState([]);
 
     useEffect(() => {
         if (productId) {
@@ -86,15 +90,53 @@ export default function ProductDetail({ productId }) {
         }
     };
 
+    const handleVariantChange = (variant) => {
+        setSelectedVariant(variant);
+        
+        // Update images if variant has specific images
+        if (variant?.images && variant.images.length > 0) {
+            setVariantImages(variant.images);
+            setSelectedImage(0);
+        } else {
+            setVariantImages([]);
+        }
+    };
+
     const handleAddToCart = async () => {
         if (!user) {
             triggerLoginModal();
             return;
         }
 
+        // Check if product has variants and a variant is selected
+        if (product?.hasVariants && !selectedVariant) {
+            alert('Please select all product options before adding to cart');
+            return;
+        }
+
+        // Check stock for variants
+        if (selectedVariant && selectedVariant.stock < quantity) {
+            alert(`Only ${selectedVariant.stock} items available for this variant`);
+            return;
+        }
+
         setAddingToCart(true);
         try {
-            await addToCart(product, quantity);
+            // Include variant info in cart item
+            const cartItem = {
+                ...product,
+                selectedVariant: selectedVariant,
+                variantId: selectedVariant?._id,
+                // Override price if variant has different price
+                sellingPrice: selectedVariant?.price?.sellingPrice || product.sellingPrice,
+                mrp: selectedVariant?.price?.mrp || product.mrp,
+                // Use variant stock if available
+                availableStock: selectedVariant?.stock || product.stock,
+                // Generate unique cart key for variants
+                cartKey: selectedVariant ? `${product._id}_${selectedVariant._id}` : product._id
+            };
+
+            await addToCart(cartItem, quantity);
             setIsCartOpen(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
@@ -103,8 +145,9 @@ export default function ProductDetail({ productId }) {
         }
     };
 
-    const images = product?.images || (product?.image ? [product.image] : []);
-    const currentImage = images[selectedImage] || images[0];
+    // Use variant images if available, otherwise use product images
+    const displayImages = variantImages.length > 0 ? variantImages : (product?.images || (product?.image ? [{url: product.image, alt: product.name}] : []));
+    const currentImage = displayImages[selectedImage] || displayImages[0];
 
     if (loading) {
         return (
@@ -155,8 +198,15 @@ export default function ProductDetail({ productId }) {
         );
     }
 
-    const discount = product.mrp && product.sellingPrice && product.mrp > product.sellingPrice
-        ? Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)
+    // Calculate prices based on variant or product
+    const currentPrice = {
+        mrp: selectedVariant?.price?.mrp || product?.mrp,
+        sellingPrice: selectedVariant?.price?.sellingPrice || product?.sellingPrice,
+        stock: selectedVariant?.stock || product?.stock
+    };
+
+    const discount = currentPrice.mrp && currentPrice.sellingPrice && currentPrice.mrp > currentPrice.sellingPrice
+        ? Math.round(((currentPrice.mrp - currentPrice.sellingPrice) / currentPrice.mrp) * 100)
         : 0;
 
     return (
@@ -211,12 +261,12 @@ export default function ProductDetail({ productId }) {
                                 </AnimatePresence>
                                 
                                 {/* Stock Badge */}
-                                {product.stock <= 5 && product.stock > 0 && (
+                                {hasLowStock(product) && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-4 py-2 shadow-lg">
-                                        <span className="text-sm font-medium">Only {product.stock} left!</span>
+                                        <span className="text-sm font-medium">Only {getEffectiveStock(product)} left!</span>
                                     </div>
                                 )}
-                                {product.stock === 0 && (
+                                {isProductOutOfStock(product) && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-4 py-2 shadow-lg">
                                         <span className="text-sm font-medium">Out of Stock</span>
                                     </div>
@@ -232,9 +282,9 @@ export default function ProductDetail({ productId }) {
                         </div>
 
                         {/* Thumbnail Images */}
-                        {images.length > 1 && (
+                        {displayImages.length > 1 && (
                             <div className="grid grid-cols-4 gap-4">
-                                {images.map((img, index) => (
+                                {displayImages.map((img, index) => (
                                     <motion.button
                                         key={index}
                                         whileHover={{ scale: 1.05 }}
@@ -289,18 +339,40 @@ export default function ProductDetail({ productId }) {
                         {/* Price */}
                         <div className="flex items-baseline gap-4 py-4 border-y border-gray-200">
                             <span className="text-4xl font-light text-[#2C2C2C]">
-                                ₹{product.sellingPrice?.toLocaleString('en-IN')}
+                                ₹{currentPrice.sellingPrice?.toLocaleString('en-IN')}
                             </span>
-                            {product.mrp && product.mrp > product.sellingPrice && (
+                            {currentPrice.mrp && currentPrice.mrp > currentPrice.sellingPrice && (
                                 <>
                                     <span className="text-xl text-gray-400 line-through font-light">
-                                        ₹{product.mrp.toLocaleString('en-IN')}
+                                        ₹{currentPrice.mrp.toLocaleString('en-IN')}
                                     </span>
                                     <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
                                         Save {discount}%
                                     </span>
                                 </>
                             )}
+                        </div>
+
+                        {/* Product Variants */}
+                        {product?.hasVariants && (
+                            <div className="bg-gradient-to-br from-[#FAFAFA] to-white rounded-2xl p-6">
+                                <h3 className="text-lg font-light text-[#2C2C2C] mb-4">Select Options</h3>
+                                <ProductVariantSelector
+                                    product={product}
+                                    selectedVariant={selectedVariant}
+                                    onVariantChange={handleVariantChange}
+                                />
+                            </div>
+                        )}
+
+                        {/* Stock Information */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-gray-700 font-light">Availability:</span>
+                                <span className={`font-medium ${currentPrice.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {currentPrice.stock > 0 ? `${currentPrice.stock} in stock` : 'Out of stock'}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Description */}
@@ -355,9 +427,9 @@ export default function ProductDetail({ productId }) {
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
-                                    className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm"
-                                    disabled={quantity >= (product.stock || 999)}
+                                    onClick={() => setQuantity(Math.min(currentPrice.stock || 999, quantity + 1))}
+                                    className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={quantity >= (currentPrice.stock || 999)}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -371,9 +443,9 @@ export default function ProductDetail({ productId }) {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleAddToCart}
-                            disabled={product.stock === 0 || addingToCart}
+                            disabled={isProductOutOfStock(product) || addingToCart}
                             className={`w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 transition-all shadow-lg ${
-                                product.stock === 0
+                                isProductOutOfStock(product)
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : addingToCart
                                     ? 'bg-[#D4AF76] text-white'
@@ -385,8 +457,10 @@ export default function ProductDetail({ productId }) {
                                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                                     Adding to Cart...
                                 </>
-                            ) : product.stock === 0 ? (
+                            ) : isProductOutOfStock(product) || currentPrice.stock === 0 ? (
                                 'Out of Stock'
+                            ) : product?.hasVariants && !selectedVariant ? (
+                                'Please Select Options'
                             ) : (
                                 <>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

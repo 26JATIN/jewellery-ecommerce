@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import ImageCarousel from './ImageCarousel';
 import { useCart } from '../context/CartContext';
+import { isProductOutOfStock, getEffectiveStock, hasLowStock, getAddToCartButtonText } from '@/lib/productUtils';
 
 export default function ProductGrid({ 
     products, 
@@ -15,6 +16,12 @@ export default function ProductGrid({
     const { addToCart, setIsCartOpen } = useCart();
 
     const handleAddToCart = async (product) => {
+        // If product has variants, redirect to detail page for variant selection
+        if (product.hasVariants) {
+            window.location.href = `/products/${product._id}`;
+            return;
+        }
+        
         const result = await addToCart(product);
         // Only open cart if item was successfully added (user is authenticated)
         if (result !== false) {
@@ -81,7 +88,7 @@ export default function ProductGrid({
                                         showDots={product.images && product.images.length > 1}
                                         autoPlay={false}
                                     />
-                                    {product.stock !== undefined && product.stock === 0 && (
+                                    {isProductOutOfStock(product) && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                                             <span className="text-white text-xs font-medium bg-red-500 px-2 py-1 rounded-full">
                                                 Out of Stock
@@ -113,10 +120,10 @@ export default function ProductGrid({
                                         </Link>
                                         <button 
                                             onClick={() => handleAddToCart(product)}
-                                            disabled={product.stock === 0}
+                                            disabled={isProductOutOfStock(product)}
                                             className="flex-1 bg-[#2C2C2C] text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-[#D4AF76] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                                         >
-                                            {product.stock === 0 ? 'Unavailable' : 'Add to Cart'}
+                                            {getAddToCartButtonText(product)}
                                         </button>
                                     </div>
                                 </div>
@@ -149,7 +156,7 @@ export default function ProductGrid({
                                                     onClick={() => handleAddToCart(product)}
                                                     className="flex-1 bg-[#2C2C2C] text-white px-3 py-2.5 rounded-xl hover:bg-[#D4AF76] transition-all duration-300 text-sm font-light"
                                                 >
-                                                    Add
+                                                    {getAddToCartButtonText(product, 'Add', 'Options', 'Unavailable')}
                                                 </button>
                                             )}
                                         </div>
@@ -164,11 +171,14 @@ export default function ProductGrid({
                                         )}
                                         <span className="text-[#2C2C2C] font-normal">₹{product.sellingPrice}</span>
                                     </div>
-                                    {product.stock !== undefined && (
-                                        <p className={`text-xs font-light mt-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                                        </p>
-                                    )}
+                                    {(() => {
+                                        const effectiveStock = getEffectiveStock(product);
+                                        return effectiveStock !== undefined && (
+                                            <p className={`text-xs font-light mt-2 ${effectiveStock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                                {effectiveStock > 0 ? `${effectiveStock} in stock` : 'Out of stock'}
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </motion.div>

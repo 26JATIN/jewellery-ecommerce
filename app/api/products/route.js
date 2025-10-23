@@ -64,16 +64,30 @@ export async function GET(req) {
         sort[sortBy] = sortOrder;
         
         // Execute query with pagination
-        const [products, totalCount] = await Promise.all([
+        const [rawProducts, totalCount] = await Promise.all([
             Product.find(query)
                 .select('-costPrice') // Exclude cost price from public API
                 .populate('subcategory', 'name slug')
                 .sort(sort)
                 .skip(skip)
-                .limit(limit)
-                .lean(),
+                .limit(limit),
             Product.countDocuments(query)
         ]);
+        
+        // Convert to plain objects and ensure totalStock is calculated
+        const products = rawProducts.map(product => {
+            const productObj = product.toObject();
+            
+            // Calculate totalStock if not already calculated
+            if (product.hasVariants && product.variants && product.variants.length > 0) {
+                productObj.totalStock = product.variants.reduce((total, variant) => 
+                    total + (variant.isActive && variant.stock ? variant.stock : 0), 0);
+            } else {
+                productObj.totalStock = product.stock || 0;
+            }
+            
+            return productObj;
+        });
         
         // Calculate pagination metadata
         const totalPages = Math.ceil(totalCount / limit);

@@ -17,6 +17,7 @@ async function checkAdminAccess() {
         }
 
         const decoded = verifyToken(token.value);
+
         if (!decoded) {
             return { error: 'Invalid token', status: 401 };
         }
@@ -38,6 +39,7 @@ async function checkAdminAccess() {
 export async function GET() {
     try {
         const authError = await checkAdminAccess();
+
         if (authError) {
             return NextResponse.json(
                 { error: authError.error },
@@ -185,14 +187,82 @@ export async function POST(req) {
             );
         }
 
-        const product = await Product.create({
+        // Handle variants if present
+        if (data.hasVariants && data.variants && data.variants.length > 0) {
+            
+            // Validate variant SKUs are unique
+            const variantSkus = data.variants.map(v => v.sku);
+            const uniqueSkus = [...new Set(variantSkus)];
+            if (variantSkus.length !== uniqueSkus.length) {
+                return NextResponse.json(
+                    { error: 'Variant SKUs must be unique' },
+                    { status: 400 }
+                );
+            }
+
+            // Check if any variant SKU already exists in database
+            const existingVariantSkus = await Product.find({
+                $or: [
+                    { sku: { $in: variantSkus } },
+                    { 'variants.sku': { $in: variantSkus } }
+                ]
+            });
+
+            if (existingVariantSkus.length > 0) {
+                return NextResponse.json(
+                    { error: 'One or more variant SKUs already exist' },
+                    { status: 400 }
+                );
+            }
+
+            // Process variants - ensure optionCombination is properly handled as object
+            data.variants = data.variants.map((variant, index) => {
+                
+                // Validate required fields for variants
+                if (!variant.sku) {
+                    throw new Error(`Variant ${index + 1} is missing SKU`);
+                }
+                
+                const processedVariant = {
+                    ...variant,
+                    // Keep optionCombination as object, not Map - MongoDB handles objects better
+                    optionCombination: variant.optionCombination || {},
+                    price: variant.price || {},
+                    stock: parseInt(variant.stock) || 0,
+                    isActive: variant.isActive !== undefined ? variant.isActive : true
+                };
+                
+                return processedVariant;
+            });
+
+            // For variants, main stock should be 0
+            data.stock = 0;
+        }
+
+        // Create the product data object
+        const productData = {
             ...data,
             price: data.sellingPrice // Set price to selling price for backward compatibility
-        });
+        };
+
+        let product;
+        try {
+            // Try using .save() instead of .create() to see if there's a difference
+            product = new Product(productData);
+            
+            await product.save();
+            
+        } catch (saveError) {
+            try {
+                product = await Product.create(productData);
+            } catch (createError) {
+                console.error('Both save and create failed:', createError);
+                throw createError;
+            }
+        }
 
         return NextResponse.json(product, { status: 201 });
     } catch (error) {
-        console.error('Admin product creation error:', error);
         
         if (error.code === 11000) {
             return NextResponse.json(

@@ -21,6 +21,23 @@ const orderSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Subcategory',
             default: null
+        },
+        // Variant support
+        variantId: {
+            type: String,
+            default: null
+        },
+        selectedVariant: {
+            sku: String,
+            optionCombination: {
+                type: Map,
+                of: String
+            },
+            price: {
+                mrp: Number,
+                costPrice: Number,
+                sellingPrice: Number
+            }
         }
     }],
     shippingAddress: {

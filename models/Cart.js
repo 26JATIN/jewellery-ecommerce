@@ -13,6 +13,32 @@ const cartItemSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 1
+    },
+    // Variant support
+    variantId: {
+        type: String, // Store variant ID as string since it's stored as subdocument ID
+        default: null
+    },
+    selectedVariant: {
+        sku: String,
+        optionCombination: {
+            type: Map,
+            of: String
+        },
+        price: {
+            mrp: Number,
+            costPrice: Number,
+            sellingPrice: Number
+        },
+        images: [{
+            url: String,
+            alt: String,
+            isPrimary: Boolean
+        }]
+    },
+    cartKey: {
+        type: String, // Unique key for cart item (productId_variantId or just productId)
+        required: true
     }
 });
 

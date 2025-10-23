@@ -16,6 +16,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import SafeImage from './SafeImage';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
 
 export default function Collections() {
     const searchParams = useSearchParams();
@@ -345,12 +346,12 @@ export default function Collections() {
                                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                                         
                                                                         {/* Stock Badge */}
-                                                                        {product.stock <= 5 && product.stock > 0 && (
+                                                                        {hasLowStock(product) && (
                                                                             <div className="absolute top-1 right-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-1.5 py-0.5 shadow-lg">
-                                                                                <span className="text-[9px] sm:text-[10px] font-medium">{product.stock}</span>
+                                                                                <span className="text-[9px] sm:text-[10px] font-medium">{getEffectiveStock(product)}</span>
                                                                             </div>
                                                                         )}
-                                                                        {product.stock === 0 && (
+                                                                        {isProductOutOfStock(product) && (
                                                                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
                                                                                 <span className="text-[9px] sm:text-[10px] text-white font-medium">Out</span>
                                                                             </div>
@@ -412,12 +413,12 @@ export default function Collections() {
                                                                 />
                                                                 
                                                                 {/* Stock Badge */}
-                                                                {product.stock <= 5 && product.stock > 0 && (
+                                                                {hasLowStock(product) && (
                                                                     <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-2 py-1 shadow-lg">
-                                                                        <span className="text-xs font-medium">{product.stock} left</span>
+                                                                        <span className="text-xs font-medium">{getEffectiveStock(product)} left</span>
                                                                     </div>
                                                                 )}
-                                                                {product.stock === 0 && (
+                                                                {isProductOutOfStock(product) && (
                                                                     <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-2 py-1 shadow-lg">
                                                                         <span className="text-xs font-medium">Out of Stock</span>
                                                                     </div>
@@ -480,12 +481,12 @@ export default function Collections() {
                                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                                         
                                                                         {/* Stock Badge */}
-                                                                        {product.stock <= 5 && product.stock > 0 && (
+                                                                        {hasLowStock(product) && (
                                                                             <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-3 py-1.5 shadow-lg">
-                                                                                <span className="text-xs font-medium">Only {product.stock} left</span>
+                                                                                <span className="text-xs font-medium">Only {getEffectiveStock(product)} left</span>
                                                                             </div>
                                                                         )}
-                                                                        {product.stock === 0 && (
+                                                                        {isProductOutOfStock(product) && (
                                                                             <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-3 py-1.5 shadow-lg">
                                                                                 <span className="text-xs font-medium">Out of Stock</span>
                                                                             </div>
@@ -586,12 +587,12 @@ export default function Collections() {
                                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                                     
                                                                     {/* Stock Badge */}
-                                                                    {product.stock <= 5 && product.stock > 0 && (
+                                                                    {hasLowStock(product) && (
                                                                         <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-3 py-1.5 shadow-lg">
-                                                                            <span className="text-xs font-medium">Only {product.stock} left</span>
+                                                                            <span className="text-xs font-medium">Only {getEffectiveStock(product)} left</span>
                                                                         </div>
                                                                     )}
-                                                                    {product.stock === 0 && (
+                                                                    {isProductOutOfStock(product) && (
                                                                         <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-3 py-1.5 shadow-lg">
                                                                             <span className="text-xs font-medium">Out of Stock</span>
                                                                         </div>

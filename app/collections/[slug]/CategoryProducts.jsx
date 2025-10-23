@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import SafeImage from '../../components/SafeImage';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
 
 // Product Card Component (Grid View)
 function ProductCard({ product, index }) {
@@ -22,12 +23,12 @@ function ProductCard({ product, index }) {
                             fill
                             className="object-cover group-hover:scale-110 transition-transform duration-700"
                         />
-                        {product.stock <= 5 && product.stock > 0 && (
+                        {hasLowStock(product) && (
                             <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-2 md:px-3 py-1 md:py-1.5 shadow-lg">
-                                <span className="text-xs font-medium">{product.stock} left</span>
+                                <span className="text-xs font-medium">{getEffectiveStock(product)} left</span>
                             </div>
                         )}
-                        {product.stock === 0 && (
+                        {isProductOutOfStock(product) && (
                             <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-2 md:px-3 py-1 md:py-1.5 shadow-lg">
                                 <span className="text-xs font-medium">Out of Stock</span>
                             </div>
@@ -83,14 +84,14 @@ function ProductListItem({ product, index }) {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 
                                 {/* Stock Badges */}
-                                {product.stock <= 5 && product.stock > 0 && (
+                                {hasLowStock(product) && (
                                     <div className="absolute top-1 right-1 md:top-2 md:right-2 lg:top-4 lg:right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-1.5 py-0.5 md:px-2 md:py-1 lg:px-3 lg:py-1.5 shadow-lg">
                                         <span className="text-[9px] md:text-[10px] lg:text-xs font-medium">
-                                            <span className="hidden sm:inline">Only </span>{product.stock}<span className="hidden sm:inline"> left</span>
+                                            <span className="hidden sm:inline">Only </span>{getEffectiveStock(product)}<span className="hidden sm:inline"> left</span>
                                         </span>
                                     </div>
                                 )}
-                                {product.stock === 0 && (
+                                {isProductOutOfStock(product) && (
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-lg md:rounded-xl lg:rounded-2xl">
                                         <span className="text-[10px] md:text-xs lg:text-sm text-white font-medium">Out of Stock</span>
                                     </div>

@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useNavbar } from "../context/NavbarContext";
 import { useEffect } from "react";
 import ImageCarousel from "./ImageCarousel";
+import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
 
 export default function QuickViewModal({ isOpen, onClose, product }) {
     const { addToCart, setIsCartOpen } = useCart();
@@ -26,6 +27,13 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
 
     const handleAddToCart = async () => {
         if (product) {
+            // If product has variants, redirect to detail page for variant selection
+            if (product.hasVariants) {
+                window.location.href = `/products/${product._id}`;
+                onClose();
+                return;
+            }
+            
             const result = await addToCart(product);
             if (result !== false) {
                 setIsCartOpen(true);
@@ -95,10 +103,11 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                     
                                     <button
                                         onClick={handleAddToCart}
-                                        disabled={product.stock === 0}
+                                        disabled={isProductOutOfStock(product)}
                                         className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl font-medium text-lg hover:bg-[#D4AF76] transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                     >
-                                        {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                        {isProductOutOfStock(product) ? 'Out of Stock' : 
+                                         product.hasVariants ? 'Select Options' : 'Add to Cart'}
                                     </button>
                                 </div>
                             </div>
@@ -136,10 +145,11 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                     
                                     <button
                                         onClick={handleAddToCart}
-                                        disabled={product.stock === 0}
+                                        disabled={isProductOutOfStock(product)}
                                         className="bg-[#2C2C2C] text-white py-4 px-8 rounded-2xl font-light text-lg hover:bg-[#D4AF76] transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                     >
-                                        {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                        {isProductOutOfStock(product) ? 'Out of Stock' : 
+                                         product.hasVariants ? 'Select Options' : 'Add to Cart'}
                                     </button>
                                 </div>
                             </div>

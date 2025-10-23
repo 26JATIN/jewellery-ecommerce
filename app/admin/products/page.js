@@ -56,9 +56,27 @@ function AdminProductsPage() {
         setActiveTab('new');
     };
 
-    const handleEditProduct = (product) => {
-        setEditingProduct(product);
-        setActiveTab('new');
+    const handleEditProduct = async (product) => {
+        try {
+            // Fetch complete product details including variants
+            const res = await fetch(`/api/admin/products/${product._id}`);
+            if (res.ok) {
+                const fullProduct = await res.json();
+                console.log('Full product data for editing:', fullProduct);
+                setEditingProduct(fullProduct);
+                setActiveTab('new');
+            } else {
+                console.error('Failed to fetch product details');
+                // Fallback to using the product from list
+                setEditingProduct(product);
+                setActiveTab('new');
+            }
+        } catch (error) {
+            console.error('Error fetching product details:', error);
+            // Fallback to using the product from list
+            setEditingProduct(product);
+            setActiveTab('new');
+        }
     };
 
     const handleDeleteProduct = async (productId) => {
@@ -82,6 +100,16 @@ function AdminProductsPage() {
 
     const handleFormSubmit = async (productData) => {
         try {
+            console.log('=== FORM SUBMISSION ===');
+            console.log('Editing product:', editingProduct ? editingProduct._id : 'NEW');
+            console.log('Product data:', {
+                hasVariants: productData.hasVariants,
+                variantOptionsCount: productData.variantOptions?.length || 0,
+                variantsCount: productData.variants?.length || 0,
+                variantOptions: productData.variantOptions,
+                variants: productData.variants
+            });
+            
             const url = editingProduct 
                 ? `/api/admin/products/${editingProduct._id}`
                 : '/api/admin/products';
@@ -98,6 +126,12 @@ function AdminProductsPage() {
 
             if (res.ok) {
                 const savedProduct = await res.json();
+                console.log('Saved product result:', {
+                    id: savedProduct._id,
+                    hasVariants: savedProduct.hasVariants,
+                    variantOptionsCount: savedProduct.variantOptions?.length || 0,
+                    variantsCount: savedProduct.variants?.length || 0
+                });
                 
                 if (editingProduct) {
                     setProducts(products.map(p => 
@@ -111,6 +145,7 @@ function AdminProductsPage() {
                 setEditingProduct(null);
             } else {
                 const error = await res.json();
+                console.error('API Error:', error);
                 alert(error.error || 'Failed to save product');
             }
         } catch (error) {

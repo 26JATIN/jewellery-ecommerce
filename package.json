@@ -11,7 +11,9 @@
     "create-admin": "node scripts/createAdmin.mjs",
     "migrate-products": "node scripts/migrateProducts.mjs",
     "seed-products": "node scripts/seedProducts.mjs",
-    "seed": "node scripts/seedData.js"
+    "seed": "node scripts/seedData.js",
+    "seed-jewelry": "node scripts/seedJewelryData.js",
+    "seed-all": "node scripts/runSeed.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import VariantManager from './VariantManager';
 
 export default function ProductForm({ product, onSubmit, onCancel }) {
     const [formData, setFormData] = useState({
@@ -28,7 +29,11 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         stoneValue: '',
         isDynamicPricing: false,
         // Enhanced stone specifications
-        stones: []
+        stones: [],
+        // Variants system
+        hasVariants: false,
+        variantOptions: [],
+        variants: []
     });
 
     const [loading, setLoading] = useState(false);
@@ -147,6 +152,14 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
     useEffect(() => {
         if (product) {
+            console.log('ProductForm: Loading product data', {
+                name: product.name,
+                hasVariants: product.hasVariants,
+                variantOptionsCount: product.variantOptions?.length || 0,
+                variantsCount: product.variants?.length || 0,
+                variantOptions: product.variantOptions,
+                variants: product.variants
+            });
             setFormData({
                 name: product.name || '',
                 description: product.description || '',
@@ -173,7 +186,11 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 isDynamicPricing: product.isDynamicPricing || false,
                 // Enhanced stone specifications
                 stones: product.stones || [],
-                images: product.images || []
+                images: product.images || [],
+                // Variants system
+                hasVariants: product.hasVariants || false,
+                variantOptions: product.variantOptions || [],
+                variants: product.variants || []
             });
             setImagePreview(product.image || '');
             // Set up multiple image previews
@@ -418,6 +435,27 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
     useEffect(() => {
         updateTotalStoneValue();
     }, [formData.stones]);
+
+    // Variant handlers
+    const handleVariantsChange = (hasVariants, variants) => {
+        console.log('ProductForm: handleVariantsChange called', {
+            hasVariants,
+            variantsCount: variants?.length || 0,
+            variants
+        });
+        setFormData(prev => ({
+            ...prev,
+            hasVariants,
+            variants: variants || []
+        }));
+    };
+
+    const handleVariantOptionsChange = (variantOptions) => {
+        setFormData(prev => ({
+            ...prev,
+            variantOptions: variantOptions || []
+        }));
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -688,8 +726,35 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     color: stone.color || 'Colorless',
                     cut: stone.cut,
                     setting: stone.setting
+                })),
+                // Variants system
+                hasVariants: formData.hasVariants,
+                variantOptions: formData.variantOptions,
+                variants: formData.variants.map(variant => ({
+                    ...variant,
+                    optionCombination: variant.optionCombination || {},
+                    price: {
+                        mrp: parseFloat(variant.price?.mrp) || parseFloat(formData.mrp) || 0,
+                        costPrice: parseFloat(variant.price?.costPrice) || parseFloat(formData.costPrice) || 0,
+                        sellingPrice: parseFloat(variant.price?.sellingPrice) || parseFloat(formData.sellingPrice) || 0
+                    },
+                    stock: parseInt(variant.stock) || 0,
+                    isActive: variant.isActive !== undefined ? variant.isActive : true,
+                    images: variant.images || [],
+                    weightAdjustment: {
+                        gold: parseFloat(variant.weightAdjustment?.gold) || 0,
+                        silver: parseFloat(variant.weightAdjustment?.silver) || 0
+                    }
                 }))
             };
+
+            console.log('ProductForm submitting data:', {
+                hasVariants: submitData.hasVariants,
+                variantOptionsCount: submitData.variantOptions?.length || 0,
+                variantsCount: submitData.variants?.length || 0,
+                variantOptions: submitData.variantOptions,
+                variants: submitData.variants
+            });
 
             await onSubmit(submitData);
         } catch (error) {
@@ -1651,6 +1716,31 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                 )}
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Variants Section */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7l2 2-2 2M5 11l-2-2 2-2m8 6h6m-6 4h6m-7-12V3m0 18v-6" />
+                            </svg>
+                            Product Variants
+                        </h3>
+                        <p className="text-indigo-100 text-sm mt-1">
+                            Add variants for different sizes, colors, or options
+                        </p>
+                    </div>
+                    <div className="p-6">
+                        <VariantManager
+                            productData={formData}
+                            hasVariants={formData.hasVariants}
+                            variantOptions={formData.variantOptions}
+                            variants={formData.variants}
+                            onVariantsChange={handleVariantsChange}
+                            onOptionsChange={handleVariantOptionsChange}
+                        />
                     </div>
                 </div>
 

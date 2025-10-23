@@ -108,7 +108,7 @@ export function CartProvider({ children }) {
         }
     };
 
-    const addToCart = async (product) => {
+    const addToCart = async (product, quantity = 1) => {
         try {
             if (!user) {
                 // User not authenticated - show login modal with helpful message
@@ -121,8 +121,16 @@ export function CartProvider({ children }) {
             const productData = {
                 ...product,
                 id: product._id || product.id,
-                price: product.sellingPrice
+                price: product.sellingPrice,
+                quantity: quantity
             };
+
+            // Include variant information if present
+            if (product.selectedVariant) {
+                productData.variantId = product.selectedVariant._id;
+                productData.selectedVariant = product.selectedVariant;
+                productData.cartKey = product.cartKey || `${product._id}_${product.selectedVariant._id}`;
+            }
 
             const res = await fetch('/api/cart', {
                 method: 'POST',

@@ -162,12 +162,46 @@ export async function POST(req) {
                 continue;
             }
             
-            // Validate stock availability
-            if (product.stock < item.quantity) {
+            // Validate stock availability (handle variants)
+            let currentStock = product.stock;
+            let variantInfo = '';
+            
+            if (item.variantId && product.hasVariants) {
+                const variant = product.variants.id(item.variantId);
+                if (!variant) {
+                    notFoundProducts.push({
+                        name: item.name || 'Unknown Product',
+                        id: productIdString,
+                        variantId: item.variantId,
+                        originalItem: item
+                    });
+                    continue;
+                }
+                
+                if (!variant.isActive) {
+                    stockErrors.push({
+                        productName: product.name,
+                        variantSku: variant.sku,
+                        error: 'Variant is no longer available'
+                    });
+                    continue;
+                }
+                
+                currentStock = variant.stock;
+                variantInfo = ` (Variant: ${variant.sku})`;
+            } else if (product.hasVariants && !item.variantId) {
                 stockErrors.push({
                     productName: product.name,
+                    error: 'Product requires variant selection'
+                });
+                continue;
+            }
+            
+            if (currentStock < item.quantity) {
+                stockErrors.push({
+                    productName: product.name + variantInfo,
                     requested: item.quantity,
-                    available: product.stock
+                    available: currentStock
                 });
             }
         }
@@ -208,15 +242,50 @@ export async function POST(req) {
                 // This shouldn't happen as we already checked above
                 throw new Error(`Product ${item.name || productIdString} not found`);
             }
-            const itemTotal = (product.sellingPrice || product.price) * item.quantity;
+            
+            // Handle variant pricing and data
+            let finalPrice = Number(product.sellingPrice || product.price || 0);
+            let variantImage = product.image || product.images?.[0]?.url;
+            let variantData = null;
+            
+            if (item.variantId && product.hasVariants) {
+                const variant = product.variants.id(item.variantId);
+                if (variant) {
+                    // Variant price is an object, use sellingPrice
+                    finalPrice = Number(variant.price?.sellingPrice || variant.price || 0);
+                    if (variant.image) {
+                        variantImage = variant.image;
+                    }
+                    
+                    variantData = {
+                        sku: variant.sku,
+                        optionCombination: new Map(Object.entries(variant.options || {})),
+                        price: {
+                            mrp: Number(variant.price?.mrp || 0),
+                            costPrice: Number(variant.price?.costPrice || 0),
+                            sellingPrice: Number(variant.price?.sellingPrice || finalPrice)
+                        }
+                    };
+                }
+            }
+            
+            const itemTotal = finalPrice * Number(item.quantity || 0);
+            
+            // Validate calculations
+            if (isNaN(finalPrice) || isNaN(itemTotal)) {
+                throw new Error(`Invalid price calculation for product ${product.name}: finalPrice=${finalPrice}, quantity=${item.quantity}`);
+            }
+            
             calculatedTotal += itemTotal;
             
             return {
                 product: product._id,
+                variantId: item.variantId || null,
+                selectedVariant: variantData,
                 name: product.name,
-                price: product.sellingPrice || product.price,
-                quantity: item.quantity,
-                image: product.image || product.images?.[0]?.url,
+                price: Number(finalPrice), // Ensure it's a number
+                quantity: Number(item.quantity), // Ensure it's a number
+                image: variantImage,
                 category: product.category,
                 subcategory: product.subcategory || null
             };
@@ -273,7 +342,16 @@ export async function POST(req) {
 
             // Verify the discount matches what frontend sent (prevent tampering)
             const sentDiscount = parseFloat(coupon.discountAmount || 0);
-            const calculatedDiscount = parseFloat(discountResult.discountAmount);
+            const calculatedDiscount = parseFloat(discountResult.discountAmount || 0);
+            
+            // Check for NaN values
+            if (isNaN(calculatedDiscount) || isNaN(discountResult.finalTotal)) {
+                console.error('Invalid discount calculation result:', discountResult);
+                return NextResponse.json(
+                    { error: 'Invalid coupon discount calculation. Please try again.' },
+                    { status: 400 }
+                );
+            }
             
             if (Math.abs(sentDiscount - calculatedDiscount) > 0.01) {
                 console.error(`Discount mismatch: Frontend sent ${sentDiscount}, server calculated ${calculatedDiscount}`);
@@ -284,8 +362,8 @@ export async function POST(req) {
             }
 
             // Verify final total
-            const expectedTotal = discountResult.finalTotal;
-            if (Math.abs(totalAmount - expectedTotal) > 0.01) {
+            const expectedTotal = parseFloat(discountResult.finalTotal || calculatedTotal);
+            if (isNaN(expectedTotal) || Math.abs(totalAmount - expectedTotal) > 0.01) {
                 console.error(`Total mismatch: Frontend sent ${totalAmount}, server calculated ${expectedTotal}`);
                 return NextResponse.json(
                     { error: 'Order total mismatch. Please refresh and try again.' },
@@ -295,8 +373,8 @@ export async function POST(req) {
 
             validatedCouponData = {
                 code: couponDoc.code,
-                discountAmount: discountResult.discountAmount,
-                originalTotal: calculatedTotal,
+                discountAmount: Number(calculatedDiscount) || 0,
+                originalTotal: Number(calculatedTotal) || 0,
                 appliedAt: new Date()
             };
         } else {
@@ -316,7 +394,7 @@ export async function POST(req) {
             items: enrichedItems, // Use enriched items with validated prices
             shippingAddress,
             paymentMethod,
-            totalAmount,
+            totalAmount: Number(totalAmount),
             status: 'pending'
         };
 
@@ -332,13 +410,30 @@ export async function POST(req) {
         // Reserve inventory - decrement stock for all ordered items (atomic operation)
         console.log(`📦 Reserving inventory for order ${order._id}...`);
         for (const item of enrichedItems) {
-            const previousStock = await Product.findById(item.product).then(p => p.stock);
-            await Product.findByIdAndUpdate(
-                item.product,
-                { $inc: { stock: -item.quantity } },
-                { new: true }
-            );
-            console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Stock: ${previousStock} → ${previousStock - item.quantity})`);
+            const product = await Product.findById(item.product);
+            
+            if (item.variantId && product.hasVariants) {
+                // Handle variant inventory
+                const variant = product.variants.id(item.variantId);
+                const previousStock = variant.stock;
+                
+                await Product.findOneAndUpdate(
+                    { _id: item.product, "variants._id": item.variantId },
+                    { $inc: { "variants.$.stock": -item.quantity } },
+                    { new: true }
+                );
+                
+                console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Variant: ${variant.sku}) (Stock: ${previousStock} → ${previousStock - item.quantity})`);
+            } else {
+                // Handle main product inventory
+                const previousStock = product.stock;
+                await Product.findByIdAndUpdate(
+                    item.product,
+                    { $inc: { stock: -item.quantity } },
+                    { new: true }
+                );
+                console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Stock: ${previousStock} → ${previousStock - item.quantity})`);
+            }
         }
         
         // Log inventory reservation in order

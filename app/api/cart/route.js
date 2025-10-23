@@ -49,17 +49,30 @@ export async function GET() {
                     continue;
                 }
                 
+                // Handle stock checking for variants
+                let currentStock = item.product.stock;
+                
+                if (item.variantId && item.product.hasVariants) {
+                    const variant = item.product.variants.id(item.variantId);
+                    if (!variant || !variant.isActive) {
+                        console.log(`Removing invalid variant from cart: ${item.product.name}`);
+                        itemsModified = true;
+                        continue;
+                    }
+                    currentStock = variant.stock;
+                }
+                
                 // Check stock and adjust quantity if needed
-                if (item.product.stock <= 0) {
-                    console.log(`Removing out-of-stock product: ${item.product.name}`);
+                if (currentStock <= 0) {
+                    console.log(`Removing out-of-stock product/variant: ${item.product.name}`);
                     itemsModified = true;
                     continue;
                 }
                 
                 // If quantity exceeds stock, adjust it
-                if (item.quantity > item.product.stock) {
-                    console.log(`Adjusting quantity for ${item.product.name} from ${item.quantity} to ${item.product.stock}`);
-                    item.quantity = item.product.stock;
+                if (item.quantity > currentStock) {
+                    console.log(`Adjusting quantity for ${item.product.name} from ${item.quantity} to ${currentStock}`);
+                    item.quantity = currentStock;
                     itemsModified = true;
                 }
                 
@@ -116,9 +129,9 @@ export async function POST(req) {
 
         // Validate required product fields
         const productId = product._id || product.id;
-        if (!productId || !product.name || !product.sellingPrice) {
+        if (!productId) {
             return NextResponse.json(
-                { error: 'Invalid product data. Missing required fields (id, name, sellingPrice).' }, 
+                { error: 'Invalid product data. Missing required fields (id).' }, 
                 { status: 400 }
             );
         }
@@ -142,22 +155,59 @@ export async function POST(req) {
             );
         }
 
-        // Check stock availability
-        if (dbProduct.stock <= 0) {
+        // Handle variant validation
+        let currentStock = dbProduct.stock;
+        let selectedVariant = null;
+        
+        if (product.variantId && dbProduct.hasVariants) {
+            selectedVariant = dbProduct.variants.id(product.variantId);
+            if (!selectedVariant) {
+                return NextResponse.json(
+                    { error: 'Selected variant not found' },
+                    { status: 400 }
+                );
+            }
+            
+            if (!selectedVariant.isActive) {
+                return NextResponse.json(
+                    { error: 'Selected variant is no longer available' },
+                    { status: 400 }
+                );
+            }
+            
+            currentStock = selectedVariant.stock;
+        } else if (dbProduct.hasVariants && !product.variantId) {
             return NextResponse.json(
-                { error: 'This product is out of stock' },
+                { error: 'Please select a variant for this product' },
+                { status: 400 }
+            );
+        }
+
+        // Check stock availability
+        if (currentStock <= 0) {
+            return NextResponse.json(
+                { error: 'This product/variant is out of stock' },
                 { status: 400 }
             );
         }
 
         let cart = await Cart.findOne({ user: decoded.userId });
         
+        // Create cart item with variant support
         const cartItem = {
             product: productId, // Store as ObjectId (mongoose will convert)
             name: product.name,
-            price: product.sellingPrice,
-            image: product.image,
-            quantity: 1
+            price: selectedVariant?.price?.sellingPrice || product.sellingPrice,
+            image: selectedVariant?.images?.[0]?.url || product.image,
+            quantity: product.quantity || 1,
+            variantId: product.variantId || null,
+            selectedVariant: selectedVariant ? {
+                sku: selectedVariant.sku,
+                optionCombination: selectedVariant.optionCombination,
+                price: selectedVariant.price,
+                images: selectedVariant.images
+            } : null,
+            cartKey: product.cartKey || (product.variantId ? `${productId}_${product.variantId}` : productId.toString())
         };
         
         // Use atomic operations to prevent race conditions
@@ -168,16 +218,18 @@ export async function POST(req) {
                 items: [cartItem]
             });
         } else {
-            // Check if item already exists
+            // Check if item already exists (considering variants)
             const existingItem = cart.items.find(
-                item => item.product.toString() === productId.toString()
+                item => item.cartKey === cartItem.cartKey
             );
 
             if (existingItem) {
-                // Check if adding one more would exceed stock
-                if (existingItem.quantity + 1 > dbProduct.stock) {
+                const newQuantity = existingItem.quantity + (product.quantity || 1);
+                
+                // Check if adding more would exceed stock
+                if (newQuantity > currentStock) {
                     return NextResponse.json(
-                        { error: `Only ${dbProduct.stock} items available in stock` },
+                        { error: `Only ${currentStock} items available in stock` },
                         { status: 400 }
                     );
                 }
@@ -186,10 +238,10 @@ export async function POST(req) {
                 cart = await Cart.findOneAndUpdate(
                     { 
                         user: decoded.userId,
-                        'items.product': productId 
+                        'items.cartKey': cartItem.cartKey
                     },
                     { 
-                        $inc: { 'items.$.quantity': 1 } 
+                        $inc: { 'items.$.quantity': (product.quantity || 1) } 
                     },
                     { new: true }
                 );
