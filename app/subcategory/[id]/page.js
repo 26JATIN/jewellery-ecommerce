@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
 import ProductGrid from '@/app/components/ProductGrid';
@@ -16,13 +17,7 @@ export default function SubcategoryPage() {
     const [pagination, setPagination] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        if (subcategoryId) {
-            fetchSubcategoryProducts();
-        }
-    }, [subcategoryId, currentPage]);
-
-    const fetchSubcategoryProducts = async () => {
+    const fetchSubcategoryProducts = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(`/api/subcategories/${subcategoryId}/products?page=${currentPage}&limit=20`);
@@ -38,11 +33,17 @@ export default function SubcategoryPage() {
             setError(null);
         } catch (err) {
             console.error('Error fetching subcategory products:', err);
-            setError('Failed to load products. Please try again.');
+            setError(err.message);
         } finally {
             setLoading(false);
         }
-    };
+    }, [subcategoryId, currentPage]);
+
+    useEffect(() => {
+        if (subcategoryId) {
+            fetchSubcategoryProducts();
+        }
+    }, [subcategoryId, fetchSubcategoryProducts]);
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
@@ -59,20 +60,20 @@ export default function SubcategoryPage() {
                     <nav className="mb-8">
                         <ol className="flex items-center space-x-2 text-sm text-gray-600">
                             <li>
-                                <a href="/" className="hover:text-[#8B6B4C] transition-colors">
+                                <Link href="/" className="hover:text-[#8B6B4C] transition-colors">
                                     Home
-                                </a>
+                                </Link>
                             </li>
                             <li>
                                 <span className="mx-2">/</span>
                             </li>
                             <li>
-                                <a 
+                                <Link 
                                     href={`/collections/${subcategory.category?.slug || ''}`}
                                     className="hover:text-[#8B6B4C] transition-colors"
                                 >
                                     {subcategory.category?.name || 'Category'}
-                                </a>
+                                </Link>
                             </li>
                             <li>
                                 <span className="mx-2">/</span>
@@ -189,12 +190,12 @@ export default function SubcategoryPage() {
                         <p className="text-gray-600 mb-6">
                             Products in this subcategory are coming soon!
                         </p>
-                        <a
+                        <Link
                             href="/"
                             className="inline-block px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#7A5D42] transition-colors"
                         >
                             Continue Shopping
-                        </a>
+                        </Link>
                     </div>
                 )}
             </main>

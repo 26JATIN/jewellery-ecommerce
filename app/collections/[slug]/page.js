@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -33,17 +33,7 @@ function CollectionContent({ params }) {
         }
     }, [searchParams]);
 
-    useEffect(() => {
-        fetchData();
-    }, [categorySlug]);
-
-    useEffect(() => {
-        if (selectedCategory || selectedSubcategory) {
-            fetchProducts();
-        }
-    }, [selectedCategory, selectedSubcategory]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const [categoriesRes, subcategoriesRes] = await Promise.all([
@@ -72,9 +62,9 @@ function CollectionContent({ params }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [categorySlug, selectedCategory]);
 
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams();
@@ -104,7 +94,17 @@ function CollectionContent({ params }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCategory, selectedSubcategory]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        if (selectedCategory || selectedSubcategory) {
+            fetchProducts();
+        }
+    }, [fetchProducts, selectedCategory, selectedSubcategory]);
 
     const getSubcategoriesForCategory = (categoryName) => {
         return subcategories.filter(sub => {
