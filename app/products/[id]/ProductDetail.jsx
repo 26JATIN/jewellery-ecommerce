@@ -93,6 +93,11 @@ export default function ProductDetail({ productId }) {
     const handleVariantChange = (variant) => {
         setSelectedVariant(variant);
         
+        // Reset quantity if it exceeds the new variant's stock
+        if (variant && variant.stock < quantity) {
+            setQuantity(Math.min(quantity, variant.stock));
+        }
+        
         // Update images if variant has specific images
         if (variant?.images && variant.images.length > 0) {
             setVariantImages(variant.images);
@@ -114,9 +119,21 @@ export default function ProductDetail({ productId }) {
             return;
         }
 
-        // Check stock for variants
-        if (selectedVariant && selectedVariant.stock < quantity) {
-            alert(`Only ${selectedVariant.stock} items available for this variant`);
+        // Check stock availability
+        const availableStock = product?.hasVariants && selectedVariant 
+            ? selectedVariant.stock 
+            : effectiveStock;
+
+        if (availableStock < quantity) {
+            const stockMessage = selectedVariant 
+                ? `Only ${availableStock} items available for this variant`
+                : `Only ${availableStock} items available`;
+            alert(stockMessage);
+            return;
+        }
+
+        if (availableStock === 0) {
+            alert('This item is currently out of stock');
             return;
         }
 
@@ -131,7 +148,7 @@ export default function ProductDetail({ productId }) {
                 sellingPrice: selectedVariant?.price?.sellingPrice || product.sellingPrice,
                 mrp: selectedVariant?.price?.mrp || product.mrp,
                 // Use variant stock if available
-                availableStock: selectedVariant?.stock || product.stock,
+                availableStock: availableStock,
                 // Generate unique cart key for variants
                 cartKey: selectedVariant ? `${product._id}_${selectedVariant._id}` : product._id
             };
@@ -140,6 +157,7 @@ export default function ProductDetail({ productId }) {
             setIsCartOpen(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
+            alert('Failed to add item to cart. Please try again.');
         } finally {
             setAddingToCart(false);
         }
@@ -202,8 +220,13 @@ export default function ProductDetail({ productId }) {
     const currentPrice = {
         mrp: selectedVariant?.price?.mrp || product?.mrp,
         sellingPrice: selectedVariant?.price?.sellingPrice || product?.sellingPrice,
-        stock: selectedVariant?.stock || product?.stock
+        stock: selectedVariant?.stock || product?.stock || product?.totalStock
     };
+
+    // For products with variants, use total stock if no variant is selected
+    const effectiveStock = product?.hasVariants && !selectedVariant 
+        ? product?.totalStock || 0 
+        : currentPrice.stock;
 
     const discount = currentPrice.mrp && currentPrice.sellingPrice && currentPrice.mrp > currentPrice.sellingPrice
         ? Math.round(((currentPrice.mrp - currentPrice.sellingPrice) / currentPrice.mrp) * 100)
@@ -261,12 +284,12 @@ export default function ProductDetail({ productId }) {
                                 </AnimatePresence>
                                 
                                 {/* Stock Badge */}
-                                {hasLowStock(product) && (
+                                {hasLowStock(product) && effectiveStock > 0 && effectiveStock <= 5 && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-4 py-2 shadow-lg">
-                                        <span className="text-sm font-medium">Only {getEffectiveStock(product)} left!</span>
+                                        <span className="text-sm font-medium">Only {effectiveStock} left!</span>
                                     </div>
                                 )}
-                                {isProductOutOfStock(product) && (
+                                {(effectiveStock === 0 || (product?.hasVariants && !selectedVariant && product?.totalStock === 0)) && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-4 py-2 shadow-lg">
                                         <span className="text-sm font-medium">Out of Stock</span>
                                     </div>
@@ -369,10 +392,17 @@ export default function ProductDetail({ productId }) {
                         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-gray-700 font-light">Availability:</span>
-                                <span className={`font-medium ${currentPrice.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {currentPrice.stock > 0 ? `${currentPrice.stock} in stock` : 'Out of stock'}
+                                <span className={`font-medium ${effectiveStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {effectiveStock > 0 ? (
+                                        selectedVariant ? `${effectiveStock} in stock` : 
+                                        product?.hasVariants ? `Total ${effectiveStock} available` :
+                                        `${effectiveStock} in stock`
+                                    ) : 'Out of stock'}
                                 </span>
                             </div>
+                            {product?.hasVariants && !selectedVariant && effectiveStock > 0 && (
+                                <p className="text-xs text-gray-500 mt-1">Select a variant to see specific availability</p>
+                            )}
                         </div>
 
                         {/* Description */}
@@ -384,25 +414,89 @@ export default function ProductDetail({ productId }) {
                         </div>
 
                         {/* Specifications */}
-                        {(product.metal || product.weight || product.purity) && (
+                        {(product.metal || product.metalType || product.weight || product.goldWeight || product.silverWeight || product.purity || product.goldPurity || product.silverPurity) && (
                             <div className="bg-gradient-to-br from-[#FAFAFA] to-white rounded-2xl p-6 space-y-3">
                                 <h3 className="text-lg font-light text-[#2C2C2C] mb-4">Specifications</h3>
-                                {product.metal && (
+                                
+                                {/* Metal Type */}
+                                {(product.metal || product.metalType) && (
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 font-light">Metal:</span>
-                                        <span className="text-[#2C2C2C] font-medium">{product.metal}</span>
+                                        <span className="text-[#2C2C2C] font-medium capitalize">
+                                            {product.metal || product.metalType}
+                                        </span>
                                     </div>
                                 )}
-                                {product.purity && (
+
+                                {/* Gold specifications */}
+                                {product.goldWeight > 0 && (
+                                    <>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600 font-light">Gold Weight:</span>
+                                            <span className="text-[#2C2C2C] font-medium">{product.goldWeight}g</span>
+                                        </div>
+                                        {product.goldPurity && (
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600 font-light">Gold Purity:</span>
+                                                <span className="text-[#2C2C2C] font-medium">{product.goldPurity}K</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Silver specifications */}
+                                {product.silverWeight > 0 && (
+                                    <>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600 font-light">Silver Weight:</span>
+                                            <span className="text-[#2C2C2C] font-medium">{product.silverWeight}g</span>
+                                        </div>
+                                        {product.silverPurity && (
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600 font-light">Silver Purity:</span>
+                                                <span className="text-[#2C2C2C] font-medium">{product.silverPurity}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Legacy purity and weight fields */}
+                                {product.purity && !product.goldPurity && !product.silverPurity && (
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 font-light">Purity:</span>
                                         <span className="text-[#2C2C2C] font-medium">{product.purity}</span>
                                     </div>
                                 )}
-                                {product.weight && (
+                                {product.weight && !product.goldWeight && !product.silverWeight && (
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 font-light">Weight:</span>
                                         <span className="text-[#2C2C2C] font-medium">{product.weight}g</span>
+                                    </div>
+                                )}
+
+                                {/* Making charge */}
+                                {product.makingChargePercent > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 font-light">Making Charge:</span>
+                                        <span className="text-[#2C2C2C] font-medium">{product.makingChargePercent}%</span>
+                                    </div>
+                                )}
+
+                                {/* Stone value */}
+                                {product.stoneValue > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 font-light">Stone Value:</span>
+                                        <span className="text-[#2C2C2C] font-medium">₹{product.stoneValue.toLocaleString('en-IN')}</span>
+                                    </div>
+                                )}
+
+                                {/* Dynamic pricing indicator */}
+                                {product.isDynamicPricing && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 font-light">Pricing:</span>
+                                        <span className="font-medium text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                            Live Gold Rate
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -427,9 +521,9 @@ export default function ProductDetail({ productId }) {
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    onClick={() => setQuantity(Math.min(currentPrice.stock || 999, quantity + 1))}
+                                    onClick={() => setQuantity(Math.min(effectiveStock || 999, quantity + 1))}
                                     className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={quantity >= (currentPrice.stock || 999)}
+                                    disabled={quantity >= (effectiveStock || 999) || effectiveStock === 0}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -443,12 +537,14 @@ export default function ProductDetail({ productId }) {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleAddToCart}
-                            disabled={isProductOutOfStock(product) || addingToCart}
+                            disabled={effectiveStock === 0 || addingToCart || (product?.hasVariants && !selectedVariant)}
                             className={`w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 transition-all shadow-lg ${
-                                isProductOutOfStock(product)
+                                effectiveStock === 0
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : addingToCart
                                     ? 'bg-[#D4AF76] text-white'
+                                    : (product?.hasVariants && !selectedVariant)
+                                    ? 'bg-gray-400 text-white cursor-not-allowed'
                                     : 'bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white hover:shadow-xl'
                             }`}
                         >
@@ -457,7 +553,7 @@ export default function ProductDetail({ productId }) {
                                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                                     Adding to Cart...
                                 </>
-                            ) : isProductOutOfStock(product) || currentPrice.stock === 0 ? (
+                            ) : effectiveStock === 0 ? (
                                 'Out of Stock'
                             ) : product?.hasVariants && !selectedVariant ? (
                                 'Please Select Options'
