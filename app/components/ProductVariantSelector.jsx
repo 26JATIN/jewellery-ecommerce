@@ -117,17 +117,17 @@ const ProductVariantSelector = ({
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Variant Options */}
             {product.variantOptions.map((option, optionIndex) => (
-                <div key={optionIndex} className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h4 className="text-lg font-medium text-gray-900">
+                <div key={optionIndex} className="space-y-2 sm:space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                        <h4 className="text-base sm:text-lg font-medium text-gray-900">
                             {option.displayName}
                             {option.required && <span className="text-red-500 ml-1">*</span>}
                         </h4>
                         {selections[option.name] && (
-                            <span className="text-sm text-gray-600">
+                            <span className="text-xs sm:text-sm text-gray-600">
                                 Selected: {selections[option.name]}
                             </span>
                         )}
@@ -137,7 +137,7 @@ const ProductVariantSelector = ({
                     <div className="space-y-2">
                         {option.type === 'color' ? (
                             // Color picker layout
-                            <div className="flex flex-wrap gap-3">
+                            <div className="flex flex-wrap gap-2 sm:gap-3">
                                 {option.values.map((value, valueIndex) => {
                                     const isSelected = selections[option.name] === value.name;
                                     const isAvailable = isOptionValueAvailable(option.name, value.name);
@@ -148,7 +148,7 @@ const ProductVariantSelector = ({
                                             onClick={() => isAvailable && handleOptionSelect(option.name, value.name)}
                                             disabled={!isAvailable}
                                             className={`
-                                                relative w-12 h-12 rounded-full border-2 transition-all
+                                                relative w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 transition-all
                                                 ${isSelected 
                                                     ? 'border-amber-500 shadow-lg scale-110' 
                                                     : 'border-gray-300 hover:border-gray-400'
@@ -162,7 +162,7 @@ const ProductVariantSelector = ({
                                         >
                                             {isSelected && (
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    <Check className="w-6 h-6 text-white drop-shadow-lg" />
+                                                    <Check className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
                                                 </div>
                                             )}
                                             {!isAvailable && (
@@ -176,7 +176,7 @@ const ProductVariantSelector = ({
                             </div>
                         ) : option.type === 'size' ? (
                             // Size selector layout
-                            <div className="grid grid-cols-6 gap-2">
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                                 {option.values.map((value, valueIndex) => {
                                     const isSelected = selections[option.name] === value.name;
                                     const isAvailable = isOptionValueAvailable(option.name, value.name);
@@ -187,7 +187,7 @@ const ProductVariantSelector = ({
                                             onClick={() => isAvailable && handleOptionSelect(option.name, value.name)}
                                             disabled={!isAvailable}
                                             className={`
-                                                relative px-3 py-2 text-center border rounded-md font-medium transition-all
+                                                relative px-2 py-2 sm:px-3 sm:py-2 text-center border rounded-md text-sm sm:text-base font-medium transition-all
                                                 ${isSelected 
                                                     ? 'border-amber-500 bg-amber-50 text-amber-900' 
                                                     : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
@@ -223,7 +223,7 @@ const ProductVariantSelector = ({
                                             onClick={() => isAvailable && handleOptionSelect(option.name, value.name)}
                                             disabled={!isAvailable}
                                             className={`
-                                                w-full text-left px-4 py-3 border rounded-lg transition-all
+                                                w-full text-left px-3 py-2.5 sm:px-4 sm:py-3 border rounded-lg transition-all text-sm sm:text-base
                                                 ${isSelected 
                                                     ? 'border-amber-500 bg-amber-50 text-amber-900' 
                                                     : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
@@ -240,12 +240,12 @@ const ProductVariantSelector = ({
                                                 <span className="font-medium">{value.displayName}</span>
                                                 <div className="flex items-center space-x-2">
                                                     {value.priceAdjustment !== 0 && (
-                                                        <span className="text-sm text-gray-600">
+                                                        <span className="text-xs sm:text-sm text-gray-600">
                                                             {value.priceAdjustment > 0 ? '+' : ''}₹{value.priceAdjustment}
                                                         </span>
                                                     )}
-                                                    {isSelected && <Check className="w-5 h-5 text-amber-600" />}
-                                                    {!isAvailable && <AlertCircle className="w-5 h-5 text-red-500" />}
+                                                    {isSelected && <Check className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />}
+                                                    {!isAvailable && <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />}
                                                 </div>
                                             </div>
                                         </motion.button>
@@ -264,14 +264,14 @@ const ProductVariantSelector = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="bg-red-50 border border-red-200 rounded-lg p-4"
+                        className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4"
                     >
                         <div className="flex items-center space-x-2">
-                            <AlertCircle className="w-5 h-5 text-red-500" />
-                            <p className="text-red-700 font-medium">Selection Error</p>
+                            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
+                            <p className="text-red-700 font-medium text-sm sm:text-base">Selection Error</p>
                         </div>
                         {Object.values(errors).map((error, index) => (
-                            <p key={index} className="text-red-600 text-sm mt-1">{error}</p>
+                            <p key={index} className="text-red-600 text-xs sm:text-sm mt-1">{error}</p>
                         ))}
                     </motion.div>
                 )}
@@ -282,21 +282,21 @@ const ProductVariantSelector = ({
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-green-50 border border-green-200 rounded-lg p-4"
+                    className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4"
                 >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                         <div>
-                            <h5 className="font-medium text-green-900">Selected Configuration</h5>
-                            <p className="text-sm text-green-700">
+                            <h5 className="font-medium text-green-900 text-sm sm:text-base">Selected Configuration</h5>
+                            <p className="text-xs sm:text-sm text-green-700">
                                 SKU: {currentVariant.sku} | Stock: {currentVariant.stock} available
                             </p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-lg font-bold text-green-900">
+                        <div className="text-left sm:text-right">
+                            <p className="text-lg sm:text-xl font-bold text-green-900">
                                 ₹{currentVariant.price?.sellingPrice?.toLocaleString() || product.sellingPrice?.toLocaleString()}
                             </p>
                             {currentVariant.price?.mrp && currentVariant.price.mrp !== currentVariant.price.sellingPrice && (
-                                <p className="text-sm text-gray-500 line-through">
+                                <p className="text-xs sm:text-sm text-gray-500 line-through">
                                     ₹{currentVariant.price.mrp.toLocaleString()}
                                 </p>
                             )}

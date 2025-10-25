@@ -245,16 +245,16 @@ const VariantManager = ({
     };
 
     return (
-        <div className="space-y-6 border-t pt-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6 border-t pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                         Product Variants 
-                        <span className="text-sm text-gray-500 ml-2">
+                        <span className="text-xs sm:text-sm text-gray-500 ml-2 block sm:inline mt-1 sm:mt-0">
                             (Has: {localHasVariants ? 'Yes' : 'No'}, Options: {localOptions.length}, Variants: {localVariants.length})
                         </span>
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                         Add variants for different sizes, colors, or other options
                     </p>
                 </div>
@@ -266,7 +266,7 @@ const VariantManager = ({
                         onChange={(e) => handleEnableVariants(e.target.checked)}
                         className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
                     />
-                    <label htmlFor="hasVariants" className="text-sm text-gray-700">
+                    <label htmlFor="hasVariants" className="text-xs sm:text-sm text-gray-700">
                         Enable variants
                     </label>
                 </div>
@@ -281,13 +281,13 @@ const VariantManager = ({
                         className="space-y-6"
                     >
                         {/* Variant Options Section */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-4">
-                                <h4 className="font-medium text-gray-900">Variant Options</h4>
+                        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                                <h4 className="text-sm sm:text-base font-medium text-gray-900">Variant Options</h4>
                                 <button
                                     type="button"
                                     onClick={addVariantOption}
-                                    className="flex items-center space-x-1 text-sm text-amber-600 hover:text-amber-700"
+                                    className="flex items-center justify-center sm:justify-start space-x-1 text-xs sm:text-sm text-amber-600 hover:text-amber-700 py-2 sm:py-0"
                                 >
                                     <Plus className="w-4 h-4" />
                                     <span>Add Option</span>
@@ -297,13 +297,13 @@ const VariantManager = ({
                             {/* Quick Add Common Options */}
                             <div className="mb-4">
                                 <p className="text-xs text-gray-600 mb-2">Quick add common options:</p>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                                     {commonOptionTypes.map((option, index) => (
                                         <button
                                             key={index}
                                             type="button"
                                             onClick={() => addCommonOption(option)}
-                                            className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                                            className="text-xs px-2 py-1.5 sm:py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
                                         >
                                             {option.displayName}
                                         </button>
@@ -312,9 +312,9 @@ const VariantManager = ({
                             </div>
 
                             {localOptions.map((option, optionIndex) => (
-                                <div key={optionIndex} className="bg-white border border-gray-200 rounded-lg p-4 mb-3">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex-1 grid grid-cols-3 gap-3">
+                                <div key={optionIndex} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">
                                                     Option Name
@@ -324,7 +324,7 @@ const VariantManager = ({
                                                     value={option.name}
                                                     onChange={(e) => updateVariantOption(optionIndex, 'name', e.target.value)}
                                                     placeholder="e.g., Size, Color"
-                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1"
+                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                                 />
                                             </div>
                                             <div>
@@ -336,7 +336,7 @@ const VariantManager = ({
                                                     value={option.displayName}
                                                     onChange={(e) => updateVariantOption(optionIndex, 'displayName', e.target.value)}
                                                     placeholder="e.g., Ring Size, Stone Color"
-                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1"
+                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                                 />
                                             </div>
                                             <div>
@@ -346,7 +346,7 @@ const VariantManager = ({
                                                 <select
                                                     value={option.type}
                                                     onChange={(e) => updateVariantOption(optionIndex, 'type', e.target.value)}
-                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1"
+                                                    className="w-full text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                                 >
                                                     <option value="select">Select</option>
                                                     <option value="color">Color</option>
@@ -357,7 +357,7 @@ const VariantManager = ({
                                         <button
                                             type="button"
                                             onClick={() => removeVariantOption(optionIndex)}
-                                            className="ml-2 text-red-600 hover:text-red-700"
+                                            className="ml-0 sm:ml-2 self-start sm:self-auto text-red-600 hover:text-red-700 p-2"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -379,43 +379,45 @@ const VariantManager = ({
                                         </div>
                                         <div className="space-y-2">
                                             {option.values.map((value, valueIndex) => (
-                                                <div key={valueIndex} className="flex items-center space-x-2">
+                                                <div key={valueIndex} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                                     <input
                                                         type="text"
                                                         value={value.name}
                                                         onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'name', e.target.value)}
                                                         placeholder="Value name"
-                                                        className="flex-1 text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="flex-1 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                     <input
                                                         type="text"
                                                         value={value.displayName}
                                                         onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'displayName', e.target.value)}
                                                         placeholder="Display name"
-                                                        className="flex-1 text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="flex-1 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
-                                                    {option.type === 'color' && (
+                                                    <div className="flex items-center gap-2">
+                                                        {option.type === 'color' && (
+                                                            <input
+                                                                type="color"
+                                                                value={value.colorCode || '#000000'}
+                                                                onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'colorCode', e.target.value)}
+                                                                className="w-10 h-9 border border-gray-300 rounded"
+                                                            />
+                                                        )}
                                                         <input
-                                                            type="color"
-                                                            value={value.colorCode || '#000000'}
-                                                            onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'colorCode', e.target.value)}
-                                                            className="w-8 h-8 border border-gray-300 rounded"
+                                                            type="number"
+                                                            value={value.priceAdjustment}
+                                                            onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'priceAdjustment', parseFloat(e.target.value) || 0)}
+                                                            placeholder="Price +/-"
+                                                            className="w-20 sm:w-20 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                         />
-                                                    )}
-                                                    <input
-                                                        type="number"
-                                                        value={value.priceAdjustment}
-                                                        onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'priceAdjustment', parseFloat(e.target.value) || 0)}
-                                                        placeholder="Price +/-"
-                                                        className="w-20 text-sm border border-gray-300 rounded px-2 py-1"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeOptionValue(optionIndex, valueIndex)}
-                                                        className="text-red-600 hover:text-red-700"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeOptionValue(optionIndex, valueIndex)}
+                                                            className="text-red-600 hover:text-red-700 p-1"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -428,7 +430,7 @@ const VariantManager = ({
                                     <button
                                         type="button"
                                         onClick={() => regenerateVariants()}
-                                        className="w-full bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors"
+                                        className="w-full bg-amber-600 text-white px-4 py-2.5 rounded-md hover:bg-amber-700 transition-colors text-sm sm:text-base"
                                     >
                                         Generate Variants ({localOptions.reduce((acc, opt) => acc * Math.max(opt.values.length, 1), 1)} combinations)
                                     </button>
@@ -438,15 +440,15 @@ const VariantManager = ({
 
                         {/* Generated Variants Section */}
                         {localVariants.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-medium text-gray-900 mb-4">
+                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-4">
                                     Generated Variants ({localVariants.length})
                                 </h4>
                                 <div className="space-y-3">
                                     {localVariants.map((variant, index) => (
-                                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
-                                            <div className="grid grid-cols-12 gap-3 items-center">
-                                                <div className="col-span-2">
+                                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                                                <div className="lg:col-span-3">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         SKU
                                                     </label>
@@ -454,22 +456,22 @@ const VariantManager = ({
                                                         type="text"
                                                         value={variant.sku}
                                                         onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>
                                                 
-                                                <div className="col-span-2">
+                                                <div className="lg:col-span-3">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         Combination
                                                     </label>
-                                                    <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                                                    <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1.5 rounded min-h-[34px] flex items-center">
                                                         {Object.entries(variant.optionCombination || {}).map(([key, value]) => 
                                                             `${key}: ${value}`
                                                         ).join(', ')}
                                                     </div>
                                                 </div>
 
-                                                <div className="col-span-1">
+                                                <div className="lg:col-span-2">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         MRP
                                                     </label>
@@ -477,11 +479,11 @@ const VariantManager = ({
                                                         type="number"
                                                         value={variant.price?.mrp || ''}
                                                         onChange={(e) => updateVariant(index, 'price.mrp', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>
 
-                                                <div className="col-span-1">
+                                                <div className="lg:col-span-2">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         Cost
                                                     </label>
@@ -489,11 +491,11 @@ const VariantManager = ({
                                                         type="number"
                                                         value={variant.price?.costPrice || ''}
                                                         onChange={(e) => updateVariant(index, 'price.costPrice', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>
 
-                                                <div className="col-span-1">
+                                                <div className="lg:col-span-2">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         Selling
                                                     </label>
@@ -501,11 +503,13 @@ const VariantManager = ({
                                                         type="number"
                                                         value={variant.price?.sellingPrice || ''}
                                                         onChange={(e) => updateVariant(index, 'price.sellingPrice', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>
+                                            </div>
 
-                                                <div className="col-span-1">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-3 mt-3">
+                                                <div className="lg:col-span-2">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         Stock
                                                     </label>
@@ -513,13 +517,13 @@ const VariantManager = ({
                                                         type="number"
                                                         value={variant.stock}
                                                         onChange={(e) => updateVariant(index, 'stock', parseInt(e.target.value) || 0)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>
 
-                                                <div className="col-span-2">
+                                                <div className="lg:col-span-3">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                        Weight Adj.
+                                                        Weight Adjustment
                                                     </label>
                                                     <div className="flex space-x-1">
                                                         <input
@@ -527,32 +531,32 @@ const VariantManager = ({
                                                             value={variant.weightAdjustment?.gold || ''}
                                                             onChange={(e) => updateVariant(index, 'weightAdjustment.gold', parseFloat(e.target.value) || 0)}
                                                             placeholder="Gold"
-                                                            className="w-full text-xs border border-gray-300 rounded px-1 py-1"
+                                                            className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
                                                         />
                                                         <input
                                                             type="number"
                                                             value={variant.weightAdjustment?.silver || ''}
                                                             onChange={(e) => updateVariant(index, 'weightAdjustment.silver', parseFloat(e.target.value) || 0)}
                                                             placeholder="Silver"
-                                                            className="w-full text-xs border border-gray-300 rounded px-1 py-1"
+                                                            className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                <div className="col-span-2 flex items-end space-x-1">
+                                                <div className="lg:col-span-3 flex items-end gap-2">
                                                     <div className="flex items-center">
                                                         <input
                                                             type="checkbox"
                                                             checked={variant.isActive}
                                                             onChange={(e) => updateVariant(index, 'isActive', e.target.checked)}
-                                                            className="w-3 h-3 text-amber-600 border-gray-300 rounded"
+                                                            className="w-4 h-4 text-amber-600 border-gray-300 rounded"
                                                         />
-                                                        <span className="ml-1 text-xs text-gray-700">Active</span>
+                                                        <span className="ml-2 text-xs sm:text-sm text-gray-700">Active</span>
                                                     </div>
                                                     <button
                                                         type="button"
                                                         onClick={() => duplicateVariant(index)}
-                                                        className="text-blue-600 hover:text-blue-700"
+                                                        className="text-blue-600 hover:text-blue-700 p-1.5"
                                                         title="Duplicate"
                                                     >
                                                         <Copy className="w-4 h-4" />
@@ -560,7 +564,7 @@ const VariantManager = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => removeVariant(index)}
-                                                        className="text-red-600 hover:text-red-700"
+                                                        className="text-red-600 hover:text-red-700 p-1.5"
                                                         title="Remove"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
