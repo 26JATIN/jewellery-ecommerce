@@ -22,12 +22,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         pricingMethod: 'fixed',
         metalType: 'gold',
         goldWeight: '',
-        goldPurity: '22',
+        goldPurity: '24',
         silverWeight: '',
         silverPurity: '999',
-        makingChargePercent: '15',
+        makingChargePercent: '',
         stoneValue: '',
         isDynamicPricing: false,
+        discountPercent: '',
         // Enhanced stone specifications
         stones: [],
         // Variants system
@@ -178,12 +179,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 pricingMethod: product.pricingMethod || 'fixed',
                 metalType: product.metalType || 'gold',
                 goldWeight: product.goldWeight || '',
-                goldPurity: product.goldPurity || '22',
+                goldPurity: product.goldPurity ? String(product.goldPurity) : '24',
                 silverWeight: product.silverWeight || '',
-                silverPurity: product.silverPurity || '999',
-                makingChargePercent: product.makingChargePercent || '15',
+                silverPurity: product.silverPurity ? String(product.silverPurity) : '999',
+                makingChargePercent: product.makingChargePercent ? String(product.makingChargePercent) : '',
                 stoneValue: product.stoneValue || '',
                 isDynamicPricing: product.isDynamicPricing || false,
+                discountPercent: product.discountPercent || '',
                 // Enhanced stone specifications
                 stones: product.stones || [],
                 images: product.images || [],
@@ -339,20 +341,8 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             if (result.success) {
                 setCalculatedPrice(result.data);
                 
-                // Auto-update pricing fields if dynamic pricing is enabled
-                if (formData.isDynamicPricing) {
-                    const calculatedSellingPrice = result.data.breakdown.finalPrice;
-                    const stoneValue = parseFloat(formData.stoneValue) || 0;
-                    const totalPrice = calculatedSellingPrice + stoneValue;
-                    
-                    setFormData(prev => ({
-                        ...prev,
-                        sellingPrice: totalPrice.toFixed(2),
-                        price: totalPrice.toFixed(2),
-                        mrp: (totalPrice * 1.1).toFixed(2), // 10% margin for MRP
-                        costPrice: (totalPrice * 0.7).toFixed(2) // Assumed 30% margin
-                    }));
-                }
+                // Don't auto-update pricing fields - let user review calculation first
+                // User must manually click "Calculate Price" to update MRP and Selling Price
             }
         } catch (error) {
             console.error('Price calculation error:', error);
@@ -422,13 +412,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             }));
         }
 
-        // Trigger price calculation for dynamic pricing fields
-        if (['goldWeight', 'goldPurity', 'silverWeight', 'silverPurity', 'makingChargePercent', 'stoneValue', 'metalType'].includes(name) && 
-            formData.isDynamicPricing) {
-            setTimeout(() => {
-                calculateDynamicPrice();
-            }, 500); // Debounce
-        }
+        // Don't auto-trigger price calculation - require manual button click
     };
 
     // Update total stone value when stones change
@@ -695,26 +679,23 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 ...formData,
                 image: imageUrl,
                 images: uploadedImages,
-                // For dynamic pricing, use calculated selling price but keep manual cost price and MRP
-                mrp: parseFloat(formData.mrp), // Always use manual input
-                costPrice: parseFloat(formData.costPrice), // Always use manual input
-                sellingPrice: formData.pricingMethod === 'dynamic'
-                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
-                    : parseFloat(formData.sellingPrice),
-                price: formData.pricingMethod === 'dynamic'
-                    ? (calculatedPrice?.breakdown?.finalPrice || 0)
-                    : parseFloat(formData.sellingPrice),
+                // Always use the form values for pricing (manual input or from calculated price)
+                mrp: parseFloat(formData.mrp),
+                costPrice: parseFloat(formData.costPrice),
+                sellingPrice: parseFloat(formData.sellingPrice),
+                price: parseFloat(formData.sellingPrice),
                 stock: parseInt(formData.stock) || 0,
                 // Dynamic pricing fields
                 metalType: formData.metalType,
                 goldWeight: parseFloat(formData.goldWeight) || 0,
-                goldPurity: parseFloat(formData.goldPurity) || 22,
+                goldPurity: parseFloat(formData.goldPurity) || 24,
                 silverWeight: parseFloat(formData.silverWeight) || 0,
                 silverPurity: parseFloat(formData.silverPurity) || 999,
-                makingChargePercent: parseFloat(formData.makingChargePercent) || 15,
+                makingChargePercent: parseFloat(formData.makingChargePercent) || 0,
                 stoneValue: parseFloat(formData.stoneValue) || 0,
                 isDynamicPricing: formData.isDynamicPricing,
                 pricingMethod: formData.pricingMethod,
+                discountPercent: parseFloat(formData.discountPercent) || 0,
                 lastPriceUpdate: formData.isDynamicPricing ? new Date() : undefined,
                 // Enhanced stone specifications
                 stones: formData.stones.map(stone => ({
@@ -1185,14 +1166,39 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                         <span>Calculate Price</span>
                                     </button>
 
-                                    {calculatedPrice?.breakdown?.finalPrice && (
-                                        <div className="bg-white px-4 py-2 rounded-lg border-2 border-green-300">
-                                            <p className="text-xs text-gray-600">Calculated Price</p>
-                                            <p className="text-xl font-bold text-green-600">
-                                                ₹{Number(calculatedPrice.breakdown.finalPrice).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-3">
+                                        {calculatedPrice?.breakdown?.finalPrice && (
+                                            <>
+                                                <div className="bg-white px-4 py-2 rounded-lg border-2 border-green-300">
+                                                    <p className="text-xs text-gray-600">Calculated MRP</p>
+                                                    <p className="text-xl font-bold text-green-600">
+                                                        ₹{Number(calculatedPrice.breakdown.finalPrice).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const calculatedMRP = calculatedPrice.breakdown.finalPrice;
+                                                        const discount = parseFloat(formData.discountPercent) || 0;
+                                                        const sellingPrice = calculatedMRP * (1 - discount / 100);
+                                                        
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            mrp: calculatedMRP.toFixed(2),
+                                                            sellingPrice: sellingPrice.toFixed(2),
+                                                            price: sellingPrice.toFixed(2)
+                                                        }));
+                                                    }}
+                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 font-medium shadow-md transition-all"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                    Apply to Form
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Price Breakdown */}
@@ -1288,42 +1294,102 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
                         {/* Dynamic Pricing - Cost and Discount */}
                         {formData.pricingMethod === 'dynamic' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Cost Price (₹) *
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="costPrice"
-                                        value={formData.costPrice}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        step="0.01"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
-                                        placeholder="Your actual cost"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Your purchase/manufacturing cost</p>
+                            <div className="space-y-6 mt-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Cost Price (₹) *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="costPrice"
+                                            value={formData.costPrice}
+                                            onChange={handleInputChange}
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                            placeholder="Your actual cost"
+                                            required
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Your purchase/manufacturing cost</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Discount (%)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="discountPercent"
+                                            value={formData.discountPercent || 0}
+                                            onChange={(e) => {
+                                                handleInputChange(e);
+                                                // Auto-update selling price when discount changes
+                                                if (formData.mrp) {
+                                                    const newDiscount = parseFloat(e.target.value) || 0;
+                                                    const newSellingPrice = formData.mrp * (1 - newDiscount / 100);
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        discountPercent: e.target.value,
+                                                        sellingPrice: newSellingPrice.toFixed(2),
+                                                        price: newSellingPrice.toFixed(2)
+                                                    }));
+                                                }
+                                            }}
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
+                                            placeholder="e.g., 10"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Discount on calculated MRP (optional)</p>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Discount (%) *
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="discountPercent"
-                                        value={formData.discountPercent || 0}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        max="100"
-                                        step="0.01"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
-                                        placeholder="e.g., 10"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Discount on calculated MRP</p>
+                                {/* Display calculated prices */}
+                                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                                    <h5 className="text-sm font-semibold text-blue-900 mb-3">Pricing Summary</h5>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                MRP (₹) *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                name="mrp"
+                                                value={formData.mrp}
+                                                onChange={handleInputChange}
+                                                min="0"
+                                                step="0.01"
+                                                className="w-full p-3 border border-blue-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                placeholder="Click 'Calculate Price' first"
+                                                required
+                                            />
+                                            <p className="text-xs text-blue-600 mt-1">Maximum Retail Price from calculation</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Selling Price (₹) *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                name="sellingPrice"
+                                                value={formData.sellingPrice}
+                                                onChange={handleInputChange}
+                                                min="0"
+                                                step="0.01"
+                                                className="w-full p-3 border border-blue-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                placeholder="MRP minus discount"
+                                                required
+                                            />
+                                            <p className="text-xs text-blue-600 mt-1">
+                                                {formData.mrp && formData.discountPercent ? 
+                                                    `MRP ₹${formData.mrp} - ${formData.discountPercent}% discount` : 
+                                                    'Customer pays this price'}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}

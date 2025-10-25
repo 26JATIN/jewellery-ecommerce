@@ -161,6 +161,54 @@ export async function PUT(req, { params }) {
             data.stock = 0;
         }
 
+        // Validate dynamic pricing updates
+        if (data.pricingMethod === 'dynamic' || data.isDynamicPricing) {
+            // For dynamic pricing updates, ensure MRP and selling price are provided
+            if (!data.mrp || data.mrp <= 0) {
+                return NextResponse.json(
+                    { error: 'MRP is required for dynamic pricing. Please calculate price first.' },
+                    { status: 400 }
+                );
+            }
+
+            if (!data.sellingPrice || data.sellingPrice <= 0) {
+                return NextResponse.json(
+                    { error: 'Selling price is required for dynamic pricing. Please calculate price first.' },
+                    { status: 400 }
+                );
+            }
+
+            // Validate pricing logic
+            if (data.sellingPrice > data.mrp) {
+                return NextResponse.json(
+                    { error: 'Selling price cannot be greater than MRP' },
+                    { status: 400 }
+                );
+            }
+
+            if (data.costPrice > data.sellingPrice) {
+                return NextResponse.json(
+                    { error: 'Cost price cannot be greater than selling price' },
+                    { status: 400 }
+                );
+            }
+        } else {
+            // For fixed pricing, validate price fields
+            if (data.sellingPrice > data.mrp) {
+                return NextResponse.json(
+                    { error: 'Selling price cannot be greater than MRP' },
+                    { status: 400 }
+                );
+            }
+
+            if (data.costPrice > data.sellingPrice) {
+                return NextResponse.json(
+                    { error: 'Cost price cannot be greater than selling price' },
+                    { status: 400 }
+                );
+            }
+        }
+
         console.log('About to update product with data:', JSON.stringify(data, null, 2));
 
         const updatedProduct = await Product.findByIdAndUpdate(

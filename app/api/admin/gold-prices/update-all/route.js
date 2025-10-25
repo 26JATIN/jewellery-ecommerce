@@ -86,12 +86,14 @@ export async function POST(request) {
     for (const product of dynamicProducts) {
       try {
         // Calculate new price based on metal type and specifications
+        // IMPORTANT: Only use the weights for the selected metal type
+        const metalType = product.metalType || 'gold';
         const priceCalculation = await calculateJewelryPrice({
-          goldWeight: product.goldWeight || 0,
-          goldPurity: product.goldPurity || 22,
-          silverWeight: product.silverWeight || 0,
+          goldWeight: metalType === 'gold' ? (product.goldWeight || 0) : 0,
+          goldPurity: product.goldPurity || 24,
+          silverWeight: metalType === 'silver' ? (product.silverWeight || 0) : 0,
           silverPurity: product.silverPurity || 999,
-          makingChargePercent: product.makingChargePercent || 15,
+          makingChargePercent: product.makingChargePercent || 0,
           stoneValue: product.stoneValue || 0,
           gstPercent: product.gstPercent || 3,
           currency: 'INR'

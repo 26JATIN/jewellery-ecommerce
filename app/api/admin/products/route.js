@@ -100,53 +100,35 @@ export async function POST(req) {
                 );
             }
 
+            // For dynamic pricing, MRP and sellingPrice should already be calculated on frontend
+            // Validate that they are provided
+            if (!data.mrp || data.mrp <= 0) {
+                return NextResponse.json(
+                    { error: 'MRP is required for dynamic pricing. Please calculate price first.' },
+                    { status: 400 }
+                );
+            }
+
+            if (!data.sellingPrice || data.sellingPrice <= 0) {
+                return NextResponse.json(
+                    { error: 'Selling price is required for dynamic pricing. Please calculate price first.' },
+                    { status: 400 }
+                );
+            }
+
             // Validate discount percent is provided
             if (data.discountPercent === undefined || data.discountPercent === null) {
                 data.discountPercent = 0; // Default to 0% discount
             }
 
-            // Calculate MRP based on current metal rates
-            try {
-                const priceCalc = await calculateJewelryPrice({
-                    goldWeight: data.goldWeight || 0,
-                    goldPurity: data.goldPurity || 22,
-                    silverWeight: data.silverWeight || 0,
-                    silverPurity: data.silverPurity || 999,
-                    makingChargePercent: data.makingChargePercent || 15,
-                    stoneValue: data.stoneValue || 0,
-                    gstPercent: 3,
-                    currency: 'INR'
-                });
+            data.isDynamicPricing = true;
+            data.pricingMethod = 'dynamic';
 
-                if (priceCalc.success) {
-                    // Calculate MRP (auto-calculated from metal rates)
-                    data.mrp = priceCalc.breakdown.finalPrice;
-                    
-                    // Calculate Selling Price = MRP - (MRP × discount%)
-                    const discountMultiplier = 1 - (data.discountPercent / 100);
-                    data.sellingPrice = data.mrp * discountMultiplier;
-                    
-                    data.isDynamicPricing = true;
-                    data.pricingMethod = 'dynamic';
-
-                    // Validate cost price is less than selling price
-                    if (data.costPrice > data.sellingPrice) {
-                        return NextResponse.json(
-                            { error: 'Cost price should be less than selling price for profitability' },
-                            { status: 400 }
-                        );
-                    }
-                } else {
-                    return NextResponse.json(
-                        { error: 'Failed to calculate price: ' + priceCalc.error },
-                        { status: 400 }
-                    );
-                }
-            } catch (error) {
-                console.error('Price calculation error:', error);
+            // Validate cost price is less than selling price
+            if (data.costPrice > data.sellingPrice) {
                 return NextResponse.json(
-                    { error: 'Failed to calculate dynamic price' },
-                    { status: 500 }
+                    { error: 'Cost price should be less than selling price for profitability' },
+                    { status: 400 }
                 );
             }
         } else {
