@@ -123,7 +123,7 @@ export default function ContactPage() {
                         </div>
                         
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
-                            We're Here to Help
+                            We&apos;re Here to Help
                             <br />
                             <span className="text-[#D4AF76]">You Shine</span>
                         </h1>
@@ -146,7 +146,7 @@ export default function ContactPage() {
                         className="text-center"
                     >
                         <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
-                            Whether you're looking for the perfect engagement ring, need assistance with a recent order, or wish to design your own masterpiece — our dedicated team is here for you.
+                            Whether you&apos;re looking for the perfect engagement ring, need assistance with a recent order, or wish to design your own masterpiece — our dedicated team is here for you.
                         </p>
                     </motion.div>
                 </div>
@@ -212,7 +212,7 @@ export default function ContactPage() {
                                     Send us a Message
                                 </h2>
                                 <p className="text-gray-600 font-light mb-8">
-                                    Fill out the form below and we'll get back to you within 24 hours.
+                                    Fill out the form below and we&apos;ll get back to you within 24 hours.
                                 </p>
 
                                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -308,7 +308,7 @@ export default function ContactPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-light text-center"
                                         >
-                                            Thank you! Your message has been sent successfully. We'll get back to you soon.
+                                            Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
                                         </motion.div>
                                     )}
                                 </form>
@@ -423,7 +423,7 @@ export default function ContactPage() {
                         className="text-center text-white"
                     >
                         <h2 className="text-3xl md:text-5xl font-light tracking-tight mb-4">
-                            Let's create something timeless together
+                            Let&apos;s create something timeless together
                         </h2>
                         <p className="text-xl font-light opacity-90">
                             Connect with Nandika Jewellers today

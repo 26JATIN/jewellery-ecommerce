@@ -92,7 +92,7 @@ export default function AboutPage() {
                     >
                         <div className="space-y-6 text-gray-700 text-lg leading-relaxed font-light">
                             <p>
-                                At <span className="text-[#D4AF76] font-normal">Nandika Jewellers</span>, we believe jewelry is not just an ornament — it's a reflection of emotion, legacy, and artistry.
+                                At <span className="text-[#D4AF76] font-normal">Nandika Jewellers</span>, we believe jewelry is not just an ornament — it&apos;s a reflection of emotion, legacy, and artistry.
                             </p>
                             
                             <p>
@@ -108,7 +108,7 @@ export default function AboutPage() {
                             </p>
                             
                             <p className="text-xl text-[#2C2C2C] font-normal italic border-l-4 border-[#D4AF76] pl-6">
-                                We don't just sell jewelry — we create lifelong bonds built on trust, transparency, and timeless design.
+                                We don&apos;t just sell jewelry — we create lifelong bonds built on trust, transparency, and timeless design.
                             </p>
                         </div>
                     </motion.div>
