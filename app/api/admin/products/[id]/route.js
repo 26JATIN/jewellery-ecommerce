@@ -144,14 +144,49 @@ export async function PUT(req, { params }) {
                 );
             }
 
+            // Get base prices for variants
+            const baseMRP = parseFloat(data.mrp) || 0;
+            const baseSellingPrice = parseFloat(data.sellingPrice) || 0;
+            const baseCostPrice = parseFloat(data.costPrice) || 0;
+
             // Process variants - ensure optionCombination is properly handled
+            // AND calculate prices with adjustments
             data.variants = data.variants.map(variant => {
                 console.log('Processing variant:', variant);
+                
+                // Calculate price adjustment for this variant based on its option combination
+                let variantPriceAdjustment = 0;
+                
+                if (variant.optionCombination && data.variantOptions) {
+                    // Loop through each option in the combination
+                    Object.entries(variant.optionCombination).forEach(([optionName, valueName]) => {
+                        // Find the option definition
+                        const option = data.variantOptions.find(opt => opt.name === optionName);
+                        if (option && option.values) {
+                            // Find the value definition
+                            const value = option.values.find(v => v.name === valueName);
+                            if (value && typeof value.priceAdjustment !== 'undefined') {
+                                const adjustment = parseFloat(value.priceAdjustment) || 0;
+                                variantPriceAdjustment += adjustment;
+                            }
+                        }
+                    });
+                }
+
+                // Apply the adjustment to the base prices
+                const variantMRP = baseMRP + variantPriceAdjustment;
+                const variantSellingPrice = baseSellingPrice + variantPriceAdjustment;
+                const variantCostPrice = baseCostPrice + variantPriceAdjustment;
+
                 return {
                     ...variant,
                     // Keep optionCombination as object, not Map - MongoDB handles objects better
                     optionCombination: variant.optionCombination || {},
-                    price: variant.price || {},
+                    price: {
+                        mrp: variantMRP,
+                        costPrice: variantCostPrice,
+                        sellingPrice: variantSellingPrice
+                    },
                     stock: parseInt(variant.stock) || 0,
                     isActive: variant.isActive !== undefined ? variant.isActive : true
                 };
