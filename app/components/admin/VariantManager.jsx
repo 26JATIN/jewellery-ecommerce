@@ -163,9 +163,9 @@ const VariantManager = ({
                 sku: `${productData.sku || 'PROD'}-VAR-${index + 1}`,
                 optionCombination: combo,
                 price: {
-                    mrp: productData.mrp || 0,
-                    costPrice: productData.costPrice || 0,
-                    sellingPrice: productData.sellingPrice || 0
+                    mrp: 0,
+                    costPrice: 0,
+                    sellingPrice: 0
                 },
                 stock: 0,
                 isActive: true,
