@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,8 +12,14 @@ export default function NewArrivals() {
     const router = useRouter();
     const { addToCart, setIsCartOpen } = useCart();
     const [hoveredProduct, setHoveredProduct] = useState(null);
+    const [mounted, setMounted] = useState(false);
     
     const { products: allProducts, loading, error } = useProducts();
+    
+    // Handle client-side mounting
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     
     // Show first 8 products sorted by creation date (newest first)
     const products = React.useMemo(() => {
@@ -93,8 +99,8 @@ export default function NewArrivals() {
                     </p>
                 </motion.div>
 
-                {/* Loading State */}
-                {loading ? (
+                {/* Always show loading state initially or when not mounted */}
+                {!mounted || loading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         {[...Array(8)].map((_, i) => (
                             <div key={i} className="animate-pulse">

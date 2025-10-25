@@ -5,16 +5,20 @@ export function useProducts() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
 
-    const fetchProducts = useCallback(async () => {
+    const fetchProducts = useCallback(async (isRetry = false) => {
         try {
-            setLoading(true);
+            if (!isRetry) {
+                setLoading(true);
+            }
             setError(null);
             
             const res = await fetch('/api/products', {
                 cache: 'no-store',
                 headers: {
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
                 }
             });
             
@@ -23,30 +27,45 @@ export function useProducts() {
                 // API returns paginated response with data nested
                 if (data.success && Array.isArray(data.data)) {
                     setProducts(data.data);
+                    setRetryCount(0); // Reset retry count on success
                 } else if (Array.isArray(data)) {
                     // Backward compatibility if API returns direct array
                     setProducts(data);
+                    setRetryCount(0);
                 } else {
                     console.error('Unexpected API response format:', data);
                     setProducts([]);
                 }
             } else {
-                throw new Error('Failed to fetch products');
+                throw new Error(`Failed to fetch products: ${res.status}`);
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
             setError(err.message);
             setProducts([]); // Ensure products is always an array
+            
+            // Auto-retry up to 2 times with exponential backoff
+            if (retryCount < 2) {
+                const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s
+                setTimeout(() => {
+                    setRetryCount(prev => prev + 1);
+                    fetchProducts(true);
+                }, delay);
+            }
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [retryCount]);
 
     useEffect(() => {
-        fetchProducts();
+        // Only fetch on client side
+        if (typeof window !== 'undefined') {
+            fetchProducts();
+        }
     }, [fetchProducts]);
 
     const refetch = () => {
+        setRetryCount(0);
         fetchProducts();
     };
 
