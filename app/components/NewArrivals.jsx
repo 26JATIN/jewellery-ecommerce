@@ -13,12 +13,15 @@ export default function NewArrivals() {
     const { addToCart, setIsCartOpen } = useCart();
     const [hoveredProduct, setHoveredProduct] = useState(null);
     
-    const { products: allProducts, loading } = useProducts();
+    const { products: allProducts, loading, error } = useProducts();
     
     // Show first 8 products sorted by creation date (newest first)
-    const products = allProducts
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 8);
+    const products = React.useMemo(() => {
+        if (!allProducts || !Array.isArray(allProducts)) return [];
+        return allProducts
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 8);
+    }, [allProducts]);
 
     const handleAddToCart = async (e, product) => {
         e.preventDefault();
@@ -101,6 +104,26 @@ export default function NewArrivals() {
                                 <div className="h-4 bg-gray-200 rounded w-1/3 mx-auto"></div>
                             </div>
                         ))}
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-12">
+                        <p className="text-red-600 mb-4">Failed to load new arrivals. Please refresh the page.</p>
+                        <button 
+                            onClick={() => window.location.reload()} 
+                            className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors"
+                        >
+                            Refresh Page
+                        </button>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-600 mb-4">No new arrivals at the moment. Check back soon!</p>
+                        <button 
+                            onClick={() => router.push('/products')} 
+                            className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors"
+                        >
+                            View All Products
+                        </button>
                     </div>
                 ) : (
                     <>
