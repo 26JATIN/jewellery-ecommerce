@@ -3,13 +3,6 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { fetchLiveGoldPrice, calculateJewelryPrice } from '@/lib/goldPrice';
 
-/**
- * @deprecated This route is deprecated. Use /api/admin/products/bulk-price-update instead
- * This route is maintained for backward compatibility only
- * 
- * IMPORTANT: This route will be removed in a future version
- * Please migrate to the new consolidated route: /api/admin/products/bulk-price-update
- */
 
 export async function POST(request) {
   try {
@@ -123,8 +116,8 @@ export async function POST(request) {
           const discountMultiplier = 1 - (discountPercent / 100);
           const newSellingPrice = newMRP * discountMultiplier;
 
-          // Update product prices (MRP auto-calculated, selling price = MRP - discount%, cost price unchanged)
-          await Product.findByIdAndUpdate(product._id, {
+          // Prepare update object
+          const updateData = {
             mrp: newMRP,
             sellingPrice: newSellingPrice,
             price: newSellingPrice, // For backward compatibility
@@ -132,9 +125,64 @@ export async function POST(request) {
             // Don't update discountPercent - it's manually set by admin
             lastPriceUpdate: new Date(),
             goldPriceAtUpdate: currentGoldPrice
-          });
+          };
+
+          // Update variant prices if product has variants
+          if (product.hasVariants && product.variants && product.variants.length > 0) {
+            console.log(`Updating variants for ${product.name}:`, {
+              variantCount: product.variants.length,
+              hasOptions: !!product.variantOptions,
+              optionsCount: product.variantOptions?.length || 0
+            });
+
+            const updatedVariants = product.variants.map((variant, vIndex) => {
+              // Calculate price adjustment for this variant based on its option combination
+              let variantPriceAdjustment = 0;
+              
+              if (variant.optionCombination && product.variantOptions) {
+                // Loop through each option in the combination
+                Object.entries(variant.optionCombination).forEach(([optionName, valueName]) => {
+                  // Find the option definition
+                  const option = product.variantOptions.find(opt => opt.name === optionName);
+                  if (option && option.values) {
+                    // Find the value definition
+                    const value = option.values.find(v => v.name === valueName);
+                    if (value && typeof value.priceAdjustment !== 'undefined') {
+                      const adjustment = parseFloat(value.priceAdjustment) || 0;
+                      variantPriceAdjustment += adjustment;
+                      console.log(`  Variant ${vIndex}: ${optionName}=${valueName}, adjustment=${adjustment}`);
+                    }
+                  }
+                });
+              }
+
+              console.log(`  Variant ${vIndex} total adjustment: ₹${variantPriceAdjustment}`);
+
+              // Apply the adjustment to the new base prices
+              const variantMRP = newMRP + variantPriceAdjustment;
+              const variantSellingPrice = newSellingPrice + variantPriceAdjustment;
+
+              return {
+                ...variant.toObject ? variant.toObject() : variant,
+                price: {
+                  mrp: variantMRP,
+                  costPrice: variant.price?.costPrice || 0, // Keep existing cost price
+                  sellingPrice: variantSellingPrice
+                }
+              };
+            });
+
+            updateData.variants = updatedVariants;
+            console.log(`Updated ${updatedVariants.length} variants for ${product.name}`);
+          }
+
+          // Update product prices (MRP auto-calculated, selling price = MRP - discount%, cost price unchanged)
+          await Product.findByIdAndUpdate(product._id, updateData);
 
           console.log(`Updated ${product.name} (${product.metalType}): MRP ₹${oldMRP} → ₹${newMRP}, Selling ₹${oldSellingPrice} → ₹${newSellingPrice}`);
+          if (updateData.variants) {
+            console.log(`  - Also updated ${updateData.variants.length} variant prices`);
+          }
 
           updateResults.push({
             productId: product._id.toString(),
@@ -149,6 +197,8 @@ export async function POST(request) {
             mrpChangePercent: oldMRP > 0 ? ((newMRP - oldMRP) / oldMRP * 100) : 0,
             sellingPriceChange: newSellingPrice - oldSellingPrice,
             sellingPriceChangePercent: oldSellingPrice > 0 ? ((newSellingPrice - oldSellingPrice) / oldSellingPrice * 100) : 0,
+            hasVariants: product.hasVariants || false,
+            variantsUpdated: updateData.variants ? updateData.variants.length : 0,
             success: true
           });
 

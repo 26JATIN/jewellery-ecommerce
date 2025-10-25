@@ -57,7 +57,14 @@ const MetalRatesManagement = () => {
                   <h5 className="font-medium text-gray-900 mb-2">Updated Products:</h5>
                   {result.details.filter(item => item.success).slice(0, 10).map((item, index) => (
                     <div key={index} className="text-sm bg-white border border-gray-200 p-3 rounded-lg mb-2 shadow-sm">
-                      <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="font-medium text-gray-900">{item.name}</div>
+                        {item.hasVariants && item.variantsUpdated > 0 && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                            {item.variantsUpdated} variants
+                          </span>
+                        )}
+                      </div>
                       
                       {/* MRP Update */}
                       <div className="flex items-center justify-between text-xs mb-1">

@@ -150,22 +150,35 @@ const VariantManager = ({
             return;
         }
 
+        // Get base prices from product data
+        const baseMRP = parseFloat(productData.mrp) || 0;
+        const baseCostPrice = parseFloat(productData.costPrice) || 0;
+        const baseSellingPrice = parseFloat(productData.sellingPrice) || 0;
+
         // Generate all combinations
         const combinations = generateCombinations(options);
         const newVariants = combinations.map((combo, index) => {
             // Check if variant already exists
             const existing = localVariants.find(v => {
                 const existingCombination = v.optionCombination || {};
-                return JSON.stringify(combo) === JSON.stringify(existingCombination);
+                return JSON.stringify(combo.optionCombination) === JSON.stringify(existingCombination);
             });
 
-            return existing || {
+            // Calculate total price adjustment for this combination
+            const totalPriceAdjustment = combo.priceAdjustment || 0;
+
+            // If variant exists, keep its custom prices, otherwise apply adjustment
+            if (existing) {
+                return existing;
+            }
+
+            return {
                 sku: `${productData.sku || 'PROD'}-VAR-${index + 1}`,
-                optionCombination: combo,
+                optionCombination: combo.optionCombination,
                 price: {
-                    mrp: 0,
-                    costPrice: 0,
-                    sellingPrice: 0
+                    mrp: baseMRP + totalPriceAdjustment,
+                    costPrice: baseCostPrice + totalPriceAdjustment,
+                    sellingPrice: baseSellingPrice + totalPriceAdjustment
                 },
                 stock: 0,
                 isActive: true,
@@ -186,20 +199,24 @@ const VariantManager = ({
 
         const combinations = [];
         
-        const generate = (current, depth) => {
+        const generate = (current, priceAdjustment, depth) => {
             if (depth === optionsWithValues.length) {
-                combinations.push({ ...current });
+                combinations.push({ 
+                    optionCombination: { ...current },
+                    priceAdjustment: priceAdjustment
+                });
                 return;
             }
 
             const option = optionsWithValues[depth];
             option.values.forEach(value => {
                 current[option.name] = value.name;
-                generate(current, depth + 1);
+                const valuePriceAdjustment = parseFloat(value.priceAdjustment) || 0;
+                generate(current, priceAdjustment + valuePriceAdjustment, depth + 1);
             });
         };
 
-        generate({}, 0);
+        generate({}, 0, 0);
         return combinations;
     };
 
@@ -242,6 +259,24 @@ const VariantManager = ({
             )
         };
         setLocalOptions([...localOptions, newOption]);
+    };
+
+    // Calculate price adjustment for a specific variant based on its option combination
+    const calculateVariantPriceAdjustment = (variant) => {
+        let totalAdjustment = 0;
+        const combination = variant.optionCombination || {};
+        
+        Object.entries(combination).forEach(([optionName, valueName]) => {
+            const option = localOptions.find(opt => opt.name === optionName);
+            if (option) {
+                const value = option.values.find(v => v.name === valueName);
+                if (value) {
+                    totalAdjustment += parseFloat(value.priceAdjustment) || 0;
+                }
+            }
+        });
+        
+        return totalAdjustment;
     };
 
     return (
@@ -377,6 +412,19 @@ const VariantManager = ({
                                                 Add Value
                                             </button>
                                         </div>
+                                        
+                                        {/* Column Headers */}
+                                        {option.values.length > 0 && (
+                                            <div className="hidden sm:grid sm:grid-cols-12 gap-2 mb-2 text-xs font-medium text-gray-600">
+                                                <div className="col-span-4">Internal Name</div>
+                                                <div className="col-span-4">Display Name</div>
+                                                <div className="col-span-3">
+                                                    {option.type === 'color' ? 'Color & Price' : 'Price Adj.'}
+                                                </div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+                                        )}
+                                        
                                         <div className="space-y-2">
                                             {option.values.map((value, valueIndex) => (
                                                 <div key={valueIndex} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -384,14 +432,16 @@ const VariantManager = ({
                                                         type="text"
                                                         value={value.name}
                                                         onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'name', e.target.value)}
-                                                        placeholder="Value name"
+                                                        placeholder="e.g., yellow-gold"
+                                                        title="Internal identifier (no spaces)"
                                                         className="flex-1 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                     <input
                                                         type="text"
                                                         value={value.displayName}
                                                         onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'displayName', e.target.value)}
-                                                        placeholder="Display name"
+                                                        placeholder="e.g., Yellow Gold"
+                                                        title="Customer-facing display name"
                                                         className="flex-1 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                     <div className="flex items-center gap-2">
@@ -400,6 +450,7 @@ const VariantManager = ({
                                                                 type="color"
                                                                 value={value.colorCode || '#000000'}
                                                                 onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'colorCode', e.target.value)}
+                                                                title="Color swatch"
                                                                 className="w-10 h-9 border border-gray-300 rounded"
                                                             />
                                                         )}
@@ -407,13 +458,15 @@ const VariantManager = ({
                                                             type="number"
                                                             value={value.priceAdjustment}
                                                             onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'priceAdjustment', parseFloat(e.target.value) || 0)}
-                                                            placeholder="Price +/-"
+                                                            placeholder="₹0"
+                                                            title="Price adjustment (+ for extra, - for discount)"
                                                             className="w-20 sm:w-20 text-sm border border-gray-300 rounded px-2 py-1.5"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => removeOptionValue(optionIndex, valueIndex)}
                                                             className="text-red-600 hover:text-red-700 p-1"
+                                                            title="Remove this value"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
@@ -464,10 +517,23 @@ const VariantManager = ({
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                                         Combination
                                                     </label>
-                                                    <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1.5 rounded min-h-[34px] flex items-center">
-                                                        {Object.entries(variant.optionCombination || {}).map(([key, value]) => 
-                                                            `${key}: ${value}`
-                                                        ).join(', ')}
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1.5 rounded min-h-[34px] flex items-center">
+                                                            {Object.entries(variant.optionCombination || {}).map(([key, value]) => 
+                                                                `${key}: ${value}`
+                                                            ).join(', ')}
+                                                        </div>
+                                                        {(() => {
+                                                            const adjustment = calculateVariantPriceAdjustment(variant);
+                                                            if (adjustment !== 0) {
+                                                                return (
+                                                                    <div className={`text-xs px-2 py-0.5 rounded ${adjustment > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                                        Price Adj: {adjustment > 0 ? '+' : ''}₹{adjustment.toFixed(2)}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
                                                     </div>
                                                 </div>
 

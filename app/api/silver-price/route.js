@@ -66,6 +66,7 @@ export async function POST(request) {
     const {
       silverWeight,
       silverPurity = 925,
+      stoneValue = 0,
       makingChargePercent = 20,
       gstPercent = 3,
       currency = 'INR'
@@ -81,6 +82,7 @@ export async function POST(request) {
     const calculation = await calculateSilverJewelryPrice({
       silverWeight,
       silverPurity,
+      stoneValue,
       makingChargePercent,
       gstPercent,
       currency
