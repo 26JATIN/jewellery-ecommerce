@@ -27,7 +27,7 @@ export default function InstallPrompt() {
       if (!hasBeenDismissed) {
         setTimeout(() => {
           setShowPrompt(true);
-        }, 30000);
+        }, 2000);
       }
     };
 
