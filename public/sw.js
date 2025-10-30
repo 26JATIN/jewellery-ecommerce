@@ -1,5 +1,5 @@
-// Service Worker for Jewelry Ecommerce PWA
-const CACHE_NAME = 'jewelry-ecommerce-v1';
+// Service Worker for Nandika Jewellers PWA
+const CACHE_NAME = 'nandika-jewellers-v1';
 const RUNTIME_CACHE = 'runtime-cache-v1';
 const IMAGE_CACHE = 'image-cache-v1';
 
@@ -236,7 +236,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Jewelry Ecommerce', options)
+    self.registration.showNotification('Nandika Jewellers', options)
   );
 });
 

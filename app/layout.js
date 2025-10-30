@@ -10,14 +10,14 @@ import InstallPrompt from "./components/InstallPrompt";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Jewelry Ecommerce",
-  description: "Ecommerce website for jewelry",
+  title: "Nandika Jewellers",
+  description: "A Bond of trust & Quality - Premium jewelry crafted with precision and passion",
   manifest: "/manifest.json",
   themeColor: "#d4af37",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Jewelry Shop",
+    title: "Nandika Jewellers",
   },
   viewport: {
     width: "device-width",

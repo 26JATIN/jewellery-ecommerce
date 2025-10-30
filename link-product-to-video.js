@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jewellery-ecommerce';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nandika-jewellers';
 
 mongoose.connect(MONGODB_URI)
   .then(async () => {
