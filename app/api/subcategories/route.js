@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Subcategory from '@/models/Subcategory';
 import Category from '@/models/Category';
 import { adminAuth } from '@/middleware/adminAuth';
+import cache from '@/lib/cache';
 
 // GET: Fetch all subcategories (with optional category filter)
 export async function GET(request) {
@@ -12,6 +13,20 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const categoryId = searchParams.get('categoryId');
         const includeInactive = searchParams.get('includeInactive') === 'true';
+        
+        // Generate cache key
+        const cacheKey = `subcategories:${categoryId || 'all'}:${includeInactive}`;
+        
+        // Check cache
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+            return NextResponse.json(cachedData, {
+                headers: {
+                    'X-Cache': 'HIT',
+                    'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200'
+                }
+            });
+        }
         
         let query = {};
         
@@ -25,11 +40,22 @@ export async function GET(request) {
         
         const subcategories = await Subcategory.find(query)
             .populate('category', 'name slug')
-            .sort({ order: 1, name: 1 });
+            .sort({ order: 1, name: 1 })
+            .lean(); // Use lean() for better performance
         
-        return NextResponse.json({
+        const response = {
             success: true,
             subcategories
+        };
+        
+        // Cache for 10 minutes
+        cache.set(cacheKey, response, 10 * 60 * 1000);
+        
+        return NextResponse.json(response, {
+            headers: {
+                'X-Cache': 'MISS',
+                'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200'
+            }
         });
     } catch (error) {
         console.error('Error fetching subcategories:', error);

@@ -1,73 +1,106 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useProducts() {
+export function useProducts(options = {}) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
+    const fetchAttemptRef = useRef(0);
+    const abortControllerRef = useRef(null);
 
-    const fetchProducts = useCallback(async (isRetry = false) => {
+    const fetchProducts = useCallback(async () => {
+        // Cancel any pending requests
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        
+        // Create new abort controller
+        abortControllerRef.current = new AbortController();
+        
         try {
-            if (!isRetry) {
-                setLoading(true);
-            }
+            setLoading(true);
             setError(null);
             
-            const res = await fetch('/api/products', {
-                cache: 'no-store',
+            const res = await fetch('/api/products?limit=100', {
+                signal: abortControllerRef.current.signal,
                 headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache'
+                    'Accept': 'application/json',
                 }
             });
             
-            if (res.ok) {
-                const data = await res.json();
-                // API returns paginated response with data nested
-                if (data.success && Array.isArray(data.data)) {
-                    setProducts(data.data);
-                    setRetryCount(0); // Reset retry count on success
-                } else if (Array.isArray(data)) {
-                    // Backward compatibility if API returns direct array
-                    setProducts(data);
-                    setRetryCount(0);
-                } else {
-                    console.error('Unexpected API response format:', data);
-                    setProducts([]);
-                }
+            // Handle non-OK responses gracefully
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `Server error: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            
+            // Handle response format
+            if (data.success && Array.isArray(data.data)) {
+                setProducts(data.data);
+                fetchAttemptRef.current = 0; // Reset on success
+                setError(null);
+            } else if (Array.isArray(data)) {
+                setProducts(data);
+                fetchAttemptRef.current = 0;
+                setError(null);
+            } else if (data.error) {
+                // API returned error in success response
+                throw new Error(data.error);
             } else {
-                throw new Error(`Failed to fetch products: ${res.status}`);
+                console.warn('Unexpected API response format:', data);
+                setProducts([]);
+                setError('Unexpected response format');
             }
         } catch (err) {
-            console.error('Failed to fetch products:', err);
-            setError(err.message);
-            setProducts([]); // Ensure products is always an array
+            // Ignore abort errors
+            if (err.name === 'AbortError') {
+                return;
+            }
             
-            // Auto-retry up to 2 times with exponential backoff
-            if (retryCount < 2) {
-                const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s
+            const errorMessage = err.message || 'Failed to load products';
+            console.error('Failed to fetch products:', errorMessage);
+            setError(errorMessage);
+            setProducts([]);
+            
+            // Auto-retry with exponential backoff (max 3 attempts)
+            if (fetchAttemptRef.current < 3) {
+                const delay = Math.min(1000 * Math.pow(2, fetchAttemptRef.current), 5000);
+                fetchAttemptRef.current += 1;
+                
+                console.log(`Retrying product fetch in ${delay}ms (attempt ${fetchAttemptRef.current}/3)...`);
+                
                 setTimeout(() => {
-                    setRetryCount(prev => prev + 1);
-                    fetchProducts(true);
+                    fetchProducts();
                 }, delay);
+            } else {
+                // Max retries reached
+                console.error('Max retry attempts reached. Product fetch failed.');
             }
         } finally {
             setLoading(false);
         }
-    }, [retryCount]);
+    }, []);
 
     useEffect(() => {
         // Only fetch on client side
         if (typeof window !== 'undefined') {
             fetchProducts();
         }
+        
+        // Cleanup on unmount
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
     }, [fetchProducts]);
 
-    const refetch = () => {
-        setRetryCount(0);
+    const refetch = useCallback(() => {
+        fetchAttemptRef.current = 0;
         fetchProducts();
-    };
+    }, [fetchProducts]);
 
     return {
         products,

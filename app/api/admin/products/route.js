@@ -5,6 +5,7 @@ import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { calculateJewelryPrice } from '@/lib/goldPrice';
+import cache from '@/lib/cache';
 
 // Middleware to check admin access
 async function checkAdminAccess() {
@@ -268,9 +269,25 @@ export async function POST(req) {
             
             await product.save();
             
+            // Clear product cache after successful save
+            const stats = cache.getStats();
+            stats.keys.forEach(key => {
+                if (key.startsWith('products:')) {
+                    cache.delete(key);
+                }
+            });
+            
         } catch (saveError) {
             try {
                 product = await Product.create(productData);
+                
+                // Clear product cache after successful create
+                const stats = cache.getStats();
+                stats.keys.forEach(key => {
+                    if (key.startsWith('products:')) {
+                        cache.delete(key);
+                    }
+                });
             } catch (createError) {
                 console.error('Both save and create failed:', createError);
                 throw createError;

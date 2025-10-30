@@ -1,0 +1,22 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f5f5f5"/>
+  
+  <!-- Decorative border -->
+  <rect x="10" y="10" width="380" height="380" fill="none" stroke="#d4af76" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Inner rectangle -->
+  <rect x="100" y="100" width="200" height="200" rx="8" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+  
+  <!-- Image icon -->
+  <g transform="translate(150, 150)">
+    <!-- Mountain/landscape icon -->
+    <path d="M 0 50 L 30 10 L 60 30 L 90 0 L 100 50 Z" fill="#d4af76" opacity="0.4"/>
+    <circle cx="25" cy="20" r="8" fill="#8b6b4c" opacity="0.5"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#999">
+    No Image Available
+  </text>
+</svg>

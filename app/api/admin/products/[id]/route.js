@@ -4,6 +4,7 @@ import Product from '@/models/Product';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import cache from '@/lib/cache';
 
 // Middleware to check admin access
 async function checkAdminAccess() {
@@ -259,6 +260,14 @@ export async function PUT(req, { params }) {
             variantsCount: updatedProduct.variants?.length || 0
         });
 
+        // Clear product cache after successful update
+        const stats = cache.getStats();
+        stats.keys.forEach(key => {
+            if (key.startsWith('products:')) {
+                cache.delete(key);
+            }
+        });
+
         return NextResponse.json(updatedProduct);
     } catch (error) {
         console.error('Admin product update error:', error);
@@ -299,6 +308,14 @@ export async function DELETE(req, { params }) {
                 { status: 404 }
             );
         }
+
+        // Clear product cache after successful delete
+        const stats = cache.getStats();
+        stats.keys.forEach(key => {
+            if (key.startsWith('products:')) {
+                cache.delete(key);
+            }
+        });
 
         return NextResponse.json({ message: 'Product deleted successfully' });
     } catch (error) {

@@ -269,6 +269,14 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Create indexes for better query performance
+productSchema.index({ isActive: 1, category: 1 });
+productSchema.index({ isActive: 1, subcategory: 1 });
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, sellingPrice: 1 });
+productSchema.index({ name: 'text', description: 'text', category: 'text' });
+// Note: sku unique index is already defined in schema field definition above
+
 // Middleware to calculate total stock
 productSchema.pre('save', function(next) {
     if (this.hasVariants && this.variants && this.variants.length > 0) {

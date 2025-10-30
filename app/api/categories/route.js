@@ -2,26 +2,53 @@ import { NextResponse } from 'next/server';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
 import connectDB from '@/lib/mongodb';
+import cache from '@/lib/cache';
 
 // GET all categories
 export async function GET() {
     try {
         await connectDB();
         
-        const categories = await Category.find({ isActive: true })
-            .sort({ sortOrder: 1, name: 1 });
+        // Check cache first
+        const cacheKey = 'categories:all';
+        const cachedData = cache.get(cacheKey);
         
-        // Update product counts for each category
-        for (let category of categories) {
-            const productCount = await Product.countDocuments({ 
-                category: category.name, 
-                isActive: true 
+        if (cachedData) {
+            return NextResponse.json(cachedData, {
+                headers: {
+                    'X-Cache': 'HIT',
+                    'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200'
+                }
             });
-            category.productsCount = productCount;
-            await category.save();
         }
+        
+        const categories = await Category.find({ isActive: true })
+            .sort({ sortOrder: 1, name: 1 })
+            .lean(); // Use lean() for better performance
+        
+        // Update product counts for each category in parallel
+        const categoriesWithCounts = await Promise.all(
+            categories.map(async (category) => {
+                const productCount = await Product.countDocuments({ 
+                    category: category.name, 
+                    isActive: true 
+                });
+                return {
+                    ...category,
+                    productsCount: productCount
+                };
+            })
+        );
 
-        return NextResponse.json(categories);
+        // Cache for 10 minutes
+        cache.set(cacheKey, categoriesWithCounts, 10 * 60 * 1000);
+
+        return NextResponse.json(categoriesWithCounts, {
+            headers: {
+                'X-Cache': 'MISS',
+                'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200'
+            }
+        });
     } catch (error) {
         console.error('Error fetching categories:', error);
         return NextResponse.json(

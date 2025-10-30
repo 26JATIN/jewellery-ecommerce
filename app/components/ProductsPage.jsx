@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -19,6 +19,10 @@ export default function ProductsPage() {
     const [sortBy, setSortBy] = useState('featured');
     const [viewMode, setViewMode] = useState('grid');
     const [selectedTags, setSelectedTags] = useState([]);
+    const [dataReady, setDataReady] = useState(false); // Track when categories/subcategories are loaded
+    
+    // Use refs to prevent unnecessary re-fetches
+    const abortControllerRef = useRef(null);
     
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
@@ -37,7 +41,7 @@ export default function ProductsPage() {
         }
     }, [searchParams]);
     
-    // Update subcategories when category changes from URL or when data is loaded
+    // Update subcategories when category changes
     useEffect(() => {
         if (allSubcategories.length === 0 || !categories.length) return;
         
@@ -57,21 +61,8 @@ export default function ProductsPage() {
         }
     }, [selectedCategory, allSubcategories, categories]);
 
-    // Fetch categories, subcategories, and products
-    useEffect(() => {
-        const fetchData = async () => {
-            await Promise.all([
-                fetchCategories(),
-                fetchSubcategories()
-            ]);
-            // Fetch products after categories and subcategories are loaded
-            await fetchProducts();
-        };
-        
-        fetchData();
-    }, []);
-
-    const fetchCategories = async () => {
+    // Fetch categories (only once)
+    const fetchCategories = useCallback(async () => {
         try {
             const response = await fetch('/api/categories');
             const data = await response.json();
@@ -80,15 +71,15 @@ export default function ProductsPage() {
             console.error('Error fetching categories:', error);
             setCategories([{ name: 'All', slug: 'all' }]);
         }
-    };
+    }, []);
 
-    const fetchSubcategories = async () => {
+    // Fetch subcategories (only once)
+    const fetchSubcategories = useCallback(async () => {
         try {
             const response = await fetch('/api/subcategories');
             const data = await response.json();
             if (data.success && Array.isArray(data.subcategories)) {
                 setAllSubcategories(data.subcategories);
-                // Initially show all subcategories
                 setSubcategories(data.subcategories);
             } else {
                 setAllSubcategories([]);
@@ -99,14 +90,35 @@ export default function ProductsPage() {
             setAllSubcategories([]);
             setSubcategories([]);
         }
-    };
+    }, []);
 
-    const fetchProducts = async () => {
+    // Initial data fetch
+    useEffect(() => {
+        const loadInitialData = async () => {
+            await Promise.all([fetchCategories(), fetchSubcategories()]);
+            setDataReady(true); // Signal that data is ready
+        };
+        
+        loadInitialData();
+    }, [fetchCategories, fetchSubcategories]);
+
+    // Fetch products with abort controller
+    const fetchProducts = useCallback(async () => {
+        // Abort previous request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        
+        // Create new abort controller
+        abortControllerRef.current = new AbortController();
+        
         try {
             setLoading(true);
             
             // Build query parameters
             const params = new URLSearchParams();
+            params.append('limit', '100'); // Fetch more at once
+            
             if (selectedCategory !== 'All' && selectedCategory) {
                 params.append('category', selectedCategory);
             }
@@ -120,15 +132,20 @@ export default function ProductsPage() {
             const queryString = params.toString();
             const url = `/api/products${queryString ? `?${queryString}` : ''}`;
             
-            console.log('Fetching products with URL:', url);
-            console.log('Filters:', { selectedCategory, selectedSubcategory, searchTerm });
+            const response = await fetch(url, {
+                signal: abortControllerRef.current.signal,
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
             
-            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
-            console.log('Products API response:', data);
-            
-            // API now returns paginated response with data nested
+            // API returns paginated response with data nested
             if (data.success && Array.isArray(data.data)) {
                 setProducts(data.data);
             } else if (Array.isArray(data)) {
@@ -139,74 +156,66 @@ export default function ProductsPage() {
                 setProducts([]);
             }
         } catch (error) {
+            // Ignore abort errors
+            if (error.name === 'AbortError') {
+                return;
+            }
             console.error('Error fetching products:', error);
             setProducts([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCategory, selectedSubcategory, searchTerm]);
 
-    // Re-fetch products when filters change
+    // Initial data fetch
     useEffect(() => {
-        // Only fetch if we have the necessary data loaded
-        if (categories.length === 0 || allSubcategories.length === 0) {
-            console.log('Waiting for categories and subcategories to load...');
+        fetchCategories();
+        fetchSubcategories();
+    }, [fetchCategories, fetchSubcategories]);
+    
+    // Fetch products when filters change OR when data becomes ready
+    useEffect(() => {
+        // Wait for initial data to load
+        if (!dataReady) {
             return;
         }
         
-        console.log('Filters changed, fetching products...', {
-            selectedCategory,
-            selectedSubcategory,
-            searchTerm
-        });
-        
+        // Fetch products immediately after data is ready
         fetchProducts();
-    }, [selectedCategory, selectedSubcategory, searchTerm, categories.length, allSubcategories.length]);
-
-    // Filter and sort products (client-side filtering for tags only, others handled by API)
-    const filteredProducts = (Array.isArray(products) ? products : [])
-        .filter(product => {
-            const matchesTags = selectedTags.length === 0 || 
-                (product.tags && product.tags.some(tag => selectedTags.includes(tag)));
-            return matchesTags;
-        })
-        .sort((a, b) => {
-            switch (sortBy) {
-                case 'price-low':
-                    return (a.sellingPrice || a.price) - (b.sellingPrice || b.price);
-                case 'price-high':
-                    return (b.sellingPrice || b.price) - (a.sellingPrice || a.price);
-                case 'newest':
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                default:
-                    return 0;
+        
+        // Cleanup on unmount
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
             }
-        });
+        };
+    }, [fetchProducts, dataReady]);
 
-    const handleCategoryClick = (categoryName) => {
-        console.log('Category clicked:', categoryName);
+    // Memoize filtered products
+    const filteredProducts = useMemo(() => {
+        return (Array.isArray(products) ? products : [])
+            .filter(product => {
+                const matchesTags = selectedTags.length === 0 || 
+                    (product.tags && product.tags.some(tag => selectedTags.includes(tag)));
+                return matchesTags;
+            })
+            .sort((a, b) => {
+                switch (sortBy) {
+                    case 'price-low':
+                        return (a.sellingPrice || a.price) - (b.sellingPrice || b.price);
+                    case 'price-high':
+                        return (b.sellingPrice || b.price) - (a.sellingPrice || a.price);
+                    case 'newest':
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    default:
+                        return 0;
+                }
+            });
+    }, [products, selectedTags, sortBy]);
+
+    const handleCategoryClick = useCallback((categoryName) => {
         setSelectedCategory(categoryName);
         setSelectedSubcategory('All'); // Reset subcategory when category changes
-        
-        // Filter subcategories based on selected category
-        if (categoryName === 'All') {
-            setSubcategories(allSubcategories);
-        } else {
-            // Find the category object to get its ID
-            const categoryObj = categories.find(cat => cat.name === categoryName);
-            console.log('Category object:', categoryObj);
-            
-            const filtered = allSubcategories.filter(sub => {
-                // Check if subcategory's category matches selected category
-                const matches = sub.category?.name === categoryName || 
-                               sub.category === categoryName ||
-                               (categoryObj && (sub.category?._id === categoryObj._id || sub.category === categoryObj._id));
-                console.log('Subcategory:', sub.name, 'matches:', matches, 'category:', sub.category);
-                return matches;
-            });
-            console.log('Filtered subcategories:', filtered);
-            setSubcategories(filtered);
-        }
         
         // Update URL without navigation
         const params = new URLSearchParams(searchParams);
@@ -218,9 +227,9 @@ export default function ProductsPage() {
             params.delete('subcategory');
         }
         router.replace(`/products?${params.toString()}`, { shallow: true });
-    };
+    }, [searchParams, router]);
 
-    const handleSubcategoryClick = (subcategoryId) => {
+    const handleSubcategoryClick = useCallback((subcategoryId) => {
         setSelectedSubcategory(subcategoryId);
         
         // Update URL without navigation
@@ -231,14 +240,14 @@ export default function ProductsPage() {
             params.set('subcategory', subcategoryId);
         }
         router.replace(`/products?${params.toString()}`, { shallow: true });
-    };
+    }, [searchParams, router]);
 
-    const clearSearch = () => {
+    const clearSearch = useCallback(() => {
         setSearchTerm('');
         const params = new URLSearchParams(searchParams);
         params.delete('search');
         router.replace(`/products?${params.toString()}`, { shallow: true });
-    };
+    }, [searchParams, router]);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
