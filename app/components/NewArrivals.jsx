@@ -112,14 +112,35 @@ export default function NewArrivals() {
                         ))}
                     </div>
                 ) : error ? (
-                    <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">Failed to load new arrivals. Please refresh the page.</p>
-                        <button 
-                            onClick={() => window.location.reload()} 
-                            className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors"
+                    // Soft error handling - show message but don't force reload
+                    <div className="text-center py-16">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="max-w-md mx-auto"
                         >
-                            Refresh Page
-                        </button>
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-medium text-gray-800 mb-2">Unable to Load New Arrivals</h3>
+                            <p className="text-gray-600 mb-6">We're having trouble loading our latest collection. Please try again.</p>
+                            <div className="flex gap-3 justify-center">
+                                <button 
+                                    onClick={() => window.location.reload()} 
+                                    className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors font-medium"
+                                >
+                                    Refresh Page
+                                </button>
+                                <button 
+                                    onClick={() => router.push('/products')} 
+                                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                >
+                                    View All Products
+                                </button>
+                            </div>
+                        </motion.div>
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-12">

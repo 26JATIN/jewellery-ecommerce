@@ -7,6 +7,7 @@ export function useProducts(options = {}) {
     const [error, setError] = useState(null);
     const fetchAttemptRef = useRef(0);
     const abortControllerRef = useRef(null);
+    const retryTimeoutRef = useRef(null);
 
     const fetchProducts = useCallback(async () => {
         // Cancel any pending requests
@@ -14,12 +15,18 @@ export function useProducts(options = {}) {
             abortControllerRef.current.abort();
         }
         
+        // Clear any pending retry timeouts
+        if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current);
+            retryTimeoutRef.current = null;
+        }
+        
         // Create new abort controller
         abortControllerRef.current = new AbortController();
         
         try {
             setLoading(true);
-            setError(null);
+            // Don't clear error during retries - only on success
             
             const res = await fetch('/api/products?limit=100', {
                 signal: abortControllerRef.current.signal,
@@ -40,18 +47,21 @@ export function useProducts(options = {}) {
             if (data.success && Array.isArray(data.data)) {
                 setProducts(data.data);
                 fetchAttemptRef.current = 0; // Reset on success
-                setError(null);
+                setError(null); // Clear error on success
             } else if (Array.isArray(data)) {
                 setProducts(data);
                 fetchAttemptRef.current = 0;
-                setError(null);
+                setError(null); // Clear error on success
             } else if (data.error) {
                 // API returned error in success response
                 throw new Error(data.error);
             } else {
                 console.warn('Unexpected API response format:', data);
                 setProducts([]);
-                setError('Unexpected response format');
+                // Only set error if max retries reached
+                if (fetchAttemptRef.current >= 2) {
+                    setError('Unexpected response format');
+                }
             }
         } catch (err) {
             // Ignore abort errors
@@ -61,25 +71,29 @@ export function useProducts(options = {}) {
             
             const errorMessage = err.message || 'Failed to load products';
             console.error('Failed to fetch products:', errorMessage);
-            setError(errorMessage);
-            setProducts([]);
             
             // Auto-retry with exponential backoff (max 3 attempts)
-            if (fetchAttemptRef.current < 3) {
-                const delay = Math.min(1000 * Math.pow(2, fetchAttemptRef.current), 5000);
+            if (fetchAttemptRef.current < 2) {
+                const delay = Math.min(1000 * Math.pow(2, fetchAttemptRef.current), 4000);
                 fetchAttemptRef.current += 1;
                 
-                console.log(`Retrying product fetch in ${delay}ms (attempt ${fetchAttemptRef.current}/3)...`);
+                console.log(`Retrying product fetch in ${delay}ms (attempt ${fetchAttemptRef.current + 1}/3)...`);
                 
-                setTimeout(() => {
+                // Don't set products to empty or show error during retries
+                retryTimeoutRef.current = setTimeout(() => {
                     fetchProducts();
                 }, delay);
             } else {
-                // Max retries reached
+                // Max retries reached - now show error
                 console.error('Max retry attempts reached. Product fetch failed.');
+                setError(errorMessage);
+                setProducts([]);
             }
         } finally {
-            setLoading(false);
+            // Only set loading to false if not retrying
+            if (fetchAttemptRef.current >= 2 || error === null) {
+                setLoading(false);
+            }
         }
     }, []);
 
@@ -93,6 +107,9 @@ export function useProducts(options = {}) {
         return () => {
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
+            }
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
             }
         };
     }, [fetchProducts]);

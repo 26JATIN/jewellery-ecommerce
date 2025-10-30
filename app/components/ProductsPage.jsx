@@ -166,12 +166,6 @@ export default function ProductsPage() {
             setLoading(false);
         }
     }, [selectedCategory, selectedSubcategory, searchTerm]);
-
-    // Initial data fetch
-    useEffect(() => {
-        fetchCategories();
-        fetchSubcategories();
-    }, [fetchCategories, fetchSubcategories]);
     
     // Fetch products when filters change OR when data becomes ready
     useEffect(() => {

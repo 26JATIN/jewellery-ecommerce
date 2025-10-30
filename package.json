@@ -26,6 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
+    "critters": "^0.0.25",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.22",
     "jose": "^6.1.0",
