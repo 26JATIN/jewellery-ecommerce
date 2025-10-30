@@ -3,9 +3,19 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import cache from '@/lib/cache';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(req) {
+    let connection;
     try {
-        await connectDB();
+        // Establish database connection with timeout
+        connection = await Promise.race([
+            connectDB(),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+            )
+        ]);
         
         // Get query parameters
         const { searchParams } = new URL(req.url);
@@ -30,13 +40,13 @@ export async function GET(req) {
         // Generate cache key based on query parameters
         const cacheKey = `products:${page}:${limit}:${category || 'all'}:${subcategory || 'all'}:${search || ''}:${sortBy}:${sortOrder}:${minPrice}:${maxPrice}`;
         
-        // Check cache first
+        // Check cache first (only for non-admin requests)
         const cachedData = cache.get(cacheKey);
         if (cachedData) {
             return NextResponse.json(cachedData, {
                 headers: {
                     'X-Cache': 'HIT',
-                    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+                    'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300'
                 }
             });
         }
@@ -79,7 +89,7 @@ export async function GET(req) {
         sort[sortBy] = sortOrder;
         
         // Optimize: Only select necessary fields
-        const selectFields = 'name description category subcategory image images sellingPrice mrp stock sku hasVariants variants tags createdAt goldWeight silverWeight isDynamicPricing metalType';
+        const selectFields = 'name description category subcategory image images sellingPrice mrp stock sku hasVariants variants tags createdAt updatedAt goldWeight silverWeight isDynamicPricing metalType totalStock isActive';
         
         // Execute query with pagination (parallel execution)
         const [rawProducts, totalCount] = await Promise.all([
@@ -142,21 +152,41 @@ export async function GET(req) {
             }
         };
         
-        // Cache the response for 5 minutes
-        cache.set(cacheKey, response, 5 * 60 * 1000);
+        // Cache the response for 2 minutes (reduced from 5)
+        cache.set(cacheKey, response, 2 * 60 * 1000);
         
         return NextResponse.json(response, {
             headers: {
                 'X-Cache': 'MISS',
-                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+                'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300'
             }
         });
     } catch (error) {
         console.error('Products fetch error:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch products', success: false, data: [] },
-            { status: 500 }
-        );
+        
+        // Always return a valid structure even on error
+        const errorResponse = {
+            success: false,
+            data: [],
+            error: error.message || 'Failed to fetch products',
+            pagination: {
+                page: 1,
+                limit: 50,
+                totalProducts: 0,
+                totalPages: 0,
+                hasNextPage: false,
+                hasPrevPage: false,
+                nextPage: null,
+                prevPage: null
+            }
+        };
+        
+        return NextResponse.json(errorResponse, { 
+            status: 500,
+            headers: {
+                'Cache-Control': 'no-store'
+            }
+        });
     }
 }
 

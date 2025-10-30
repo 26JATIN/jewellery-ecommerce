@@ -14,7 +14,7 @@ export default function NewArrivals() {
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const [mounted, setMounted] = useState(false);
     
-    const { products: allProducts, loading, error } = useProducts();
+    const { products: allProducts, loading, error, refetch } = useProducts();
     
     // Handle client-side mounting
     useEffect(() => {
@@ -22,10 +22,20 @@ export default function NewArrivals() {
     }, []);
     
     // Show first 8 products sorted by creation date (newest first)
+    // Fallback to array order if createdAt is missing
     const products = React.useMemo(() => {
-        if (!allProducts || !Array.isArray(allProducts)) return [];
-        return allProducts
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        if (!allProducts || !Array.isArray(allProducts) || allProducts.length === 0) return [];
+        
+        // Filter out invalid products and sort
+        const validProducts = allProducts.filter(p => p && p._id);
+        
+        // Sort by createdAt if available, otherwise use array order
+        return validProducts
+            .sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+                const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+                return dateB - dateA;
+            })
             .slice(0, 8);
     }, [allProducts]);
 
@@ -112,7 +122,7 @@ export default function NewArrivals() {
                         ))}
                     </div>
                 ) : error ? (
-                    // Soft error handling - show message but don't force reload
+                    // Soft error handling - show message with retry option
                     <div className="text-center py-16">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -125,17 +135,17 @@ export default function NewArrivals() {
                                 </svg>
                             </div>
                             <h3 className="text-xl font-medium text-gray-800 mb-2">Unable to Load New Arrivals</h3>
-                            <p className="text-gray-600 mb-6">We're having trouble loading our latest collection. Please try again.</p>
-                            <div className="flex gap-3 justify-center">
+                            <p className="text-gray-600 mb-6 text-sm">We're having trouble loading our latest collection right now.</p>
+                            <div className="flex gap-3 justify-center flex-wrap">
                                 <button 
-                                    onClick={() => window.location.reload()} 
-                                    className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors font-medium"
+                                    onClick={() => refetch()} 
+                                    className="px-6 py-2.5 bg-[#D4AF76] text-white rounded-lg hover:bg-[#C19A65] transition-colors font-medium text-sm"
                                 >
-                                    Refresh Page
+                                    Try Again
                                 </button>
                                 <button 
                                     onClick={() => router.push('/products')} 
-                                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                    className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
                                 >
                                     View All Products
                                 </button>

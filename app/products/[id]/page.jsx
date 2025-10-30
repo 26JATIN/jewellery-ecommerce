@@ -2,8 +2,6 @@
 import { Suspense, use } from 'react';
 import ProductDetail from './ProductDetail';
 
-export const dynamic = 'force-dynamic';
-
 function ProductDetailContent({ params }) {
     const resolvedParams = use(params);
     return <ProductDetail productId={resolvedParams.id} />;

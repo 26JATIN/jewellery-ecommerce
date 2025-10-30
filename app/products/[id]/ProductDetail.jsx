@@ -23,6 +23,7 @@ export default function ProductDetail({ productId }) {
     const [addingToCart, setAddingToCart] = useState(false);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [variantImages, setVariantImages] = useState([]);
+    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
         if (productId) {
@@ -30,25 +31,56 @@ export default function ProductDetail({ productId }) {
         }
     }, [productId]);
 
-    const fetchProduct = async () => {
+    const fetchProduct = async (retry = 0) => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/products/${productId}`);
+            setError('');
+            
+            const response = await fetch(`/api/products/${productId}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                }
+            });
             
             if (response.ok) {
                 const data = await response.json();
                 setProduct(data);
+                setRetryCount(0);
                 
                 // Fetch related products
                 if (data.category) {
                     fetchRelatedProducts(data.category, productId);
                 }
-            } else {
+            } else if (response.status === 404) {
                 setError('Product not found');
+            } else if (response.status === 400) {
+                setError('Invalid product ID');
+            } else {
+                // Retry on server errors (500, 503, etc.)
+                if (retry < 3) {
+                    console.log(`Retrying... attempt ${retry + 1}`);
+                    setTimeout(() => {
+                        setRetryCount(retry + 1);
+                        fetchProduct(retry + 1);
+                    }, 1000 * (retry + 1)); // Exponential backoff
+                } else {
+                    setError('Failed to load product. Please try again.');
+                }
             }
         } catch (error) {
             console.error('Error fetching product:', error);
-            setError('Failed to load product');
+            
+            // Retry on network errors
+            if (retry < 3) {
+                console.log(`Retrying... attempt ${retry + 1}`);
+                setTimeout(() => {
+                    setRetryCount(retry + 1);
+                    fetchProduct(retry + 1);
+                }, 1000 * (retry + 1)); // Exponential backoff
+            } else {
+                setError('Failed to load product. Please check your connection and try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -197,19 +229,35 @@ export default function ProductDetail({ productId }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-light text-gray-900 mb-3">Product Not Found</h3>
+                        <h3 className="text-2xl font-light text-gray-900 mb-3">
+                            {error === 'Invalid product ID' ? 'Invalid Product' : 'Product Not Found'}
+                        </h3>
                         <p className="text-gray-600 font-light mb-6">
-                            The product you're looking for doesn't exist or has been removed.
+                            {error === 'Invalid product ID' 
+                                ? 'The product link appears to be invalid.'
+                                : error || "The product you're looking for doesn't exist or has been removed."}
                         </p>
-                        <Link href="/products">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="px-6 py-3 bg-[#8B6B4C] text-white rounded-full hover:bg-[#7A5D42] transition-colors font-light shadow-lg"
-                            >
-                                Browse Collections
-                            </motion.button>
-                        </Link>
+                        <div className="flex gap-4 justify-center">
+                            {retryCount < 3 && error !== 'Product not found' && error !== 'Invalid product ID' && (
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => fetchProduct(0)}
+                                    className="px-6 py-3 bg-[#D4AF76] text-white rounded-full hover:bg-[#C19A65] transition-colors font-light shadow-lg"
+                                >
+                                    Try Again
+                                </motion.button>
+                            )}
+                            <Link href="/products">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-3 bg-[#8B6B4C] text-white rounded-full hover:bg-[#7A5D42] transition-colors font-light shadow-lg"
+                                >
+                                    Browse Collections
+                                </motion.button>
+                            </Link>
+                        </div>
                     </motion.div>
                 </div>
             </div>

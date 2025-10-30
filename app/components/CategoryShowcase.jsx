@@ -475,17 +475,17 @@ export default function CategoryShowcase() {
                                             <button
                                                 key={filter}
                                                 onClick={() => setSelectedCategory(filter)}
-                                                className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 flex items-center justify-between group ${
+                                                className={`text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-[1.02] flex items-center justify-between group ${
                                                     selectedCategory === filter
-                                                        ? 'bg-foreground text-background shadow-md'
-                                                        : 'text-gray-600 dark:text-gray-300 hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                        ? 'bg-gradient-to-r from-[#D4AF76] to-[#B8935F] text-white shadow-lg shadow-[#D4AF76]/20'
+                                                        : 'text-gray-700 dark:text-gray-300 hover:text-[#8B6B4C] dark:hover:text-[#D4AF76] hover:bg-gradient-to-r hover:from-[#FAF6F1] hover:to-[#F5EFE7] dark:hover:from-[#2A2520] dark:hover:to-[#3A3530] hover:shadow-md border border-transparent hover:border-[#D4AF76]/30'
                                                 }`}
                                             >
                                                 <span className="truncate">{filter}</span>
-                                                <span className={`ml-2 text-xs px-2 py-1 rounded-full transition-colors ${
+                                                <span className={`ml-2 text-xs px-2 py-1 rounded-full transition-all duration-300 ${
                                                     selectedCategory === filter
-                                                        ? 'bg-background text-foreground'
-                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-foreground group-hover:text-background'
+                                                        ? 'bg-white/20 text-white backdrop-blur-sm'
+                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-[#D4AF76] group-hover:text-white'
                                                 }`}>
                                                     {count}
                                                 </span>
@@ -516,17 +516,17 @@ export default function CategoryShowcase() {
                                                 <button
                                                     key={filter}
                                                     onClick={() => setSelectedCategory(filter)}
-                                                    className={`whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                                                    className={`whitespace-nowrap px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group ${
                                                         selectedCategory === filter
-                                                            ? 'bg-foreground text-background shadow-md'
-                                                            : 'text-gray-600 dark:text-gray-300 hover:text-foreground bg-gray-100 dark:bg-gray-800'
+                                                            ? 'bg-gradient-to-r from-[#D4AF76] to-[#B8935F] text-white shadow-lg shadow-[#D4AF76]/20'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:text-[#8B6B4C] dark:hover:text-[#D4AF76] bg-gradient-to-r from-[#FAF6F1] to-[#F5EFE7] dark:from-[#2A2520] dark:to-[#3A3530] hover:shadow-md border border-transparent hover:border-[#D4AF76]/30'
                                                     }`}
                                                 >
                                                     <span>{filter}</span>
-                                                    <span className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                                                    <span className={`text-xs px-2 py-1 rounded-full transition-all duration-300 ${
                                                         selectedCategory === filter
-                                                            ? 'bg-background text-foreground'
-                                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                                            ? 'bg-white/20 text-white backdrop-blur-sm'
+                                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-[#D4AF76] group-hover:text-white'
                                                     }`}>
                                                         {count}
                                                     </span>
