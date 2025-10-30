@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
+import Subcategory from '@/models/Subcategory'; // Import to register the model
 import cache from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
@@ -9,15 +10,9 @@ export const fetchCache = 'force-no-store';
 export const runtime = 'nodejs';
 
 export async function GET(req) {
-    let connection;
     try {
-        // Establish database connection with timeout
-        connection = await Promise.race([
-            connectDB(),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Database connection timeout')), 15000)
-            )
-        ]);
+        // Establish database connection
+        await connectDB();
         
         // Get query parameters
         const { searchParams } = new URL(req.url);
@@ -168,6 +163,8 @@ export async function GET(req) {
         });
     } catch (error) {
         console.error('Products fetch error:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Error name:', error.name);
         
         // Always return a valid structure even on error
         const errorResponse = {
