@@ -21,13 +21,17 @@ export default function NewArrivals() {
         setMounted(true);
     }, []);
     
-    // Show first 8 products sorted by creation date (newest first)
-    // Fallback to array order if createdAt is missing
+    // Show first 8 IN-STOCK products sorted by creation date (newest first)
+    // Filter out products that are out of stock
     const products = React.useMemo(() => {
         if (!allProducts || !Array.isArray(allProducts) || allProducts.length === 0) return [];
         
-        // Filter out invalid products and sort
-        const validProducts = allProducts.filter(p => p && p._id);
+        // Filter out invalid products and out of stock products
+        const validProducts = allProducts.filter(p => {
+            if (!p || !p._id) return false;
+            // Only show products that have stock > 0
+            return p.stock && p.stock > 0;
+        });
         
         // Sort by createdAt if available, otherwise use array order
         return validProducts
