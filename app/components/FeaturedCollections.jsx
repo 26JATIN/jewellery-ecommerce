@@ -15,7 +15,13 @@ export default function FeaturedCollections() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('/api/categories');
+                const timestamp = Date.now();
+                const response = await fetch(`/api/categories?_=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 const data = await response.json();
                 setCategories(data);
                 

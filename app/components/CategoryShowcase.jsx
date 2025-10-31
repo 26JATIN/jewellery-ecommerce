@@ -270,9 +270,22 @@ export default function CategoryShowcase() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const timestamp = Date.now();
         const [categoriesRes, subcategoriesRes] = await Promise.all([
-          fetch('/api/categories', { signal: controller.signal }),
-          fetch('/api/subcategories', { signal: controller.signal })
+          fetch(`/api/categories?_=${timestamp}`, { 
+            signal: controller.signal,
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          }),
+          fetch(`/api/subcategories?_=${timestamp}`, { 
+            signal: controller.signal,
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          })
         ]);
 
         const categoriesData = await categoriesRes.json();

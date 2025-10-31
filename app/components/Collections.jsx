@@ -48,7 +48,13 @@ export default function Collections() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/categories');
+            const timestamp = Date.now();
+            const response = await fetch(`/api/categories?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCategories(data);
@@ -66,7 +72,13 @@ export default function Collections() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/products');
+            const timestamp = Date.now();
+            const response = await fetch(`/api/products?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 // API returns paginated response with data nested

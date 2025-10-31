@@ -64,7 +64,13 @@ export default function ProductsPage() {
     // Fetch categories (only once)
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await fetch('/api/categories');
+            const timestamp = Date.now();
+            const response = await fetch(`/api/categories?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             const data = await response.json();
             setCategories([{ name: 'All', slug: 'all' }, ...data]);
         } catch (error) {
@@ -76,7 +82,13 @@ export default function ProductsPage() {
     // Fetch subcategories (only once)
     const fetchSubcategories = useCallback(async () => {
         try {
-            const response = await fetch('/api/subcategories');
+            const timestamp = Date.now();
+            const response = await fetch(`/api/subcategories?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             const data = await response.json();
             if (data.success && Array.isArray(data.subcategories)) {
                 setAllSubcategories(data.subcategories);

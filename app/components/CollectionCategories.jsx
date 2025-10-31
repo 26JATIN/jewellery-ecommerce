@@ -16,7 +16,13 @@ export default function CollectionCategories() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/categories');
+            const timestamp = Date.now();
+            const response = await fetch(`/api/categories?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 // Show only first 6 categories for homepage
