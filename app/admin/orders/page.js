@@ -233,7 +233,7 @@ function AdminOrdersPage() {
                             )}
                             {searchTerm && (
                                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full">
-                                    Search: "{searchTerm}"
+                                    Search: &quot;{searchTerm}&quot;
                                     <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">
                                         <XCircle className="w-4 h-4" />
                                     </button>

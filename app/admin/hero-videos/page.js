@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import AdminLayout from '../../components/AdminLayout';
 import withAdminAuth from '../../components/withAdminAuth';
 
@@ -389,9 +390,11 @@ function AdminHeroVideosPage() {
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                             <div className="flex items-start gap-4">
                                                 {selectedProduct.images && selectedProduct.images[0] && (
-                                                    <img
+                                                    <Image
                                                         src={selectedProduct.images[0]}
                                                         alt={selectedProduct.name}
+                                                        width={80}
+                                                        height={80}
                                                         className="w-20 h-20 object-cover rounded-lg"
                                                     />
                                                 )}
@@ -446,9 +449,11 @@ function AdminHeroVideosPage() {
                                                             className="w-full flex items-start gap-3 p-3 hover:bg-gray-50 transition text-left border-b border-gray-100 last:border-b-0"
                                                         >
                                                             {product.images && product.images[0] && (
-                                                                <img
+                                                                <Image
                                                                     src={product.images[0]}
                                                                     alt={product.name}
+                                                                    width={64}
+                                                                    height={64}
                                                                     className="w-16 h-16 object-cover rounded-lg"
                                                                 />
                                                             )}

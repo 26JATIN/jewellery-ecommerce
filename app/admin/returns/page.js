@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import AdminLayout from '@/app/components/AdminLayout';
 import withAdminAuth from '@/app/components/withAdminAuth';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,19 +24,6 @@ function AdminReturnsPage() {
         reason: '',
         method: 'original_payment'
     });
-    const [manualReturnData, setManualReturnData] = useState({
-        orderId: '',
-        customerId: '',
-        items: [],
-        reason: '',
-        autoApprove: true,
-        pickupRequired: true,
-        notes: ''
-    });
-
-    useEffect(() => {
-        fetchReturns();
-    }, [filter]);
 
     const fetchReturns = async () => {
         try {
@@ -52,6 +40,11 @@ function AdminReturnsPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchReturns();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filter]);
 
     const handleStatusUpdate = async (returnId, payload, note = '') => {
         try {
@@ -796,9 +789,11 @@ function AdminReturnsPage() {
                                                 <div className="flex items-start space-x-4">
                                                     <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0">
                                                         {item.image && (
-                                                            <img 
+                                                            <Image 
                                                                 src={item.image} 
                                                                 alt={item.name}
+                                                                width={64}
+                                                                height={64}
                                                                 className="w-full h-full object-cover rounded-lg"
                                                             />
                                                         )}
