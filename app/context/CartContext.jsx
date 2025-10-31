@@ -152,6 +152,12 @@ export function CartProvider({ children }) {
             const data = await res.json();
             setCartItems(data.items || []);
             
+            // Trigger vibration feedback on successful add
+            if (navigator.vibrate) {
+                // Short double vibration: 50ms vibrate, 50ms pause, 50ms vibrate
+                navigator.vibrate([50, 50, 50]);
+            }
+            
             // Show success feedback (you can replace this with a toast notification)
             console.log('Item added to cart successfully');
             return true; // Return true on success

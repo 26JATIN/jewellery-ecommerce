@@ -4,10 +4,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
 import { ShoppingBag, X, Trash2, Plus, Minus, ShoppingCart, Sparkles } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function Cart() {
     const router = useRouter();
     const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, loading } = useCart();
+
+    // Handle browser back button to close cart
+    useEffect(() => {
+        if (isCartOpen) {
+            // Push a new state when cart opens
+            window.history.pushState({ cartOpen: true }, '');
+            
+            const handlePopState = (event) => {
+                if (isCartOpen) {
+                    setIsCartOpen(false);
+                    // Prevent actual navigation
+                    event.preventDefault();
+                }
+            };
+
+            window.addEventListener('popstate', handlePopState);
+
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isCartOpen, setIsCartOpen]);
 
     const calculateTotal = () => {
         return (cartItems || []).reduce((total, item) => total + (item.price * item.quantity), 0);

@@ -268,17 +268,29 @@ export default function ProductDetail({ productId }) {
     const currentPrice = {
         mrp: selectedVariant?.price?.mrp || product?.mrp,
         sellingPrice: selectedVariant?.price?.sellingPrice || product?.sellingPrice,
-        stock: selectedVariant?.stock || product?.stock || product?.totalStock
+        stock: selectedVariant?.stock ?? product?.stock ?? product?.totalStock ?? 0
     };
 
     // For products with variants, use total stock if no variant is selected
-    const effectiveStock = product?.hasVariants && !selectedVariant 
-        ? product?.totalStock || 0 
-        : currentPrice.stock;
+    // Otherwise use the selected variant's stock or the product's stock
+    let effectiveStock;
+    if (product?.hasVariants && !selectedVariant) {
+        // Product has variants but none selected - show total stock
+        effectiveStock = product?.totalStock ?? 0;
+    } else if (selectedVariant) {
+        // A variant is selected - use variant stock
+        effectiveStock = selectedVariant?.stock ?? 0;
+    } else {
+        // Regular product without variants - use product stock
+        effectiveStock = product?.stock ?? 0;
+    }
 
     const discount = currentPrice.mrp && currentPrice.sellingPrice && currentPrice.mrp > currentPrice.sellingPrice
         ? Math.round(((currentPrice.mrp - currentPrice.sellingPrice) / currentPrice.mrp) * 100)
         : 0;
+    
+    // Check if product is out of stock
+    const isOutOfStock = effectiveStock <= 0;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white pt-4 md:pt-6 lg:pt-8 pb-20">
@@ -332,12 +344,12 @@ export default function ProductDetail({ productId }) {
                                 </AnimatePresence>
                                 
                                 {/* Stock Badge */}
-                                {hasLowStock(product) && effectiveStock > 0 && effectiveStock <= 5 && (
+                                {!isOutOfStock && effectiveStock > 0 && effectiveStock <= 5 && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-4 py-2 shadow-lg">
                                         <span className="text-sm font-medium">Only {effectiveStock} left!</span>
                                     </div>
                                 )}
-                                {(effectiveStock === 0 || (product?.hasVariants && !selectedVariant && product?.totalStock === 0)) && (
+                                {isOutOfStock && (
                                     <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-4 py-2 shadow-lg">
                                         <span className="text-sm font-medium">Out of Stock</span>
                                     </div>
@@ -551,69 +563,76 @@ export default function ProductDetail({ productId }) {
                         )}
 
                         {/* Quantity Selector */}
-                        <div className="space-y-3">
-                            <label className="text-lg font-light text-[#2C2C2C]">Quantity</label>
-                            <div className="flex items-center gap-4">
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm"
-                                    disabled={quantity <= 1}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                    </svg>
-                                </motion.button>
-                                <span className="text-2xl font-light text-[#2C2C2C] min-w-[3rem] text-center">{quantity}</span>
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setQuantity(Math.min(effectiveStock || 999, quantity + 1))}
-                                    className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={quantity >= (effectiveStock || 999) || effectiveStock === 0}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </motion.button>
+                        {!isOutOfStock && (
+                            <div className="space-y-3">
+                                <label className="text-lg font-light text-[#2C2C2C]">Quantity</label>
+                                <div className="flex items-center gap-4">
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={quantity <= 1}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                        </svg>
+                                    </motion.button>
+                                    <span className="text-2xl font-light text-[#2C2C2C] min-w-[3rem] text-center">{quantity}</span>
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(Math.min(effectiveStock || 999, quantity + 1))}
+                                        className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={quantity >= (effectiveStock || 999)}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </motion.button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Add to Cart Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={handleAddToCart}
-                            disabled={effectiveStock === 0 || addingToCart || (product?.hasVariants && !selectedVariant)}
-                            className={`w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 transition-all shadow-lg ${
-                                effectiveStock === 0
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : addingToCart
-                                    ? 'bg-[#D4AF76] text-white'
-                                    : (product?.hasVariants && !selectedVariant)
-                                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white hover:shadow-xl'
-                            }`}
-                        >
-                            {addingToCart ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                                    Adding to Cart...
-                                </>
-                            ) : effectiveStock === 0 ? (
-                                'Out of Stock'
-                            ) : product?.hasVariants && !selectedVariant ? (
-                                'Please Select Options'
-                            ) : (
-                                <>
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                    </svg>
-                                    Add to Cart
-                                </>
-                            )}
-                        </motion.button>
+                        {!isOutOfStock ? (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleAddToCart}
+                                disabled={addingToCart || (product?.hasVariants && !selectedVariant)}
+                                className={`w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 transition-all shadow-lg ${
+                                    addingToCart
+                                        ? 'bg-[#D4AF76] text-white'
+                                        : (product?.hasVariants && !selectedVariant)
+                                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white hover:shadow-xl'
+                                }`}
+                            >
+                                {addingToCart ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                        Adding to Cart...
+                                    </>
+                                ) : product?.hasVariants && !selectedVariant ? (
+                                    'Please Select Options'
+                                ) : (
+                                    <>
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        Add to Cart
+                                    </>
+                                )}
+                            </motion.button>
+                        ) : (
+                            <div className="w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 bg-gray-300 text-gray-600 cursor-not-allowed shadow-lg">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Out of Stock
+                            </div>
+                        )}
 
                         {/* Features */}
                         <div className="grid grid-cols-2 gap-4 pt-6">
