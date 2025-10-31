@@ -14,8 +14,33 @@ export async function GET(request) {
         const categoryId = searchParams.get('categoryId');
         const includeInactive = searchParams.get('includeInactive') === 'true';
         
-        // Generate cache key
-        const cacheKey = `subcategories:${categoryId || 'all'}:${includeInactive}`;
+        // For admin requests (includeInactive=true), skip caching
+        if (includeInactive) {
+            let query = {};
+            
+            if (categoryId) {
+                query.category = categoryId;
+            }
+            
+            const subcategories = await Subcategory.find(query)
+                .populate('category', 'name slug')
+                .sort({ order: 1, name: 1 })
+                .lean();
+            
+            return NextResponse.json({
+                success: true,
+                subcategories
+            }, {
+                headers: {
+                    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+        }
+        
+        // For public requests, use caching
+        const cacheKey = `subcategories:${categoryId || 'all'}:false`;
         
         // Check cache
         const cachedData = cache.get(cacheKey);
@@ -34,9 +59,7 @@ export async function GET(request) {
             query.category = categoryId;
         }
         
-        if (!includeInactive) {
-            query.isActive = true;
-        }
+        query.isActive = true;
         
         const subcategories = await Subcategory.find(query)
             .populate('category', 'name slug')

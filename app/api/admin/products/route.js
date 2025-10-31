@@ -53,7 +53,13 @@ export async function GET() {
         const products = await Product.find({})
             .populate('subcategory', 'name slug')
             .sort({ createdAt: -1 });
-        return NextResponse.json(products);
+        return NextResponse.json(products, {
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
     } catch (error) {
         console.error('Admin products fetch error:', error);
         return NextResponse.json(

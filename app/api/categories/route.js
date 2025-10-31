@@ -5,11 +5,42 @@ import connectDB from '@/lib/mongodb';
 import cache from '@/lib/cache';
 
 // GET all categories
-export async function GET() {
+export async function GET(request) {
     try {
         await connectDB();
         
-        // Check cache first
+        const { searchParams } = new URL(request.url);
+        const includeInactive = searchParams.get('includeInactive') === 'true';
+        
+        // For admin requests (includeInactive=true), skip caching
+        if (includeInactive) {
+            const categories = await Category.find({})
+                .sort({ sortOrder: 1, name: 1 })
+                .lean();
+            
+            // Update product counts for each category in parallel
+            const categoriesWithCounts = await Promise.all(
+                categories.map(async (category) => {
+                    const productCount = await Product.countDocuments({ 
+                        category: category.name
+                    });
+                    return {
+                        ...category,
+                        productsCount: productCount
+                    };
+                })
+            );
+            
+            return NextResponse.json(categoriesWithCounts, {
+                headers: {
+                    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+        }
+        
+        // For public requests, use caching
         const cacheKey = 'categories:all';
         const cachedData = cache.get(cacheKey);
         

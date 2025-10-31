@@ -31,7 +31,14 @@ function AdminProductsPage() {
     const fetchProducts = async () => {
         try {
             console.log('Fetching products from /api/admin/products...');
-            const res = await fetch('/api/admin/products');
+            const timestamp = Date.now()
+            const res = await fetch(`/api/admin/products?_=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
             console.log('Response status:', res.status);
             
             if (res.ok) {

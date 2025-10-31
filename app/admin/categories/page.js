@@ -48,7 +48,14 @@ function CategoriesAdmin() {
   const fetchCategories = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/categories")
+      const timestamp = Date.now()
+      const response = await fetch(`/api/categories?includeInactive=true&_=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -65,7 +72,14 @@ function CategoriesAdmin() {
 
   const fetchSubcategories = async () => {
     try {
-      const response = await fetch("/api/subcategories?includeInactive=true")
+      const timestamp = Date.now()
+      const response = await fetch(`/api/subcategories?includeInactive=true&_=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setSubcategories(data.subcategories || [])
