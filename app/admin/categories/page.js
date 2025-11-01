@@ -596,6 +596,7 @@ function CategoriesAdmin() {
               </div>
 
               <form
+                id="categoryForm"
                 onSubmit={handleSubmit}
                 className="px-6 py-4 overflow-y-auto max-h-[calc(92vh-180px)] space-y-5"
               >
@@ -728,11 +729,12 @@ function CategoriesAdmin() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  form="categoryForm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                  type="button"
+                  onClick={() => {
+                    const form = document.getElementById('categoryForm');
+                    if (form) {
+                      form.requestSubmit();
+                    }
                   }}
                   disabled={loading || uploadingImage}
                   className="flex-1 py-3 px-4 text-sm font-medium bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200"
@@ -779,6 +781,7 @@ function CategoriesAdmin() {
               </div>
 
               <form
+                id="subcategoryForm"
                 onSubmit={handleSubmitSubcategory}
                 className="px-6 py-4 overflow-y-auto max-h-[calc(92vh-180px)] space-y-5"
               >
@@ -933,11 +936,12 @@ function CategoriesAdmin() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const form = document.querySelector('form[onsubmit]');
-                    if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                  type="button"
+                  onClick={() => {
+                    const form = document.getElementById('subcategoryForm');
+                    if (form) {
+                      form.requestSubmit();
+                    }
                   }}
                   disabled={loading || uploadingImage}
                   className="flex-1 py-3 px-4 text-sm font-medium bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200"
