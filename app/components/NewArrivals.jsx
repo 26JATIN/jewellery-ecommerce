@@ -21,37 +21,46 @@ export default function NewArrivals() {
         setMounted(true);
     }, []);
     
-    // Show first 8 IN-STOCK products sorted by creation date (newest first)
-    // Filter out products that are out of stock
+    // Debug logging
+    useEffect(() => {
+        console.log('NewArrivals Debug:', {
+            allProducts: allProducts?.length,
+            loading,
+            error,
+            mounted
+        });
+    }, [allProducts, loading, error, mounted]);
+    
+    // Show first 8 products sorted by creation date (newest first)
     const products = React.useMemo(() => {
-        if (!allProducts || !Array.isArray(allProducts) || allProducts.length === 0) return [];
+        if (!allProducts || !Array.isArray(allProducts) || allProducts.length === 0) {
+            console.log('NewArrivals: No products available');
+            return [];
+        }
         
-        // Filter out invalid products and out of stock products
+        // Filter out invalid products only (don't filter by stock for new arrivals)
         const validProducts = allProducts.filter(p => {
-            if (!p || !p._id) return false;
-            // Only show products that have stock > 0
-            return p.stock && p.stock > 0;
+            return p && p._id;
         });
         
+        console.log('NewArrivals: Valid products:', validProducts.length);
+        
         // Sort by createdAt if available, otherwise use array order
-        return validProducts
+        const sorted = validProducts
             .sort((a, b) => {
                 const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
                 const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
                 return dateB - dateA;
             })
             .slice(0, 8);
+            
+        console.log('NewArrivals: Final products to display:', sorted.length);
+        return sorted;
     }, [allProducts]);
 
     const handleAddToCart = async (e, product) => {
         e.preventDefault();
         e.stopPropagation();
-        
-        // Check stock before adding
-        if (!product.stock || product.stock <= 0) {
-            alert('This product is out of stock');
-            return;
-        }
         
         const result = await addToCart(product);
         if (result !== false) {
@@ -209,18 +218,7 @@ export default function NewArrivals() {
                                                     <span className="text-xs font-semibold tracking-wider">NEW</span>
                                                 </motion.div>
 
-                                                {/* Out of Stock Badge */}
-                                                {(!product.stock || product.stock <= 0) && (
-                                                    <motion.div
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                        className="absolute top-4 right-4 bg-red-500 text-white rounded-full px-3 py-1.5 shadow-lg z-10"
-                                                    >
-                                                        <span className="text-xs font-semibold tracking-wider">OUT OF STOCK</span>
-                                                    </motion.div>
-                                                )}
-
-                                                {/* Low Stock Badge */}
+                                                {/* Low Stock Badge - only show if stock is defined and low */}
                                                 {product.stock > 0 && product.stock <= 5 && (
                                                     <motion.div
                                                         initial={{ scale: 0 }}
@@ -251,18 +249,13 @@ export default function NewArrivals() {
                                                 {/* Add to Cart Button */}
                                                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                                                     <motion.button 
-                                                        whileHover={{ scale: product.stock > 0 ? 1.05 : 1 }}
-                                                        whileTap={{ scale: product.stock > 0 ? 0.95 : 1 }}
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
                                                         onClick={(e) => handleAddToCart(e, product)}
-                                                        disabled={!product.stock || product.stock <= 0}
-                                                        className={`w-full px-4 py-3 rounded-full transition-all duration-300 text-sm font-medium shadow-xl flex items-center justify-center gap-2 ${
-                                                            !product.stock || product.stock <= 0
-                                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                                                : 'bg-white/95 backdrop-blur-sm text-[#2C2C2C] hover:bg-[#D4AF76] hover:text-white'
-                                                        }`}
+                                                        className="w-full px-4 py-3 rounded-full transition-all duration-300 text-sm font-medium shadow-xl flex items-center justify-center gap-2 bg-white/95 backdrop-blur-sm text-[#2C2C2C] hover:bg-[#D4AF76] hover:text-white"
                                                     >
                                                         <ShoppingBag className="w-4 h-4" />
-                                                        {!product.stock || product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                                                        Add to Cart
                                                     </motion.button>
                                                 </div>
                                             </div>
