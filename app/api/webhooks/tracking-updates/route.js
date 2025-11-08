@@ -50,8 +50,10 @@ export async function POST(request) {
         } = body;
 
         if (!order_id && !sr_order_id) {
-            return NextResponse.json({ error: 'Order ID required' }, { 
-                status: 400,
+            console.log('Webhook received but no order ID provided');
+            // Still return 200 to acknowledge receipt
+            return new Response(null, { 
+                status: 200,
                 headers: corsHeaders 
             });
         }
@@ -69,8 +71,9 @@ export async function POST(request) {
 
         if (!order) {
             console.log('Order not found for Shiprocket webhook. Tried order_id:', order_id, 'sr_order_id:', sr_order_id);
-            return NextResponse.json({ error: 'Order not found' }, { 
-                status: 404,
+            // Still return 200 to acknowledge receipt even if order not found
+            return new Response(null, { 
+                status: 200,
                 headers: corsHeaders 
             });
         }
