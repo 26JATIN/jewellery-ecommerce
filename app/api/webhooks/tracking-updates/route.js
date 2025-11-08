@@ -41,12 +41,26 @@ export async function POST(request) {
     console.log('='.repeat(80));
     
     try {
+        // Log raw headers for debugging
+        const headersList = {};
+        request.headers.forEach((value, key) => {
+            headersList[key] = value;
+        });
+        console.log('📋 Headers:', JSON.stringify(headersList, null, 2));
+        
         // Parse webhook body
         const body = await request.json();
         
         console.log('📥 Webhook Payload:');
         console.log(JSON.stringify(body, null, 2));
         console.log('-'.repeat(80));
+
+        // Log to file for debugging (async, don't wait)
+        fetch(`${request.nextUrl.origin}/api/debug/webhook-logs`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }).catch(err => console.log('Failed to log webhook:', err.message));
 
         // Extract data from webhook
         const {
