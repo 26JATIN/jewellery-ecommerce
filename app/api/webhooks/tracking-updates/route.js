@@ -279,7 +279,17 @@ async function handleReturnUpdate(webhookData) {
         sr_order_id
     });
 
-    if (awb) {
+    // Try to find by shipment_id FIRST (most reliable for returns)
+    if (shipment_id) {
+        returnDoc = await ReturnModel.findOne({ shiprocketReturnShipmentId: String(shipment_id) });
+        if (returnDoc) {
+            console.log('✅ Found return by shipment ID:', shipment_id);
+        }
+    }
+
+    // Then try AWB if not found
+    // Then try AWB if not found
+    if (!returnDoc && awb) {
         returnDoc = await ReturnModel.findOne({ shiprocketReturnAwb: awb });
         if (returnDoc) {
             console.log('✅ Found return by AWB:', awb);
@@ -347,9 +357,7 @@ async function handleReturnUpdate(webhookData) {
         returnDoc.courierName = courier_name;
         updated = true;
         console.log('📝 Updated return courier:', courier_name);
-    }
-
-    if (etd && returnDoc.estimatedPickupDate !== etd) {
+    }    if (etd && returnDoc.estimatedPickupDate !== etd) {
         returnDoc.estimatedPickupDate = etd;
         updated = true;
         console.log('📝 Updated return ETA:', etd);
