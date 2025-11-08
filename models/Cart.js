@@ -53,4 +53,9 @@ const cartSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Create indexes for better query performance
+cartSchema.index({ user: 1 }); // For finding cart by user
+cartSchema.index({ 'items.product': 1 }); // For product-based cart queries
+cartSchema.index({ updatedAt: -1 }); // For cleanup of old carts
+
 export default mongoose.models.Cart || mongoose.model('Cart', cartSchema);

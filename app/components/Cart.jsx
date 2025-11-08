@@ -49,10 +49,7 @@ export default function Cart() {
         return (cartItems || []).reduce((total, item) => total + item.quantity, 0);
     };
 
-    const handleCheckout = () => {
-        setIsCartOpen(false);
-        router.push('/checkout');
-    };
+    // Checkout functionality removed - will be implemented later
 
     const sidebarVariants = {
         hidden: { 
@@ -305,7 +302,7 @@ export default function Cart() {
                                     </div>
 
                                     {/* Total */}
-                                    <div className="flex justify-between items-center mb-4 pt-3 border-t border-gray-200">
+                                    <div className="flex justify-between items-center mb-6 pt-3 border-t border-gray-200">
                                         <span className="text-lg font-bold text-gray-800">Total</span>
                                         <motion.span 
                                             key={calculateTotal()}
@@ -318,30 +315,16 @@ export default function Cart() {
                                     </div>
 
                                     {/* Checkout Button */}
-                                    <motion.button 
-                                        onClick={handleCheckout}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="w-full bg-gradient-to-r from-[#8B6B4C] to-[#725939] text-white py-3.5 sm:py-4 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                                    <button
+                                        onClick={() => {
+                                            setIsCartOpen(false);
+                                            router.push('/checkout');
+                                        }}
+                                        className="w-full bg-gradient-to-r from-[#8B6B4C] to-[#725939] text-white py-4 rounded-xl font-semibold hover:from-[#725939] hover:to-[#5D4A2E] transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2"
                                     >
-                                        <span className="flex items-center justify-center gap-2 text-sm sm:text-base">
-                                            Proceed to Checkout
-                                            <motion.span
-                                                animate={{ x: [0, 5, 0] }}
-                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                            >
-                                                →
-                                            </motion.span>
-                                        </span>
-                                    </motion.button>
-
-                                    {/* Security Badge */}
-                                    <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-500">
-                                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 1L3 5v6c0 5.25 3.5 8.5 7 9 3.5-.5 7-3.75 7-9V5l-7-4z" clipRule="evenodd" />
-                                        </svg>
-                                        <span>Secure checkout powered by Razorpay</span>
-                                    </div>
+                                        <ShoppingBag className="w-5 h-5" />
+                                        Proceed to Checkout
+                                    </button>
                                 </div>
                             </>
                         )}

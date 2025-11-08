@@ -185,10 +185,6 @@ self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-cart') {
     event.waitUntil(syncCart());
   }
-  
-  if (event.tag === 'sync-orders') {
-    event.waitUntil(syncOrders());
-  }
 });
 
 // Sync cart data
@@ -198,16 +194,6 @@ async function syncCart() {
     // Implement cart sync logic here
   } catch (error) {
     console.error('[Service Worker] Cart sync failed:', error);
-  }
-}
-
-// Sync orders data
-async function syncOrders() {
-  try {
-    console.log('[Service Worker] Syncing orders data');
-    // Implement orders sync logic here
-  } catch (error) {
-    console.error('[Service Worker] Orders sync failed:', error);
   }
 }
 

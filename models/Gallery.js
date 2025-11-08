@@ -41,4 +41,9 @@ const gallerySchema = new mongoose.Schema({
     timestamps: true // Automatically adds createdAt and updatedAt
 });
 
+// Create indexes for better query performance
+gallerySchema.index({ isActive: 1, order: 1 }); // For listing active gallery items sorted
+gallerySchema.index({ mediaType: 1, isActive: 1 }); // For filtering by media type
+gallerySchema.index({ tags: 1 }); // For tag-based searches
+
 export default mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);

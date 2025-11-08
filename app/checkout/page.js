@@ -1,277 +1,594 @@
-"use client";
+'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import AddressForm from '../components/checkout/AddressForm';
-import CheckoutSummary from '../components/checkout/CheckoutSummary';
-import CouponCode from '../components/CouponCode';
-import RazorpayScript from '../components/RazorpayScript';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCart } from '@/app/context/CartContext';
+import { 
+    MapPin, 
+    Plus, 
+    Trash2, 
+    Check, 
+    ShoppingBag,
+    AlertCircle,
+    Loader2,
+    ChevronRight,
+    Home
+} from 'lucide-react';
 
 export default function CheckoutPage() {
     const router = useRouter();
     const { cartItems, clearCart } = useCart();
-    const { user, triggerLoginModal } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [shippingData, setShippingData] = useState(null);
-    const [appliedCoupon, setAppliedCoupon] = useState(null);
-    const [originalTotal, setOriginalTotal] = useState(0);
-    const [finalTotal, setFinalTotal] = useState(0);
+    const [addresses, setAddresses] = useState([]);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [showAddressForm, setShowAddressForm] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    const [notes, setNotes] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'online'
+    // Calculate total from cart items
+    const calculateTotal = () => {
+        if (!cartItems || !Array.isArray(cartItems)) return 0;
+        return cartItems.reduce((total, item) => {
+            // Get price from selectedVariant.price.sellingPrice or product price
+            const price = item.selectedVariant?.price?.sellingPrice || 
+                         item.price || 
+                         item.product?.price || 
+                         0;
+            return total + (price * item.quantity);
+        }, 0);
+    };
+    
+    const [formData, setFormData] = useState({
+        fullName: '',
+        phone: '',
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        state: '',
+        pincode: '',
+        isDefault: false
+    });
 
-    // Calculate totals
     useEffect(() => {
-        const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        setOriginalTotal(total);
-        
-        if (appliedCoupon) {
-            setFinalTotal(appliedCoupon.finalTotal);
-        } else {
-            setFinalTotal(total);
-        }
-    }, [cartItems, appliedCoupon]);
+        fetchAddresses();
+    }, []);
 
-    // Redirect to home if user not authenticated
-    useEffect(() => {
-        if (!user) {
-            triggerLoginModal();
-            router.push('/');
-        }
-    }, [user, router, triggerLoginModal]);
-
-    const handleCouponApplied = (couponData) => {
-        setAppliedCoupon(couponData);
-    };
-
-    const handleCouponRemoved = () => {
-        setAppliedCoupon(null);
-    };
-
-    const handleCheckout = async (shippingAddress) => {
+    const fetchAddresses = async () => {
         try {
-            setShippingData(shippingAddress); // Store shipping data
-            setLoading(true);
-
-            const totalAmount = finalTotal; // Use final total after coupon discount
-
-            // Create order first
-            const orderRes = await fetch('/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    items: cartItems,
-                    shippingAddress,
-                    paymentMethod: 'razorpay',
-                    totalAmount,
-                    coupon: appliedCoupon ? {
-                        code: appliedCoupon.couponCode,
-                        discountAmount: appliedCoupon.discountAmount,
-                        originalTotal: appliedCoupon.originalTotal
-                    } : null
-                }),
-            });
-
-            const orderData = await orderRes.json();
-            
-            if (!orderRes.ok) {
-                throw new Error(orderData.error || 'Failed to create order');
-            }
-
-            // Initialize Razorpay with order data
-            await initializeRazorpay(orderData._id, totalAmount, shippingAddress);
-
-        } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Failed to process order. Please try again.');
-            setLoading(false);
-        }
-    };
-
-    const initializeRazorpay = async (orderId, amount, shippingAddress) => {
-        try {
-            const res = await fetch('/api/payment/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    amount: Number(amount) // Ensure amount is a number
-                }),
-            });
-
+            const res = await fetch('/api/addresses');
             const data = await res.json();
-            
-            if (!res.ok) {
-                throw new Error(data.error || 'Failed to create payment');
+            if (res.ok) {
+                setAddresses(data.addresses);
+                const defaultAddr = data.addresses.find(addr => addr.isDefault);
+                if (defaultAddr) setSelectedAddress(defaultAddr._id);
+                else if (data.addresses.length > 0) setSelectedAddress(data.addresses[0]._id);
             }
-
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // This should be available
-                amount: data.amount,
-                currency: data.currency || 'INR',
-                name: "Jewellery Store",
-                description: "Payment for Order #" + orderId,
-                order_id: data.id,
-                handler: async (response) => {
-                    await handlePaymentSuccess(response, orderId);
-                },
-                prefill: {
-                    name: shippingAddress.fullName,
-                    contact: shippingAddress.phone,
-                },
-                theme: {
-                    color: "#8B6B4C",
-                },
-                modal: {
-                    ondismiss: () => {
-                        setLoading(false);
-                    }
-                }
-            };
-
-            // Verify Razorpay is loaded
-            if (!window.Razorpay) {
-                throw new Error('Razorpay SDK not loaded');
-            }
-
-            const paymentObject = new window.Razorpay(options);
-            paymentObject.open();
-        } catch (error) {
-            console.error('Razorpay initialization error:', error);
-            setLoading(false);
-            alert('Payment initialization failed. Please try again.');
-        }
-    };
-
-    const handlePaymentSuccess = async (response, orderId) => {
-        try {
-            setLoading(true);
-            const verifyRes = await fetch('/api/payment/verify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    orderId,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature,
-                }),
-            });
-
-            const verifyData = await verifyRes.json();
-            
-            if (!verifyRes.ok) {
-                throw new Error(verifyData.error || 'Payment verification failed');
-            }
-
-            await clearCart();
-            router.push(`/orders/${orderId}`);
-        } catch (error) {
-            console.error('Payment verification error:', error);
-            router.push(`/orders/${orderId}`);
+        } catch (err) {
+            console.error('Error fetching addresses:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    // Don't render checkout if user is not authenticated
-    if (!user) {
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        setError('');
+        
+        try {
+            const res = await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                setAddresses(data.addresses);
+                const newAddr = data.addresses[data.addresses.length - 1];
+                setSelectedAddress(newAddr._id);
+                setShowAddressForm(false);
+                setFormData({
+                    fullName: '',
+                    phone: '',
+                    addressLine1: '',
+                    addressLine2: '',
+                    city: '',
+                    state: '',
+                    pincode: '',
+                    isDefault: false
+                });
+            } else {
+                setError(data.error || 'Failed to add address');
+            }
+        } catch (err) {
+            setError('Failed to add address');
+        }
+    };
+
+    const handleDeleteAddress = async (addressId) => {
+        if (!confirm('Are you sure you want to delete this address?')) return;
+        
+        try {
+            const res = await fetch(`/api/addresses?id=${addressId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                setAddresses(data.addresses);
+                if (selectedAddress === addressId) {
+                    setSelectedAddress(data.addresses[0]?._id || null);
+                }
+            }
+        } catch (err) {
+            console.error('Error deleting address:', err);
+        }
+    };
+
+    const handlePlaceOrder = async () => {
+        if (!selectedAddress) {
+            setError('Please select a delivery address');
+            return;
+        }
+
+        if (!cartItems || cartItems.length === 0) {
+            setError('Your cart is empty');
+            return;
+        }
+
+        setError('');
+        setSubmitting(true);
+
+        try {
+            const address = addresses.find(addr => addr._id === selectedAddress);
+            const items = cartItems.map(item => ({
+                productId: item.product?._id || item.product,
+                name: item.product?.name || item.name,
+                image: item.selectedVariant?.images?.[0]?.url || item.image || item.product?.images?.[0] || '',
+                quantity: item.quantity,
+                price: item.selectedVariant?.price?.sellingPrice || item.price || item.product?.price || 0,
+                selectedVariant: item.selectedVariant ? {
+                    sku: item.selectedVariant.sku,
+                    price: item.selectedVariant.price?.sellingPrice,
+                    optionCombination: item.selectedVariant.optionCombination
+                } : null
+            }));
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items,
+                    shippingAddress: {
+                        fullName: address.fullName,
+                        phone: address.phone,
+                        addressLine1: address.addressLine1,
+                        addressLine2: address.addressLine2,
+                        city: address.city,
+                        state: address.state,
+                        pincode: address.pincode
+                    },
+                    paymentMethod,
+                    notes
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                clearCart();
+                router.push(`/orders?success=true&orderNumber=${data.order.orderNumber}`);
+            } else {
+                setError(data.error || 'Failed to place order');
+            }
+        } catch (err) {
+            setError('Failed to place order. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 pt-8 md:pt-9 lg:pt-10 flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
-                    <p className="text-gray-600 mb-6">Please log in to continue with checkout</p>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B6B4C] mx-auto"></div>
-                </div>
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 pt-8 md:pt-9 lg:pt-10 pb-12">
-            <RazorpayScript />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="mb-8 text-left">
-                    <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                        Checkout
-                    </h1>
-                    <p className="text-gray-600">Complete your order securely</p>
-                </div>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                >
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
+                    <p className="text-gray-600">Complete your order</p>
+                </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-                    {/* Left Column - Address Form */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-                            <AddressForm onSubmit={handleCheckout} />
-                        </div>
-                    </div>
-
-                    {/* Right Column - Summary & Coupon */}
-                    <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                        {/* Coupon Section */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                            <CouponCode 
-                                cartItems={cartItems.map(item => ({
-                                    productId: item.id,
-                                    name: item.name,
-                                    price: item.price,
-                                    quantity: item.quantity,
-                                    category: item.category
-                                }))}
-                                onCouponApplied={handleCouponApplied}
-                                onCouponRemoved={handleCouponRemoved}
-                                appliedCoupon={appliedCoupon}
-                            />
-                        </div>
-
-                        {/* Order Summary */}
-                        <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100">
-                            <CheckoutSummary 
-                                appliedCoupon={appliedCoupon}
-                                originalTotal={originalTotal}
-                                finalTotal={finalTotal}
-                            />
-                        </div>
-
-                        {/* Security Badge */}
-                        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                            <div className="flex items-center space-x-3">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm font-semibold text-green-900">Secure Checkout</p>
-                                    <p className="text-xs text-green-700">Your payment info is safe with us</p>
-                                </div>
+                <div className="grid lg:grid-cols-3 gap-8">
+                    {/* Left Section - Addresses */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Delivery Address */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-2xl shadow-lg p-6"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                    <MapPin className="w-6 h-6 text-amber-600" />
+                                    Delivery Address
+                                </h2>
+                                <button
+                                    onClick={() => setShowAddressForm(!showAddressForm)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add New
+                                </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Loading Overlay */}
-                {loading && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-white rounded-2xl p-8 shadow-2xl">
-                            <div className="flex flex-col items-center space-y-4">
-                                <div className="relative">
-                                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#D4AF76]"></div>
-                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                        <svg className="w-6 h-6 text-[#8B6B4C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
+                            {/* Address Form */}
+                            <AnimatePresence>
+                                {showAddressForm && (
+                                    <motion.form
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        onSubmit={handleAddAddress}
+                                        className="mb-6 space-y-4 p-4 bg-amber-50 rounded-lg"
+                                    >
+                                        <div className="grid sm:grid-cols-2 gap-4">
+                                            <input
+                                                type="text"
+                                                name="fullName"
+                                                placeholder="Full Name"
+                                                value={formData.fullName}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                placeholder="Phone Number"
+                                                value={formData.phone}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name="addressLine1"
+                                            placeholder="Address Line 1"
+                                            value={formData.addressLine1}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="addressLine2"
+                                            placeholder="Address Line 2 (Optional)"
+                                            value={formData.addressLine2}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        />
+                                        <div className="grid sm:grid-cols-3 gap-4">
+                                            <input
+                                                type="text"
+                                                name="city"
+                                                placeholder="City"
+                                                value={formData.city}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                            <input
+                                                type="text"
+                                                name="state"
+                                                placeholder="State"
+                                                value={formData.state}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                            <input
+                                                type="text"
+                                                name="pincode"
+                                                placeholder="Pincode"
+                                                value={formData.pincode}
+                                                onChange={handleInputChange}
+                                                required
+                                                pattern="[0-9]{6}"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="isDefault"
+                                                checked={formData.isDefault}
+                                                onChange={handleInputChange}
+                                                className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Set as default address</span>
+                                        </label>
+                                        <div className="flex gap-3">
+                                            <button
+                                                type="submit"
+                                                className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
+                                            >
+                                                Save Address
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAddressForm(false)}
+                                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </motion.form>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Saved Addresses */}
+                            <div className="space-y-3">
+                                {addresses.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <Home className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                        <p>No saved addresses. Add one to continue.</p>
                                     </div>
+                                ) : (
+                                    addresses.map((address) => (
+                                        <motion.div
+                                            key={address._id}
+                                            whileHover={{ scale: 1.02 }}
+                                            onClick={() => setSelectedAddress(address._id)}
+                                            className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                                                selectedAddress === address._id
+                                                    ? 'border-amber-600 bg-amber-50'
+                                                    : 'border-gray-200 hover:border-amber-300'
+                                            }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-start gap-3 flex-1">
+                                                    <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                                        selectedAddress === address._id
+                                                            ? 'border-amber-600 bg-amber-600'
+                                                            : 'border-gray-300'
+                                                    }`}>
+                                                        {selectedAddress === address._id && (
+                                                            <Check className="w-3 h-3 text-white" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h3 className="font-semibold text-gray-900">{address.fullName}</h3>
+                                                            {address.isDefault && (
+                                                                <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">
+                                                                    Default
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm text-gray-600">{address.phone}</p>
+                                                        <p className="text-sm text-gray-700 mt-2">
+                                                            {address.addressLine1}
+                                                            {address.addressLine2 && `, ${address.addressLine2}`}
+                                                        </p>
+                                                        <p className="text-sm text-gray-700">
+                                                            {address.city}, {address.state} - {address.pincode}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteAddress(address._id);
+                                                    }}
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+
+                        {/* Payment Method */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-white rounded-2xl shadow-lg p-6"
+                        >
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Method</h2>
+                            <div className="space-y-3">
+                                {/* Cash on Delivery */}
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    onClick={() => setPaymentMethod('cod')}
+                                    className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                                        paymentMethod === 'cod'
+                                            ? 'border-amber-600 bg-amber-50'
+                                            : 'border-gray-200 hover:border-amber-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                            paymentMethod === 'cod'
+                                                ? 'border-amber-600 bg-amber-600'
+                                                : 'border-gray-300'
+                                        }`}>
+                                            {paymentMethod === 'cod' && (
+                                                <Check className="w-3 h-3 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-gray-900">Cash on Delivery</h3>
+                                            <p className="text-sm text-gray-600">Pay when you receive your order</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Online Payment */}
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    onClick={() => setPaymentMethod('online')}
+                                    className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                                        paymentMethod === 'online'
+                                            ? 'border-amber-600 bg-amber-50'
+                                            : 'border-gray-200 hover:border-amber-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                            paymentMethod === 'online'
+                                                ? 'border-amber-600 bg-amber-600'
+                                                : 'border-gray-300'
+                                        }`}>
+                                            {paymentMethod === 'online' && (
+                                                <Check className="w-3 h-3 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-gray-900">Online Payment</h3>
+                                            <p className="text-sm text-gray-600">Pay securely using UPI, Card, or Net Banking</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </motion.div>
+
+                        {/* Order Notes */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className="bg-white rounded-2xl shadow-lg p-6"
+                        >
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">Order Notes (Optional)</h2>
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                placeholder="Any special instructions for your order?"
+                                rows={4}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                            />
+                        </motion.div>
+                    </div>
+
+                    {/* Right Section - Order Summary */}
+                    <div className="lg:col-span-1">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-white rounded-2xl shadow-lg p-6 sticky top-6"
+                        >
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <ShoppingBag className="w-6 h-6 text-amber-600" />
+                                Order Summary
+                            </h2>
+
+                            {/* Cart Items */}
+                            <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                                {cartItems && cartItems.map((item) => (
+                                    <div key={item._id} className="flex gap-3 pb-4 border-b border-gray-200">
+                                        <img
+                                            src={item.selectedVariant?.images?.[0]?.url || item.image || item.product?.images?.[0] || '/placeholder.png'}
+                                            alt={item.product?.name || item.name || 'Product'}
+                                            className="w-16 h-16 object-cover rounded-lg"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-medium text-gray-900 text-sm truncate">
+                                                {item.product?.name || item.name || 'Product'}
+                                            </h3>
+                                            {item.selectedVariant && (
+                                                <p className="text-xs text-gray-600">
+                                                    {item.selectedVariant.sku && `SKU: ${item.selectedVariant.sku}`}
+                                                </p>
+                                            )}
+                                            <p className="text-sm text-gray-700 mt-1">
+                                                ₹{(item.selectedVariant?.price?.sellingPrice || item.price || item.product?.price || 0).toLocaleString()} × {item.quantity}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Total */}
+                            <div className="space-y-3 mb-6 pt-4 border-t-2 border-gray-200">
+                                <div className="flex justify-between text-gray-700">
+                                    <span>Subtotal</span>
+                                    <span>₹{calculateTotal().toLocaleString()}</span>
                                 </div>
-                                <div className="text-center">
-                                    <p className="text-lg font-semibold text-gray-900">Processing your order...</p>
-                                    <p className="text-sm text-gray-600 mt-1">Please wait while we secure your payment</p>
+                                <div className="flex justify-between text-gray-700">
+                                    <span>Shipping</span>
+                                    <span className="text-green-600">FREE</span>
+                                </div>
+                                <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
+                                    <span>Total</span>
+                                    <span className="text-amber-600">₹{calculateTotal().toLocaleString()}</span>
                                 </div>
                             </div>
-                        </div>
+
+                            {/* Error Message */}
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2"
+                                >
+                                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </motion.div>
+                            )}
+
+                            {/* Place Order Button */}
+                            <button
+                                onClick={handlePlaceOrder}
+                                disabled={submitting || !selectedAddress || !cartItems || cartItems.length === 0}
+                                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl font-semibold hover:from-amber-700 hover:to-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    <>
+                                        Place Order
+                                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+                                    </>
+                                )}
+                            </button>
+
+                            <p className="text-xs text-gray-500 text-center mt-4">
+                                By placing your order, you agree to our terms and conditions
+                            </p>
+                        </motion.div>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

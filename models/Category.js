@@ -4,7 +4,6 @@ const categorySchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: true,
         trim: true
     },
     description: {
@@ -18,7 +17,6 @@ const categorySchema = new mongoose.Schema({
     },
     slug: {
         type: String,
-        unique: true,
         lowercase: true,
         trim: true
     },
@@ -37,6 +35,12 @@ const categorySchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// Create indexes for better query performance
+categorySchema.index({ slug: 1 }, { unique: true }); // Unique slug index
+categorySchema.index({ name: 1 }, { unique: true }); // Unique name index
+categorySchema.index({ isActive: 1, sortOrder: 1 }); // For active category listings sorted
+categorySchema.index({ isActive: 1, productsCount: -1 }); // For popular categories
 
 // Generate slug from name before saving
 categorySchema.pre('save', function(next) {

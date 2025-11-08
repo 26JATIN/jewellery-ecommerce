@@ -92,10 +92,6 @@ const couponSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        orderId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Order'
-        },
         usedAt: {
             type: Date,
             default: Date.now

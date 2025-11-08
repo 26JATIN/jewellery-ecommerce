@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
-import Order from '@/models/Order';
 import User from '@/models/User';
-import Return from '@/models/Return';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -43,36 +41,16 @@ export async function GET(req) {
             activeProducts,
             lowStockProducts,
             outOfStockProducts,
-            totalOrders,
             totalUsers,
-            revenueData,
-            totalInventoryValue,
-            totalReturns,
-            pendingReturns,
-            completedReturns,
-            refundAmount
+            totalInventoryValue
         ] = await Promise.all([
             Product.countDocuments(),
             Product.countDocuments({ isActive: true }),
             Product.countDocuments({ stock: { $lt: 10, $gt: 0 } }),
             Product.countDocuments({ stock: 0 }),
-            Order.countDocuments(),
             User.countDocuments(),
-            Order.aggregate([
-                { $match: { 'payment.status': 'completed' } },
-                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-            ]),
             Product.aggregate([
                 { $group: { _id: null, total: { $sum: { $multiply: ['$costPrice', '$stock'] } } } }
-            ]),
-            Return.countDocuments(),
-            Return.countDocuments({ 
-                status: { $in: ['requested', 'pending_approval', 'approved', 'pickup_scheduled'] } 
-            }),
-            Return.countDocuments({ status: 'completed' }),
-            Return.aggregate([
-                { $match: { status: { $in: ['refund_processed', 'completed'] } } },
-                { $group: { _id: null, total: { $sum: '$refundDetails.refundAmount' } } }
             ])
         ]);
 
@@ -81,14 +59,8 @@ export async function GET(req) {
             activeProducts,
             lowStockProducts,
             outOfStockProducts,
-            totalOrders,
             totalUsers,
-            revenue: revenueData[0]?.total || 0,
-            inventoryValue: totalInventoryValue[0]?.total || 0,
-            totalReturns,
-            pendingReturns,
-            completedReturns,
-            totalRefunds: refundAmount[0]?.total || 0
+            inventoryValue: totalInventoryValue[0]?.total || 0
         });
     } catch (error) {
         console.error('Stats fetch error:', error);

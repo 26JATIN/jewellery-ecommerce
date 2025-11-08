@@ -275,6 +275,11 @@ productSchema.index({ isActive: 1, subcategory: 1 });
 productSchema.index({ isActive: 1, createdAt: -1 });
 productSchema.index({ isActive: 1, sellingPrice: 1 });
 productSchema.index({ name: 'text', description: 'text', category: 'text' });
+productSchema.index({ category: 1, isActive: 1, createdAt: -1 }); // Compound index for category listings
+productSchema.index({ subcategory: 1, isActive: 1, createdAt: -1 }); // Compound index for subcategory listings
+productSchema.index({ isActive: 1, stock: 1 }); // For stock filtering
+productSchema.index({ isDynamicPricing: 1, metalType: 1 }); // For dynamic pricing queries
+productSchema.index({ tags: 1, isActive: 1 }); // For tag-based filtering
 // Note: sku unique index is already defined in schema field definition above
 
 // Middleware to calculate total stock

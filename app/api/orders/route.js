@@ -1,450 +1,239 @@
-import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
-import Return from '@/models/Return';
-import Coupon from '@/models/Coupon';
+import Cart from '@/models/Cart';
 import Product from '@/models/Product';
-import { verifyToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
-import { inventoryService } from '@/lib/inventoryService';
+import { verifyAuth } from '@/lib/auth';
+import { NextResponse } from 'next/server';
 
-// GET: Fetch user orders with filtering options
-export async function GET(req) {
+export async function GET(request) {
     try {
-        const cookieStore = await cookies();
-        const token = await cookieStore.get('token');
-
-        if (!token) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
+        const user = await verifyAuth(request);
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const decoded = verifyToken(token.value);
-        if (!decoded || !decoded.userId) {
-            return NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
-            );
-        }
-
-        const { searchParams } = new URL(req.url);
-        const status = searchParams.get('status');
-        const returnEligible = searchParams.get('returnEligible') === 'true';
-        const limit = parseInt(searchParams.get('limit')) || 20;
 
         await connectDB();
-
-        let query = { user: decoded.userId };
-        
-        // If looking for return-eligible orders
-        if (returnEligible) {
-            // Include all orders except cancelled ones
-            query.status = { $ne: 'cancelled' };
-        } else if (status) {
-            // Filter by specific status
-            query.status = status;
-        }
-
-        const orders = await Order.find(query)
+        const orders = await Order.find({ userId: user.userId })
             .sort({ createdAt: -1 })
-            .limit(limit);
+            .populate('items.productId', 'name images');
 
-        // If fetching for returns, filter out orders that already have active returns
-        if (returnEligible) {
-            const orderIds = orders.map(order => order._id);
-            
-            // Find orders that already have active return requests
-            const existingReturns = await Return.find({
-                order: { $in: orderIds },
-                status: { $nin: ['cancelled', 'completed'] }
-            }).distinct('order');
-
-            // Filter out orders with existing returns
-            const eligibleOrders = orders.filter(order => 
-                !existingReturns.some(returnOrderId => 
-                    returnOrderId.toString() === order._id.toString()
-                )
-            );
-
-            return NextResponse.json({
-                success: true,
-                orders: eligibleOrders,
-                total: eligibleOrders.length
-            });
-        }
-
-        return NextResponse.json({
-            success: true,
-            orders,
-            total: orders.length
-        });
-
+        return NextResponse.json({ orders });
     } catch (error) {
         console.error('Error fetching orders:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch orders' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
     }
 }
 
-export async function POST(req) {
+export async function POST(request) {
     try {
-        const cookieStore = await cookies();
-        const token = await cookieStore.get('token');
-
-        if (!token) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
+        const user = await verifyAuth(request);
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const decoded = verifyToken(token.value);
-        if (!decoded || !decoded.userId) {
-            return NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
-            );
+        const body = await request.json();
+        const { items, shippingAddress, notes, paymentMethod = 'cod' } = body;
+
+        if (!items || items.length === 0) {
+            return NextResponse.json({ error: 'No items in order' }, { status: 400 });
         }
 
-        const { items, shippingAddress, paymentMethod, totalAmount, coupon } = await req.json();
+        if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.phone || 
+            !shippingAddress.addressLine1 || !shippingAddress.city || 
+            !shippingAddress.state || !shippingAddress.pincode) {
+            return NextResponse.json({ error: 'Complete shipping address required' }, { status: 400 });
+        }
+
+        if (!['cod', 'online'].includes(paymentMethod)) {
+            return NextResponse.json({ error: 'Invalid payment method' }, { status: 400 });
+        }
 
         await connectDB();
 
-        // Validate items array
-        if (!items || !Array.isArray(items) || items.length === 0) {
-            return NextResponse.json(
-                { error: 'Cart is empty' },
-                { status: 400 }
-            );
+        // Validate stock for each item
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return NextResponse.json({ 
+                    error: `Product ${item.name} not found` 
+                }, { status: 404 });
+            }
+
+            // Check stock
+            if (item.selectedVariant && product.hasVariants) {
+                const variant = product.variants.find(
+                    v => v.name === item.selectedVariant.name && v.value === item.selectedVariant.value
+                );
+                if (!variant) {
+                    return NextResponse.json({ 
+                        error: `Variant not found for ${item.name}` 
+                    }, { status: 400 });
+                }
+                if (variant.stock < item.quantity) {
+                    return NextResponse.json({ 
+                        error: `Insufficient stock for ${item.name} - ${item.selectedVariant.value}` 
+                    }, { status: 400 });
+                }
+            } else {
+                if (product.stock < item.quantity) {
+                    return NextResponse.json({ 
+                        error: `Insufficient stock for ${item.name}` 
+                    }, { status: 400 });
+                }
+            }
         }
 
-        // SERVER-SIDE VALIDATION: Calculate actual cart total and check stock
-        // Extract product IDs properly (handle both string and object formats)
-        const productIds = items.map(item => {
-            const productId = item.product || item.productId || item.id || item._id;
-            // Convert to string if it's an object
-            return typeof productId === 'object' && productId._id 
-                ? productId._id.toString()
-                : productId?.toString();
-        }).filter(Boolean); // Remove any undefined/null values
-        
-        if (productIds.length === 0) {
-            return NextResponse.json(
-                { error: 'Invalid cart items: No product IDs found' },
-                { status: 400 }
-            );
-        }
-        
-        const products = await Product.find({ _id: { $in: productIds } });
-        
-        // Check stock availability first
-        const stockErrors = [];
-        const notFoundProducts = [];
-        
-        for (const item of items) {
-            const productId = item.product || item.productId || item.id || item._id;
-            const productIdString = typeof productId === 'object' && productId._id 
-                ? productId._id.toString()
-                : productId?.toString();
-                
-            const product = products.find(p => p._id.toString() === productIdString);
-            
-            if (!product) {
-                notFoundProducts.push({
-                    name: item.name || 'Unknown Product',
-                    id: productIdString,
-                    originalItem: item
-                });
-                continue;
-            }
-            
-            // Validate stock availability (handle variants)
-            let currentStock = product.stock;
-            let variantInfo = '';
-            
-            if (item.variantId && product.hasVariants) {
-                const variant = product.variants.id(item.variantId);
-                if (!variant) {
-                    notFoundProducts.push({
-                        name: item.name || 'Unknown Product',
-                        id: productIdString,
-                        variantId: item.variantId,
-                        originalItem: item
-                    });
-                    continue;
-                }
-                
-                if (!variant.isActive) {
-                    stockErrors.push({
-                        productName: product.name,
-                        variantSku: variant.sku,
-                        error: 'Variant is no longer available'
-                    });
-                    continue;
-                }
-                
-                currentStock = variant.stock;
-                variantInfo = ` (Variant: ${variant.sku})`;
-            } else if (product.hasVariants && !item.variantId) {
-                stockErrors.push({
-                    productName: product.name,
-                    error: 'Product requires variant selection'
-                });
-                continue;
-            }
-            
-            if (currentStock < item.quantity) {
-                stockErrors.push({
-                    productName: product.name + variantInfo,
-                    requested: item.quantity,
-                    available: currentStock
-                });
-            }
-        }
-        
-        // If products not found, return detailed error
-        if (notFoundProducts.length > 0) {
-            console.error('Products not found:', notFoundProducts);
-            return NextResponse.json(
-                { 
-                    error: `${notFoundProducts.length} product(s) not found in database`,
-                    details: notFoundProducts.map(p => `${p.name} (ID: ${p.id})`).join(', '),
-                    notFoundProducts: notFoundProducts
-                },
-                { status: 404 }
-            );
-        }
-        
-        // If any stock issues, return error
-        if (stockErrors.length > 0) {
-            return NextResponse.json(
-                { 
-                    error: 'Insufficient stock for some items',
-                    stockErrors: stockErrors 
-                },
-                { status: 400 }
-            );
-        }
-        
-        let calculatedTotal = 0;
-        const enrichedItems = items.map(item => {
-            const productId = item.product || item.productId || item.id || item._id;
-            const productIdString = typeof productId === 'object' && productId._id 
-                ? productId._id.toString()
-                : productId?.toString();
-                
-            const product = products.find(p => p._id.toString() === productIdString);
-            if (!product) {
-                // This shouldn't happen as we already checked above
-                throw new Error(`Product ${item.name || productIdString} not found`);
-            }
-            
-            // Handle variant pricing and data
-            let finalPrice = Number(product.sellingPrice || product.price || 0);
-            let variantImage = product.image || product.images?.[0]?.url;
-            let variantData = null;
-            
-            if (item.variantId && product.hasVariants) {
-                const variant = product.variants.id(item.variantId);
-                if (variant) {
-                    // Variant price is an object, use sellingPrice
-                    finalPrice = Number(variant.price?.sellingPrice || variant.price || 0);
-                    if (variant.image) {
-                        variantImage = variant.image;
-                    }
-                    
-                    variantData = {
-                        sku: variant.sku,
-                        optionCombination: new Map(Object.entries(variant.options || {})),
-                        price: {
-                            mrp: Number(variant.price?.mrp || 0),
-                            costPrice: Number(variant.price?.costPrice || 0),
-                            sellingPrice: Number(variant.price?.sellingPrice || finalPrice)
-                        }
-                    };
-                }
-            }
-            
-            const itemTotal = finalPrice * Number(item.quantity || 0);
-            
-            // Validate calculations
-            if (isNaN(finalPrice) || isNaN(itemTotal)) {
-                throw new Error(`Invalid price calculation for product ${product.name}: finalPrice=${finalPrice}, quantity=${item.quantity}`);
-            }
-            
-            calculatedTotal += itemTotal;
-            
-            return {
-                product: product._id,
-                variantId: item.variantId || null,
-                selectedVariant: variantData,
-                name: product.name,
-                price: Number(finalPrice), // Ensure it's a number
-                quantity: Number(item.quantity), // Ensure it's a number
-                image: variantImage,
-                category: product.category,
-                subcategory: product.subcategory || null
-            };
+        // Calculate total
+        const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Create order
+        const order = new Order({
+            userId: user.userId,
+            items: items.map(item => ({
+                productId: item.productId,
+                name: item.name,
+                image: item.image,
+                quantity: item.quantity,
+                price: item.price,
+                selectedVariant: item.selectedVariant
+            })),
+            shippingAddress,
+            totalAmount,
+            paymentMethod,
+            paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
+            notes,
+            status: 'pending'
         });
 
-        // SERVER-SIDE VALIDATION: Verify coupon discount if applied
-        let validatedCouponData = null;
-        if (coupon && coupon.code) {
-            const couponDoc = await Coupon.findOne({ 
-                code: coupon.code.toUpperCase(),
-                isActive: true 
-            });
-
-            if (!couponDoc) {
-                return NextResponse.json(
-                    { error: 'Invalid coupon code' },
-                    { status: 400 }
-                );
-            }
-
-            // Validate coupon is currently valid
-            if (!couponDoc.isCurrentlyValid) {
-                return NextResponse.json(
-                    { error: 'Coupon has expired or is not yet active' },
-                    { status: 400 }
-                );
-            }
-
-            // Check user usage limit
-            if (!couponDoc.canUserUseCoupon(decoded.userId)) {
-                return NextResponse.json(
-                    { error: 'You have already used this coupon the maximum number of times' },
-                    { status: 400 }
-                );
-            }
-
-            // Calculate discount server-side
-            const enrichedCartItems = enrichedItems.map(item => {
-                const product = products.find(p => p._id.toString() === item.product.toString());
-                return {
-                    ...item,
-                    category: product?.category
-                };
-            });
-
-            const discountResult = couponDoc.calculateDiscount(enrichedCartItems, calculatedTotal);
-
-            if (!discountResult.valid) {
-                return NextResponse.json(
-                    { error: discountResult.error },
-                    { status: 400 }
-                );
-            }
-
-            // Verify the discount matches what frontend sent (prevent tampering)
-            const sentDiscount = parseFloat(coupon.discountAmount || 0);
-            const calculatedDiscount = parseFloat(discountResult.discountAmount || 0);
-            
-            // Check for NaN values
-            if (isNaN(calculatedDiscount) || isNaN(discountResult.finalTotal)) {
-                console.error('Invalid discount calculation result:', discountResult);
-                return NextResponse.json(
-                    { error: 'Invalid coupon discount calculation. Please try again.' },
-                    { status: 400 }
-                );
-            }
-            
-            if (Math.abs(sentDiscount - calculatedDiscount) > 0.01) {
-                console.error(`Discount mismatch: Frontend sent ${sentDiscount}, server calculated ${calculatedDiscount}`);
-                return NextResponse.json(
-                    { error: 'Discount calculation mismatch. Please try again.' },
-                    { status: 400 }
-                );
-            }
-
-            // Verify final total
-            const expectedTotal = parseFloat(discountResult.finalTotal || calculatedTotal);
-            if (isNaN(expectedTotal) || Math.abs(totalAmount - expectedTotal) > 0.01) {
-                console.error(`Total mismatch: Frontend sent ${totalAmount}, server calculated ${expectedTotal}`);
-                return NextResponse.json(
-                    { error: 'Order total mismatch. Please refresh and try again.' },
-                    { status: 400 }
-                );
-            }
-
-            validatedCouponData = {
-                code: couponDoc.code,
-                discountAmount: Number(calculatedDiscount) || 0,
-                originalTotal: Number(calculatedTotal) || 0,
-                appliedAt: new Date()
-            };
-        } else {
-            // No coupon - verify total matches cart total
-            if (Math.abs(totalAmount - calculatedTotal) > 0.01) {
-                console.error(`Total mismatch without coupon: Frontend sent ${totalAmount}, server calculated ${calculatedTotal}`);
-                return NextResponse.json(
-                    { error: 'Order total mismatch. Please refresh and try again.' },
-                    { status: 400 }
-                );
-            }
-        }
-
-        // Create order with validated data
-        const orderData = {
-            user: decoded.userId,
-            items: enrichedItems, // Use enriched items with validated prices
-            shippingAddress,
-            paymentMethod,
-            totalAmount: Number(totalAmount),
-            status: 'pending'
-        };
-
-        // Add validated coupon data if provided
-        if (validatedCouponData) {
-            orderData.coupon = validatedCouponData;
-        }
-
-        const order = new Order(orderData);
-
         await order.save();
-        
-        // Reserve inventory - decrement stock for all ordered items (atomic operation)
-        console.log(`📦 Reserving inventory for order ${order._id}...`);
-        for (const item of enrichedItems) {
-            const product = await Product.findById(item.product);
-            
-            if (item.variantId && product.hasVariants) {
-                // Handle variant inventory
-                const variant = product.variants.id(item.variantId);
-                const previousStock = variant.stock;
-                
-                await Product.findOneAndUpdate(
-                    { _id: item.product, "variants._id": item.variantId },
-                    { $inc: { "variants.$.stock": -item.quantity } },
-                    { new: true }
-                );
-                
-                console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Variant: ${variant.sku}) (Stock: ${previousStock} → ${previousStock - item.quantity})`);
-            } else {
-                // Handle main product inventory
-                const previousStock = product.stock;
-                await Product.findByIdAndUpdate(
-                    item.product,
-                    { $inc: { stock: -item.quantity } },
-                    { new: true }
-                );
-                console.log(`  ✅ Reserved ${item.quantity} units of ${item.name} (Stock: ${previousStock} → ${previousStock - item.quantity})`);
-            }
-        }
-        
-        // Log inventory reservation in order
-        await inventoryService.reserveInventory(order._id);
 
-        return NextResponse.json(order);
+        // Create Shiprocket order
+        try {
+            const { createShiprocketOrder, getAvailableCouriers, generateAWB } = await import('@/lib/shiprocket');
+            
+            // Prepare order items for Shiprocket
+            const shiprocketItems = items.map(item => ({
+                name: item.name,
+                sku: item.selectedVariant?.sku || `PROD-${item.productId}`,
+                units: item.quantity,
+                selling_price: item.price,
+                discount: 0,
+                tax: 0,
+                hsn: '',
+            }));
+
+            // Calculate total weight (assuming 50g per item, adjust as needed)
+            const totalWeight = items.reduce((sum, item) => sum + (item.quantity * 0.05), 0);
+
+            const shiprocketData = {
+                orderNumber: order.orderNumber,
+                orderDate: new Date().toISOString().split('T')[0],
+                billingCustomerName: shippingAddress.fullName,
+                billingAddress: shippingAddress.addressLine1 + (shippingAddress.addressLine2 ? ', ' + shippingAddress.addressLine2 : ''),
+                billingCity: shippingAddress.city,
+                billingPincode: shippingAddress.pincode,
+                billingState: shippingAddress.state,
+                billingEmail: user.email || 'customer@nandikajewellers.com',
+                billingPhone: shippingAddress.phone,
+                shippingCustomerName: shippingAddress.fullName,
+                shippingAddress: shippingAddress.addressLine1 + (shippingAddress.addressLine2 ? ', ' + shippingAddress.addressLine2 : ''),
+                shippingCity: shippingAddress.city,
+                shippingPincode: shippingAddress.pincode,
+                shippingState: shippingAddress.state,
+                orderItems: shiprocketItems,
+                paymentMethod: paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+                subTotal: totalAmount,
+                weight: totalWeight,
+                length: 15,
+                breadth: 15,
+                height: 10,
+            };
+
+            const shiprocketResponse = await createShiprocketOrder(shiprocketData);
+
+            // Update order with Shiprocket details
+            if (shiprocketResponse.order_id) {
+                order.shiprocketOrderId = shiprocketResponse.order_id;
+                order.shiprocketShipmentId = shiprocketResponse.shipment_id;
+                order.status = 'confirmed';
+
+                // Get pickup pincode from environment or config
+                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '110001';
+                
+                // Get available couriers and find the cheapest one
+                try {
+                    const codAmount = paymentMethod === 'cod' ? totalAmount : 0;
+                    const couriersResponse = await getAvailableCouriers(
+                        pickupPincode,
+                        shippingAddress.pincode,
+                        totalWeight,
+                        codAmount
+                    );
+
+                    if (couriersResponse.data?.available_courier_companies?.length > 0) {
+                        // Sort by total charge (rate) to find cheapest
+                        const sortedCouriers = couriersResponse.data.available_courier_companies.sort(
+                            (a, b) => a.rate - b.rate
+                        );
+                        
+                        const cheapestCourier = sortedCouriers[0];
+                        console.log(`Selected cheapest courier: ${cheapestCourier.courier_name} - ₹${cheapestCourier.rate}`);
+
+                        // Generate AWB with the cheapest courier
+                        try {
+                            const awbResponse = await generateAWB(
+                                shiprocketResponse.shipment_id,
+                                cheapestCourier.courier_company_id
+                            );
+
+                            if (awbResponse.awb_code) {
+                                order.awbCode = awbResponse.awb_code;
+                                order.courierName = cheapestCourier.courier_name;
+                                console.log(`AWB generated: ${awbResponse.awb_code} for order ${order.orderNumber}`);
+                            }
+                        } catch (awbError) {
+                            console.error('Failed to generate AWB:', awbError);
+                        }
+                    }
+                } catch (courierError) {
+                    console.error('Failed to get available couriers:', courierError);
+                }
+
+                await order.save();
+            }
+        } catch (shiprocketError) {
+            console.error('Shiprocket order creation failed:', shiprocketError);
+            // Don't fail the entire order if Shiprocket fails
+            // Admin can manually create shipment later
+        }
+
+        // Update stock for each product
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            
+            if (item.selectedVariant && product.hasVariants) {
+                const variantIndex = product.variants.findIndex(
+                    v => v.sku === item.selectedVariant.sku
+                );
+                if (variantIndex !== -1) {
+                    product.variants[variantIndex].stock -= item.quantity;
+                }
+            } else {
+                product.stock -= item.quantity;
+            }
+
+            await product.save();
+        }
+
+        // Clear user's cart
+        await Cart.deleteMany({ user: user.userId });
+
+        return NextResponse.json({ 
+            message: 'Order placed successfully',
+            order 
+        }, { status: 201 });
     } catch (error) {
-        console.error('Order creation error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to create order' },
-            { status: 500 }
-        );
+        console.error('Error creating order:', error);
+        return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 }

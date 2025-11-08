@@ -38,6 +38,12 @@ const subcategorySchema = new mongoose.Schema({
 // Create compound index for category + slug uniqueness
 subcategorySchema.index({ category: 1, slug: 1 }, { unique: true });
 
+// Additional indexes for better query performance
+subcategorySchema.index({ category: 1, isActive: 1, order: 1 }); // For listing subcategories by category
+subcategorySchema.index({ isActive: 1 }); // For active subcategory queries
+subcategorySchema.index({ slug: 1 }); // For slug-based lookups
+subcategorySchema.index({ name: 1 }); // For name-based searches
+
 // Pre-save hook to generate slug from name
 subcategorySchema.pre('save', async function(next) {
     if (this.isModified('name') || !this.slug) {

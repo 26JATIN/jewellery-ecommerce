@@ -43,10 +43,8 @@
     "puppeteer": "^24.25.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shiprocket-api": "^1.1.4",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

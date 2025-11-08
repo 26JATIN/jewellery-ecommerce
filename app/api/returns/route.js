@@ -1,302 +1,156 @@
-import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Return from '@/models/Return';
+import ReturnModel from '@/models/Return';
 import Order from '@/models/Order';
-import User from '@/models/User';
-import { verifyToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
-import { returnAutomationService } from '@/lib/returnAutomationService';
+import { verifyAuth } from '@/lib/auth';
+import { NextResponse } from 'next/server';
 
-// GET: Fetch user's returns
-export async function GET(req) {
+export async function POST(request) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('token');
+        const user = await verifyAuth(request);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        if (!token) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
+        const body = await request.json();
+        const { orderId, items, reason, refundDetails, notes } = body;
 
-        const decoded = verifyToken(token.value);
-        if (!decoded || !decoded.userId) {
-            return NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
-            );
-        }
+        if (!orderId) return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
 
         await connectDB();
 
-        const { searchParams } = new URL(req.url);
-        const page = parseInt(searchParams.get('page')) || 1;
-        const limit = parseInt(searchParams.get('limit')) || 10;
-        const status = searchParams.get('status');
-        const filterOrderId = searchParams.get('orderId'); // Add orderId filter
+        const order = await Order.findById(orderId);
+        if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        if (String(order.userId) !== user.userId) return NextResponse.json({ error: 'Not authorized for this order' }, { status: 403 });
 
-        // Build query
-        const query = { user: decoded.userId };
-        if (status && status !== 'all') {
-            query.status = status;
-        }
-        // Filter by specific order if orderId is provided
-        if (filterOrderId) {
-            query.order = filterOrderId;
+        // Check if order is eligible for return (must be delivered)
+        if (order.status !== 'delivered') {
+            return NextResponse.json({ error: 'Only delivered orders can be returned' }, { status: 400 });
         }
 
-        // Fetch returns with pagination
-        const returns = await Return.find(query)
-            .populate('order', 'totalAmount createdAt items')
-            .populate('user', 'name email')
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .skip((page - 1) * limit);
-
-        const totalReturns = await Return.countDocuments(query);
-        const totalPages = Math.ceil(totalReturns / limit);
-
-        return NextResponse.json({
-            success: true,
-            data: {
-                returns,
-                pagination: {
-                    currentPage: page,
-                    totalPages,
-                    totalReturns,
-                    hasNextPage: page < totalPages,
-                    hasPrevPage: page > 1
-                }
-            }
+        // Create return record
+        const returnDoc = new ReturnModel({
+            orderId: order._id,
+            userId: user.userId,
+            items: items || [],
+            status: 'requested',
+            refundDetails: refundDetails || {},
+            notes: notes || ''
         });
 
+        await returnDoc.save();
+
+        // Create Shiprocket return order
+        try {
+            const { createReturnOrder, getAvailableCouriers, generateAWB } = await import('@/lib/shiprocket');
+
+            // Prepare return items for Shiprocket
+            const shiprocketReturnItems = items.map(item => ({
+                name: item.name,
+                sku: `RETURN-${item.productId}`,
+                units: item.quantity,
+                selling_price: order.items.find(oi => String(oi.productId) === String(item.productId))?.price || 0,
+                discount: 0,
+                tax: 0,
+                hsn: '',
+            }));
+
+            // Calculate total weight
+            const totalWeight = items.reduce((sum, item) => sum + (item.quantity * 0.05), 0);
+
+            const returnOrderData = {
+                orderId: `RETURN-${order.orderNumber}`,
+                shipmentId: order.shiprocketShipmentId,
+                orderDate: new Date().toISOString().split('T')[0],
+                pickupCustomerName: order.shippingAddress.fullName,
+                pickupAddress: order.shippingAddress.addressLine1 + (order.shippingAddress.addressLine2 ? ', ' + order.shippingAddress.addressLine2 : ''),
+                pickupCity: order.shippingAddress.city,
+                pickupPincode: order.shippingAddress.pincode,
+                pickupState: order.shippingAddress.state,
+                pickupEmail: user.email || 'customer@nandikajewellers.com',
+                pickupPhone: order.shippingAddress.phone,
+                returnItems: shiprocketReturnItems,
+                weight: totalWeight,
+                length: 15,
+                breadth: 15,
+                height: 10,
+            };
+
+            const shiprocketResponse = await createReturnOrder(returnOrderData);
+
+            // Update return document with Shiprocket details
+            if (shiprocketResponse.order_id) {
+                returnDoc.shiprocketReturnId = shiprocketResponse.order_id;
+                returnDoc.shiprocketReturnShipmentId = shiprocketResponse.shipment_id;
+                returnDoc.status = 'pickup_scheduled';
+
+                // Get pickup pincode from environment or use customer's pincode
+                const pickupPincode = order.shippingAddress.pincode;
+                const deliveryPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '110001';
+
+                // Get available couriers and select cheapest
+                try {
+                    const couriersResponse = await getAvailableCouriers(
+                        pickupPincode,
+                        deliveryPincode,
+                        totalWeight,
+                        0 // No COD for returns
+                    );
+
+                    if (couriersResponse.data?.available_courier_companies?.length > 0) {
+                        // Sort by total charge to find cheapest
+                        const sortedCouriers = couriersResponse.data.available_courier_companies.sort(
+                            (a, b) => a.rate - b.rate
+                        );
+
+                        const cheapestCourier = sortedCouriers[0];
+                        console.log(`Selected cheapest courier for return: ${cheapestCourier.courier_name} - ₹${cheapestCourier.rate}`);
+
+                        // Generate AWB with the cheapest courier
+                        try {
+                            const awbResponse = await generateAWB(
+                                shiprocketResponse.shipment_id,
+                                cheapestCourier.courier_company_id
+                            );
+
+                            if (awbResponse.awb_code) {
+                                returnDoc.shiprocketReturnAwb = awbResponse.awb_code;
+                                returnDoc.courierName = cheapestCourier.courier_name;
+                                returnDoc.estimatedPickupDate = cheapestCourier.pickup_performance || null;
+                                console.log(`AWB generated for return: ${awbResponse.awb_code}`);
+                            }
+                        } catch (awbError) {
+                            console.error('Failed to generate AWB for return:', awbError);
+                        }
+                    }
+                } catch (courierError) {
+                    console.error('Failed to get available couriers for return:', courierError);
+                }
+
+                await returnDoc.save();
+                console.log(`Shiprocket return created: ${shiprocketResponse.order_id} for return ${returnDoc._id}`);
+            }
+        } catch (shiprocketError) {
+            console.error('Shiprocket return creation failed:', shiprocketError);
+            // Don't fail the entire return request if Shiprocket fails
+            // Admin can manually create return shipment later
+        }
+
+        return NextResponse.json({ success: true, returnId: returnDoc._id });
     } catch (error) {
-        console.error('Error fetching returns:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch returns' },
-            { status: 500 }
-        );
+        console.error('Create return error:', error);
+        return NextResponse.json({ error: 'Failed to create return', details: error.message }, { status: 500 });
     }
 }
 
-// POST: Create new return request
-export async function POST(req) {
+export async function GET(request) {
     try {
-        console.log('🔴 ========================================');
-        console.log('🔴 RETURN CREATION ENDPOINT CALLED');
-        console.log('🔴 ========================================');
-        
-        const cookieStore = await cookies();
-        const token = cookieStore.get('token');
-
-        if (!token) {
-            console.error('❌ No token provided for return creation');
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-        const decoded = verifyToken(token.value);
-        if (!decoded || !decoded.userId) {
-            console.error('❌ Invalid token for return creation');
-            return NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
-            );
-        }
-
-        const { 
-            orderId, 
-            items, 
-            pickupAddress,
-            specialInstructions 
-        } = await req.json();
-
-        console.log(`🔵 Return creation requested:`, {
-            orderId,
-            userId: decoded.userId,
-            itemCount: items?.length,
-            timestamp: new Date().toISOString(),
-            referer: req.headers.get('referer'),
-            userAgent: req.headers.get('user-agent')
-        });
-
-        // Validate required fields
-        if (!orderId || !items || !Array.isArray(items) || items.length === 0) {
-            console.error(`❌ Invalid return request - missing required fields`);
-            return NextResponse.json(
-                { error: 'Order ID and items are required' },
-                { status: 400 }
-            );
-        }
+        const user = await verifyAuth(request);
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         await connectDB();
-
-        // Verify order exists and belongs to user
-        const order = await Order.findOne({ 
-            _id: orderId, 
-            user: decoded.userId 
-        }).populate('items.product');
-
-        if (!order) {
-            return NextResponse.json(
-                { error: 'Order not found' },
-                { status: 404 }
-            );
-        }
-
-        // Check if order is eligible for return
-        const daysSinceOrder = Math.floor((new Date() - order.createdAt) / (1000 * 60 * 60 * 24));
-        const returnPolicy = Return.getReturnPolicyForCategory('jewelry'); // Default to jewelry policy
-
-        if (daysSinceOrder > returnPolicy.days) {
-            return NextResponse.json(
-                { error: `Return window has expired. Returns are allowed within ${returnPolicy.days} days of delivery.` },
-                { status: 400 }
-            );
-        }
-
-        // Check if order is eligible for return (not cancelled)
-        if (order.status === 'cancelled') {
-            return NextResponse.json(
-                { error: 'Returns cannot be initiated for cancelled orders' },
-                { status: 400 }
-            );
-        }
-
-        // Check if return already exists for this order
-        const existingReturn = await Return.findOne({ 
-            order: orderId,
-            status: { $nin: ['cancelled', 'completed'] }
-        });
-
-        if (existingReturn) {
-            return NextResponse.json(
-                { error: 'A return request already exists for this order' },
-                { status: 400 }
-            );
-        }
-
-        // Validate return items against order items
-        const validatedItems = [];
-        let totalRefundAmount = 0;
-
-        for (const returnItem of items) {
-            const orderItem = order.items.find(
-                item => item.product._id.toString() === returnItem.productId
-            );
-
-            if (!orderItem) {
-                return NextResponse.json(
-                    { error: `Product ${returnItem.productId} not found in order` },
-                    { status: 400 }
-                );
-            }
-
-            if (returnItem.quantity > orderItem.quantity) {
-                return NextResponse.json(
-                    { error: `Cannot return more items than ordered for ${orderItem.name}` },
-                    { status: 400 }
-                );
-            }
-
-            // Validate return reason
-            if (!returnPolicy.allowedReasons.includes(returnItem.returnReason)) {
-                return NextResponse.json(
-                    { error: `Invalid return reason: ${returnItem.returnReason}` },
-                    { status: 400 }
-                );
-            }
-
-            const itemRefundAmount = orderItem.price * returnItem.quantity;
-            totalRefundAmount += itemRefundAmount;
-
-            validatedItems.push({
-                product: orderItem.product._id,
-                name: orderItem.name,
-                price: orderItem.price,
-                quantity: returnItem.quantity,
-                image: orderItem.image,
-                returnReason: returnItem.returnReason,
-                detailedReason: returnItem.detailedReason || '',
-                itemCondition: returnItem.itemCondition || 'unused'
-            });
-        }
-
-        // Create return request
-        const returnRequest = new Return({
-            order: orderId,
-            user: decoded.userId,
-            items: validatedItems,
-            status: 'requested',
-            returnWindow: {
-                orderDate: order.createdAt,
-                returnRequestDate: new Date(),
-                allowedReturnDays: returnPolicy.days,
-                isWithinWindow: true
-            },
-            refundDetails: {
-                originalAmount: totalRefundAmount,
-                returnShippingCost: 0, // Free return shipping for now
-                restockingFee: 0, // No restocking fee for jewelry
-                refundAmount: totalRefundAmount,
-                refundMethod: 'original_payment'
-            },
-            pickup: {
-                address: pickupAddress || {
-                    fullName: order.shippingAddress.fullName,
-                    addressLine1: order.shippingAddress.addressLine1,
-                    addressLine2: order.shippingAddress.addressLine2,
-                    city: order.shippingAddress.city,
-                    state: order.shippingAddress.state,
-                    postalCode: order.shippingAddress.postalCode,
-                    country: order.shippingAddress.country,
-                    phone: order.shippingAddress.phone
-                },
-                specialInstructions: specialInstructions || '',
-                pickupStatus: 'pending'
-            },
-            eligibility: {
-                isEligible: true,
-                eligibilityReason: `Order placed and within return window (Status: ${order.status})`,
-                checkedAt: new Date()
-            },
-            source: 'website'
-        });
-
-        await returnRequest.save();
-
-        // Populate the saved return for response
-        const populatedReturn = await Return.findById(returnRequest._id)
-            .populate('order', 'totalAmount createdAt')
-            .populate('user', 'name email');
-
-        // ✨ AUTOMATIC RETURN APPROVAL & PICKUP SCHEDULING
-        // Process the return automatically - no admin intervention needed
-        try {
-            console.log(`✨ Auto-processing return ${returnRequest._id} for order ${orderId}...`);
-            console.log(`📋 Return created by user ${decoded.userId} via ${returnRequest.source || 'website'}`);
-            await returnAutomationService.processNewReturn(returnRequest._id);
-            console.log(`✅ Return ${returnRequest._id} processed automatically`);
-        } catch (automationError) {
-            console.error(`❌ Return automation failed for ${returnRequest._id}:`, automationError);
-            // Don't fail the return creation if automation fails
-            // Return is already created, automation can be retried
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: 'Return request created and automatically approved',
-            data: populatedReturn
-        });
-
+        // Return list of user's returns
+        const returns = await ReturnModel.find({ userId: user.userId }).sort({ createdAt: -1 });
+        return NextResponse.json({ success: true, returns });
     } catch (error) {
-        console.error('Error creating return request:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to create return request' },
-            { status: 500 }
-        );
+        console.error('List returns error:', error);
+        return NextResponse.json({ error: 'Failed to fetch returns', details: error.message }, { status: 500 });
     }
 }

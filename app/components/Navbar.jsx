@@ -188,8 +188,20 @@ export default function Navbar() {
                                                             </svg>
                                                             My Orders
                                                         </button>
-                                                        
-                                                        
+
+                                                        <button
+                                                            onClick={() => {
+                                                                setIsProfileOpen(false);
+                                                                router.push('/returns');
+                                                            }}
+                                                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <svg className="mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                                                            </svg>
+                                                            My Returns
+                                                        </button>
+
                                                         {user.isAdmin && (
                                                             <button
                                                                 onClick={() => {
@@ -430,7 +442,18 @@ export default function Navbar() {
                                                 </svg>
                                                 My Orders
                                             </button>
-
+                                            <button
+                                                onClick={() => {
+                                                    setIsMobileMenuOpen(false);
+                                                    router.push('/returns');
+                                                }}
+                                                className="flex items-center w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50"
+                                            >
+                                                <svg className="mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                                                </svg>
+                                                My Returns
+                                            </button>
                                             {user.isAdmin && (
                                                 <button
                                                     onClick={() => {
