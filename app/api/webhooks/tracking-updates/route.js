@@ -20,7 +20,20 @@ export async function OPTIONS(request) {
 }
 
 export async function POST(request) {
+    const startTime = Date.now();
+    console.log('=== WEBHOOK RECEIVED ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('URL:', request.url);
+    console.log('Method:', request.method);
+    
     try {
+        // Log all headers for debugging
+        const headers = {};
+        request.headers.forEach((value, key) => {
+            headers[key] = value;
+        });
+        console.log('Headers:', JSON.stringify(headers, null, 2));
+
         // Optional: Verify security token if configured in Shiprocket
         // const apiKey = request.headers.get('anx-api-key');
         // if (apiKey && apiKey !== process.env.SHIPROCKET_WEBHOOK_TOKEN) {
@@ -30,7 +43,9 @@ export async function POST(request) {
 
         const body = await request.json();
         
-        console.log('Shiprocket webhook received:', JSON.stringify(body, null, 2));
+        console.log('=== WEBHOOK BODY ===');
+        console.log(JSON.stringify(body, null, 2));
+        console.log('=== END BODY ===');
 
         const {
             order_id,
