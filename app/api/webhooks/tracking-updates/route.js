@@ -288,18 +288,10 @@ async function handleReturnUpdate(webhookData) {
     }
 
     // Then try AWB if not found
-    // Then try AWB if not found
     if (!returnDoc && awb) {
         returnDoc = await ReturnModel.findOne({ shiprocketReturnAwb: awb });
         if (returnDoc) {
             console.log('✅ Found return by AWB:', awb);
-        }
-    }
-
-    if (!returnDoc && shipment_id) {
-        returnDoc = await ReturnModel.findOne({ shiprocketReturnShipmentId: String(shipment_id) });
-        if (returnDoc) {
-            console.log('✅ Found return by shipment ID:', shipment_id);
         }
     }
 
