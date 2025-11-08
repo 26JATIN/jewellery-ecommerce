@@ -25,19 +25,24 @@ export async function POST(request) {
         
         console.log('Shiprocket webhook received:', JSON.stringify(body, null, 2));
 
-        // Verify webhook authenticity (optional but recommended)
-        // You can add HMAC verification here if Shiprocket provides it
-
         const {
             order_id,
+            sr_order_id,
             shipment_id,
             awb,
             courier_name,
             current_status,
-            tracking_url,
+            shipment_status,
+            current_status_id,
+            shipment_status_id,
+            etd,
+            scans,
+            is_return,
+            pod,
+            pod_status
         } = body;
 
-        if (!order_id) {
+        if (!order_id && !sr_order_id) {
             return NextResponse.json({ error: 'Order ID required' }, { 
                 status: 400,
                 headers: corsHeaders 
@@ -49,131 +54,110 @@ export async function POST(request) {
         // Find order by Shiprocket order ID or order number
         const order = await Order.findOne({
             $or: [
+                { shiprocketOrderId: sr_order_id },
                 { shiprocketOrderId: order_id },
                 { orderNumber: order_id }
             ]
         });
 
         if (!order) {
-            console.log('Order not found for Shiprocket webhook:', order_id);
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+            console.log('Order not found for Shiprocket webhook. Tried order_id:', order_id, 'sr_order_id:', sr_order_id);
+            return NextResponse.json({ error: 'Order not found' }, { 
+                status: 404,
+                headers: corsHeaders 
+            });
         }
 
         // Update order with Shiprocket details
         if (shipment_id) order.shiprocketShipmentId = shipment_id;
         if (awb) order.awbCode = awb;
         if (courier_name) order.courierName = courier_name;
-        if (tracking_url) order.trackingUrl = tracking_url;
+        if (etd) order.estimatedDeliveryDate = etd;
 
         // Map Shiprocket status to our order status
+        // Using sr-status-label from scans or shipment_status
         const statusMapping = {
-            'NEW': 'confirmed',
+            'MANIFEST GENERATED': 'confirmed',
             'PENDING PICKUP': 'confirmed',
             'PICKED UP': 'processing',
+            'SHIPPED': 'shipped',
             'IN TRANSIT': 'shipped',
             'OUT FOR DELIVERY': 'shipped',
             'DELIVERED': 'delivered',
             'CANCELED': 'cancelled',
+            'CANCELLED': 'cancelled',
             'RTO': 'cancelled',
             'RTO DELIVERED': 'cancelled',
-            // Return related statuses (map to order returned/received as appropriate)
             'RETURNED': 'returned',
             'RETURNED TO SENDER': 'returned',
             'RETURN TO ORIGIN': 'returned'
         };
 
-        if (current_status && statusMapping[current_status.toUpperCase()]) {
-            order.status = statusMapping[current_status.toUpperCase()];
+        // Use shipment_status or current_status
+        const status = shipment_status || current_status;
+        if (status && statusMapping[status.toUpperCase()]) {
+            order.status = statusMapping[status.toUpperCase()];
             
             // Auto-mark COD orders as paid when delivered
-            if (order.status === 'delivered' && order.paymentMethod === 'cod' && order.paymentStatus === 'pending') {
+            if (order.status === 'delivered' && order.paymentMethod === 'cod' && order.paymentStatus !== 'paid') {
                 order.paymentStatus = 'paid';
                 console.log(`COD order ${order.orderNumber} marked as paid upon delivery`);
             }
         }
 
-        // Handle return-specific payloads or statuses
-        // Shiprocket may include return_awb, return_shipment_id or use statuses containing RETURN
-        try {
-            // Determine if this webhook concerns a return
-            const returnAwb = body.return_awb || body.return_awb_code || body.return_awb_code || body.return_awb || awb;
-            const returnShipmentId = body.return_shipment_id || body.return_shipment || body.return_id;
-            const isReturnStatus = current_status && /RETURN/i.test(current_status);
+        // Handle return shipments
+        if (is_return === 1) {
+            try {
+                let returnDoc = await ReturnModel.findOne({ orderId: order._id });
 
-            if (returnAwb || returnShipmentId || isReturnStatus) {
-                // Try to find a matching Return document by order_id or awb
-                let returnDoc = null;
-                if (order) {
-                    returnDoc = await ReturnModel.findOne({ orderId: order._id });
-                }
-
-                if (!returnDoc && returnAwb) {
-                    returnDoc = await ReturnModel.findOne({ shiprocketReturnAwb: returnAwb });
+                if (!returnDoc && awb) {
+                    returnDoc = await ReturnModel.findOne({ shiprocketReturnAwb: awb });
                 }
 
                 if (returnDoc) {
-                    if (returnShipmentId) returnDoc.shiprocketReturnShipmentId = returnShipmentId;
-                    if (returnAwb) returnDoc.shiprocketReturnAwb = returnAwb;
+                    if (shipment_id) returnDoc.shiprocketReturnShipmentId = shipment_id;
+                    if (awb) returnDoc.shiprocketReturnAwb = awb;
                     if (courier_name) returnDoc.courierName = courier_name;
-                    if (tracking_url) returnDoc.trackingUrl = tracking_url;
+                    if (etd) returnDoc.estimatedPickupDate = etd;
 
                     // Map return status from Shiprocket to our return statuses
                     const returnStatusMapping = {
-                        'RETURN_REQUESTED': 'requested',
-                        'RETURN REQUESTED': 'requested',
-                        'RETURN_INITIATED': 'requested',
-                        'RETURN INITIATED': 'requested',
-                        'RETURN_PICKUP_SCHEDULED': 'pickup_scheduled',
-                        'RETURN PICKUP SCHEDULED': 'pickup_scheduled',
-                        'RETURN_PICKED_UP': 'in_transit',
-                        'RETURN PICKED UP': 'in_transit',
-                        'RETURN_IN_TRANSIT': 'in_transit',
-                        'RETURN IN TRANSIT': 'in_transit',
-                        'RETURN_OUT_FOR_DELIVERY': 'in_transit',
-                        'RETURN OUT FOR DELIVERY': 'in_transit',
-                        'RETURN_DELIVERED': 'returned_to_seller',
-                        'RETURN DELIVERED': 'returned_to_seller',
-                        'RETURNED_TO_SELLER': 'returned_to_seller',
-                        'RETURNED TO SELLER': 'returned_to_seller',
-                        'RETURN_RECEIVED': 'received',
-                        'RETURN RECEIVED': 'received',
-                        'RETURN_CANCELED': 'cancelled',
-                        'RETURN CANCELED': 'cancelled',
-                        'RETURN_CANCELLED': 'cancelled',
-                        'RETURN CANCELLED': 'cancelled',
+                        'MANIFEST GENERATED': 'requested',
+                        'PENDING PICKUP': 'pickup_scheduled',
+                        'PICKED UP': 'in_transit',
+                        'SHIPPED': 'in_transit',
+                        'IN TRANSIT': 'in_transit',
+                        'OUT FOR DELIVERY': 'in_transit',
+                        'DELIVERED': 'returned_to_seller',
                         'CANCELED': 'cancelled',
-                        'CANCELLED': 'cancelled'
+                        'CANCELLED': 'cancelled',
+                        'RTO': 'cancelled',
+                        'RTO DELIVERED': 'cancelled'
                     };
 
                     // Update return status based on Shiprocket status
-                    if (current_status) {
-                        const normalizedStatus = current_status.toUpperCase().trim();
+                    const returnStatus = shipment_status || current_status;
+                    if (returnStatus) {
+                        const normalizedStatus = returnStatus.toUpperCase().trim();
                         
-                        // Check if it's a return cancellation
-                        if (normalizedStatus.includes('CANCEL')) {
-                            returnDoc.status = 'cancelled';
-                            console.log(`Return ${returnDoc.returnNumber} cancelled via Shiprocket webhook`);
-                        }
-                        // Check specific return status mappings
-                        else if (returnStatusMapping[normalizedStatus]) {
+                        if (returnStatusMapping[normalizedStatus]) {
                             returnDoc.status = returnStatusMapping[normalizedStatus];
                             console.log(`Return ${returnDoc.returnNumber} status updated to: ${returnDoc.status}`);
-                        }
-                        // Check if it's a delivered status (return completed)
-                        else if (normalizedStatus.includes('DELIVERED') || normalizedStatus.includes('RETURNED')) {
-                            returnDoc.status = 'returned_to_seller';
-                            // Set refund requested time if not set
-                            if (!returnDoc.refundRequestedAt) returnDoc.refundRequestedAt = new Date();
-                            console.log(`Return ${returnDoc.returnNumber} delivered back to seller`);
+                            
+                            // Set refund requested time when delivered back to seller
+                            if (returnDoc.status === 'returned_to_seller' && !returnDoc.refundRequestedAt) {
+                                returnDoc.refundRequestedAt = new Date();
+                                console.log(`Return ${returnDoc.returnNumber} delivered back to seller`);
+                            }
                         }
                     }
 
                     await returnDoc.save();
                     console.log(`Return ${returnDoc.returnNumber} updated via Shiprocket webhook`);
                 }
+            } catch (retErr) {
+                console.error('Error handling return in Shiprocket webhook:', retErr);
             }
-        } catch (retErr) {
-            console.error('Error handling return in Shiprocket webhook:', retErr);
         }
 
         await order.save();
