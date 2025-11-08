@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/app/context/CartContext';
+import CouponCode from '@/app/components/CouponCode';
 import { 
     MapPin, 
     Plus, 
@@ -43,8 +44,10 @@ export default function CheckoutPage() {
     const [error, setError] = useState('');
     const [notes, setNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'online'
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    
     // Calculate total from cart items
-    const calculateTotal = () => {
+    const calculateSubtotal = () => {
         if (!cartItems || !Array.isArray(cartItems)) return 0;
         return cartItems.reduce((total, item) => {
             // Get price from selectedVariant.price.sellingPrice or product price
@@ -54,6 +57,12 @@ export default function CheckoutPage() {
                          0;
             return total + (price * item.quantity);
         }, 0);
+    };
+
+    const calculateTotal = () => {
+        const subtotal = calculateSubtotal();
+        const discount = appliedCoupon?.discountAmount || 0;
+        return Math.max(0, subtotal - discount);
     };
     
     const [formData, setFormData] = useState({
@@ -70,6 +79,15 @@ export default function CheckoutPage() {
     useEffect(() => {
         fetchAddresses();
     }, []);
+
+    const handleCouponApplied = (couponData) => {
+        setAppliedCoupon(couponData);
+        setError(''); // Clear any previous errors
+    };
+
+    const handleCouponRemoved = () => {
+        setAppliedCoupon(null);
+    };
 
     const fetchAddresses = async () => {
         try {
@@ -309,6 +327,10 @@ export default function CheckoutPage() {
                 },
                 paymentMethod,
                 notes,
+                ...(appliedCoupon && {
+                    couponCode: appliedCoupon.couponCode,
+                    couponDiscount: appliedCoupon.discountAmount
+                }),
                 ...(paymentDetails && {
                     razorpayOrderId: paymentDetails.razorpayOrderId,
                     razorpayPaymentId: paymentDetails.razorpayPaymentId,
@@ -681,8 +703,17 @@ export default function CheckoutPage() {
                             <div className="space-y-3 mb-6 pt-4 border-t-2 border-gray-200">
                                 <div className="flex justify-between text-gray-700">
                                     <span>Subtotal</span>
-                                    <span>₹{calculateTotal().toLocaleString()}</span>
+                                    <span>₹{calculateSubtotal().toLocaleString()}</span>
                                 </div>
+                                {appliedCoupon && (
+                                    <div className="flex justify-between text-green-600">
+                                        <span className="flex items-center gap-1">
+                                            <Check className="w-4 h-4" />
+                                            Coupon Discount ({appliedCoupon.couponCode})
+                                        </span>
+                                        <span>-₹{appliedCoupon.discountAmount.toLocaleString()}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-gray-700">
                                     <span>Shipping</span>
                                     <span className="text-green-600">FREE</span>
@@ -691,6 +722,16 @@ export default function CheckoutPage() {
                                     <span>Total</span>
                                     <span className="text-[#D4AF76]">₹{calculateTotal().toLocaleString()}</span>
                                 </div>
+                            </div>
+
+                            {/* Coupon Code Section */}
+                            <div className="mb-6">
+                                <CouponCode 
+                                    cartItems={cartItems}
+                                    onCouponApplied={handleCouponApplied}
+                                    onCouponRemoved={handleCouponRemoved}
+                                    appliedCoupon={appliedCoupon}
+                                />
                             </div>
 
                             {/* Error Message */}

@@ -289,9 +289,9 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
                   name="goldWeight"
                   value={formData.goldWeight}
                   onChange={handleInputChange}
-                  step="0.01"
+                  step="0.001"
                   min="0"
-                  placeholder="e.g., 10.5"
+                  placeholder="e.g., 10.525"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   required={metalType !== 'silver'}
                 />
@@ -335,9 +335,9 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
                   name="silverWeight"
                   value={formData.silverWeight}
                   onChange={handleInputChange}
-                  step="0.01"
+                  step="0.001"
                   min="0"
-                  placeholder="e.g., 15.0"
+                  placeholder="e.g., 15.525"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   required={metalType !== 'gold'}
                 />

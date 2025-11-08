@@ -589,7 +589,7 @@ const VariantManager = ({
 
                                                 <div className="lg:col-span-3">
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                        Weight Adjustment
+                                                        Weight Adjustment (grams)
                                                     </label>
                                                     <div className="flex space-x-1">
                                                         <input
@@ -597,6 +597,7 @@ const VariantManager = ({
                                                             value={variant.weightAdjustment?.gold || ''}
                                                             onChange={(e) => updateVariant(index, 'weightAdjustment.gold', parseFloat(e.target.value) || 0)}
                                                             placeholder="Gold"
+                                                            step="0.001"
                                                             className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
                                                         />
                                                         <input
@@ -604,6 +605,7 @@ const VariantManager = ({
                                                             value={variant.weightAdjustment?.silver || ''}
                                                             onChange={(e) => updateVariant(index, 'weightAdjustment.silver', parseFloat(e.target.value) || 0)}
                                                             placeholder="Silver"
+                                                            step="0.001"
                                                             className="w-full text-xs border border-gray-300 rounded px-2 py-1.5"
                                                         />
                                                     </div>
