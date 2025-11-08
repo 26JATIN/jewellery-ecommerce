@@ -19,6 +19,16 @@ export async function OPTIONS(request) {
     return NextResponse.json({}, { headers: corsHeaders });
 }
 
+// GET handler for Shiprocket endpoint verification
+export async function GET(request) {
+    console.log('=== WEBHOOK GET REQUEST (Verification) ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('URL:', request.url);
+    
+    // Shiprocket might send GET to verify endpoint
+    return new Response(null, { status: 200, headers: corsHeaders });
+}
+
 export async function POST(request) {
     const startTime = Date.now();
     console.log('=== WEBHOOK RECEIVED ===');
