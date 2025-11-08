@@ -8,19 +8,29 @@ export default function Users() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingUser, setEditingUser] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const pathname = usePathname();
+    const ITEMS_PER_PAGE = 20;
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [page]);
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const res = await fetch('/api/admin/users');
             const data = await res.json();
             // Sort users to show admin first
             const sortedUsers = data.sort((a, b) => (b.isAdmin ? 1 : -1));
-            setUsers(sortedUsers);
+            
+            const total = Math.ceil(sortedUsers.length / ITEMS_PER_PAGE);
+            setTotalPages(total);
+            
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            setUsers(sortedUsers.slice(start, end));
         } catch (error) {
             console.error('Failed to fetch users:', error);
         } finally {
@@ -197,6 +207,29 @@ export default function Users() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="mt-6 flex justify-center gap-2">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            >
+                                Previous
+                            </button>
+                            <span className="px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg font-medium">
+                                Page {page} of {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                                className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
         </AdminLayout>

@@ -82,52 +82,71 @@ export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+            {/* Backdrop */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={handleClose}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            />
+
+            {/* Modal Container - Responsive positioning */}
+            <div className="fixed inset-0 z-[101] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
                 <motion.div
-                    initial={{ opacity: 0, y: 100, scale: 0.95 }}
+                    initial={{ opacity: 0, y: "100%", scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 100, scale: 0.95 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto mb-0 sm:mb-0"
-                    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                    exit={{ opacity: 0, y: "100%", scale: 0.95 }}
+                    transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-white rounded-t-[2rem] sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden pointer-events-auto"
                 >
-                    {/* Header */}
-                    <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Package className="w-6 h-6 text-amber-600" />
-                            <h2 className="text-2xl font-bold text-gray-900">Return Request</h2>
+                    {/* Header - Sticky with brand colors */}
+                    <div className="sticky top-0 bg-gradient-to-r from-[#F5E6D3] to-[#FFF8F0] border-b border-[#D4AF76]/30 px-4 sm:px-6 py-4 flex items-center justify-between z-10 backdrop-blur-sm">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg sm:rounded-xl shadow-lg">
+                                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <h2 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900">Return Request</h2>
                         </div>
                         <button
                             onClick={handleClose}
-                            className="p-2 hover:bg-gray-100 rounded-full transition"
+                            className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                            aria-label="Close"
                         >
-                            <X className="w-6 h-6 text-gray-500" />
+                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                         </button>
                     </div>
 
-                    {success ? (
-                        <div className="p-8 text-center">
-                            <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Return Request Submitted!</h3>
-                            <p className="text-gray-600">We'll process your return shortly. You'll receive updates via email.</p>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {/* Scrollable Content with safe areas */}
+                    <div className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+                        {success ? (
+                            <div className="p-6 sm:p-8 text-center">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" />
+                                </div>
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">Return Request Submitted!</h3>
+                                <p className="text-sm sm:text-base text-gray-600">
+                                    We'll process your return shortly. You'll receive updates via email.
+                                </p>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 pb-24 sm:pb-6">
                             {/* Order Info */}
-                            <div className="bg-amber-50 rounded-lg p-4">
-                                <h3 className="font-semibold text-gray-900 mb-2">Order: {order.orderNumber}</h3>
-                                <p className="text-sm text-gray-700">
-                                    Total Amount: <span className="font-semibold">₹{order.totalAmount.toLocaleString()}</span>
+                            <div className="bg-gradient-to-br from-[#F5E6D3] to-[#FFF8F0] rounded-xl p-3 sm:p-4 border border-[#D4AF76]/20">
+                                <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Order: {order.orderNumber}</h3>
+                                <p className="text-xs sm:text-sm text-gray-700">
+                                    Total Amount: <span className="font-bold text-[#8B6B4C]">₹{order.totalAmount.toLocaleString()}</span>
                                 </p>
                             </div>
 
                             {/* Error Message */}
                             {error && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                    <div className="flex items-start gap-3">
-                                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                        <div className="flex-1">
-                                            <p className="text-sm text-red-700 font-medium">{error}</p>
+                                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 sm:p-4">
+                                    <div className="flex items-start gap-2 sm:gap-3">
+                                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs sm:text-sm text-red-700 font-medium">{error}</p>
                                             {existingReturnNumber && (
                                                 <div className="mt-3">
                                                     <a 
@@ -244,30 +263,31 @@ export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }
                                     value={formData.notes}
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     rows={3}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
-                                    placeholder="Any additional information about the return..."
+                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:border-[#D4AF76] focus:ring-2 focus:ring-[#D4AF76]/20 outline-none resize-none text-sm sm:text-base"
+                                    placeholder="Any specific details about the return..."
                                 />
                             </div>
 
-                            {/* Submit Button */}
-                            <div className="flex gap-3 pt-4">
+                            {/* Submit Buttons - Fixed on mobile, relative on desktop */}
+                            <div className="fixed sm:relative bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:right-auto p-4 sm:p-0 bg-white sm:bg-transparent border-t-2 sm:border-t-0 border-gray-100 flex gap-2 sm:gap-3 sm:pt-2 z-10">
                                 <button
                                     type="button"
                                     onClick={handleClose}
-                                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                                    className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-sm sm:text-base"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-xl hover:shadow-lg hover:shadow-[#D4AF76]/30 transition-all duration-300 font-semibold text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {loading ? 'Submitting...' : 'Submit Return Request'}
+                                    {loading ? 'Submitting...' : 'Submit Return'}
                                 </button>
                             </div>
                         </form>
                     )}
+                    </div>
                 </motion.div>
             </div>
         </AnimatePresence>

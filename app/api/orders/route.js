@@ -32,7 +32,15 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { items, shippingAddress, notes, paymentMethod = 'cod' } = body;
+        const { 
+            items, 
+            shippingAddress, 
+            notes, 
+            paymentMethod = 'cod',
+            razorpayOrderId,
+            razorpayPaymentId,
+            razorpaySignature
+        } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json({ error: 'No items in order' }, { status: 400 });
@@ -86,6 +94,12 @@ export async function POST(request) {
         // Calculate total
         const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+        // Determine payment status based on method
+        let paymentStatus = 'pending';
+        if (paymentMethod === 'online' && razorpayPaymentId) {
+            paymentStatus = 'paid';
+        }
+
         // Create order
         const order = new Order({
             userId: user.userId,
@@ -100,9 +114,13 @@ export async function POST(request) {
             shippingAddress,
             totalAmount,
             paymentMethod,
-            paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
+            paymentStatus,
             notes,
-            status: 'pending'
+            status: 'pending',
+            ...(razorpayOrderId && { razorpayOrderId }),
+            ...(razorpayPaymentId && { razorpayPaymentId }),
+            ...(razorpaySignature && { razorpaySignature }),
+            ...(paymentStatus === 'paid' && { paidAt: new Date() }),
         });
 
         await order.save();

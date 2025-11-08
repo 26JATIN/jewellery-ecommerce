@@ -30,17 +30,27 @@ export default function AdminReturnsPage() {
     const [returns, setReturns] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processingRefund, setProcessingRefund] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const ITEMS_PER_PAGE = 20;
 
     useEffect(() => {
         fetchReturns();
-    }, []);
+    }, [page]);
 
     const fetchReturns = async () => {
+        setLoading(true);
         try {
             const res = await fetch('/api/admin/returns');
             const data = await res.json();
             if (res.ok) {
-                setReturns(data.returns);
+                const allReturns = data.returns || [];
+                const total = Math.ceil(allReturns.length / ITEMS_PER_PAGE);
+                setTotalPages(total);
+                
+                const start = (page - 1) * ITEMS_PER_PAGE;
+                const end = start + ITEMS_PER_PAGE;
+                setReturns(allReturns.slice(start, end));
             }
         } catch (err) {
             console.error('Error fetching returns:', err);
@@ -289,6 +299,29 @@ export default function AdminReturnsPage() {
                                 </motion.div>
                             );
                         })}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="mt-6 flex justify-center gap-2">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            Previous
+                        </button>
+                        <span className="px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg font-medium">
+                            Page {page} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
             </div>

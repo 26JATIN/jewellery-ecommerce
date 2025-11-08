@@ -81,6 +81,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'returned', 'cancelled'],
         default: 'pending'
     },
+    // Razorpay payment fields
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+    razorpaySignature: String,
+    paidAt: Date,
     // Shiprocket integration fields
     shiprocketOrderId: String,
     shiprocketShipmentId: String,

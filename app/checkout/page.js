@@ -12,8 +12,25 @@ import {
     AlertCircle,
     Loader2,
     ChevronRight,
-    Home
+    Home,
+    CreditCard
 } from 'lucide-react';
+
+// Load Razorpay script
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+        if (typeof window !== 'undefined' && window.Razorpay) {
+            resolve(true);
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -165,38 +182,154 @@ export default function CheckoutPage() {
                 } : null
             }));
 
-            const res = await fetch('/api/orders', {
+            // If online payment, create Razorpay order first
+            if (paymentMethod === 'online') {
+                await handleOnlinePayment(items, address);
+            } else {
+                // COD payment - create order directly
+                await createOrder(items, address);
+            }
+        } catch (err) {
+            console.error('Order placement error:', err);
+            setError(err.message || 'Failed to place order. Please try again.');
+            setSubmitting(false);
+        }
+    };
+
+    const handleOnlinePayment = async (items, address) => {
+        try {
+            const totalAmount = calculateTotal();
+            
+            // Load Razorpay script
+            const scriptLoaded = await loadRazorpayScript();
+            if (!scriptLoaded) {
+                throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
+            }
+
+            // Create Razorpay order
+            const orderRes = await fetch('/api/payment/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    items,
-                    shippingAddress: {
-                        fullName: address.fullName,
-                        phone: address.phone,
-                        addressLine1: address.addressLine1,
-                        addressLine2: address.addressLine2,
-                        city: address.city,
-                        state: address.state,
-                        pincode: address.pincode
-                    },
-                    paymentMethod,
-                    notes
+                    amount: totalAmount,
+                    currency: 'INR',
+                    notes: {
+                        orderNotes: notes,
+                    }
                 })
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                clearCart();
-                router.push(`/orders?success=true&orderNumber=${data.order.orderNumber}`);
-            } else {
-                setError(data.error || 'Failed to place order');
+            const orderData = await orderRes.json();
+            
+            if (!orderRes.ok) {
+                throw new Error(orderData.error || 'Failed to create payment order');
             }
+
+            // Configure Razorpay options
+            const options = {
+                key: orderData.keyId,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: 'Nandika Jewellers',
+                description: 'Purchase from Nandika Jewellers',
+                order_id: orderData.orderId,
+                handler: async function (response) {
+                    // Payment successful - create order and verify payment
+                    try {
+                        const order = await createOrder(items, address, {
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature,
+                        });
+
+                        // Verify payment
+                        const verifyRes = await fetch('/api/payment/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderNumber: order.orderNumber,
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+
+                        if (verifyRes.ok && verifyData.success) {
+                            clearCart();
+                            router.push(`/orders/${order._id}?success=true`);
+                        } else {
+                            setError('Payment verification failed. Please contact support.');
+                            setSubmitting(false);
+                        }
+                    } catch (err) {
+                        console.error('Order creation error:', err);
+                        setError('Failed to complete order. Please contact support.');
+                        setSubmitting(false);
+                    }
+                },
+                prefill: {
+                    name: address.fullName,
+                    contact: address.phone,
+                },
+                theme: {
+                    color: '#D97706',
+                },
+                modal: {
+                    ondismiss: function() {
+                        setError('Payment cancelled');
+                        setSubmitting(false);
+                    }
+                }
+            };
+
+            const razorpay = new window.Razorpay(options);
+            razorpay.open();
+            
         } catch (err) {
-            setError('Failed to place order. Please try again.');
-        } finally {
-            setSubmitting(false);
+            throw err;
         }
+    };
+
+    const createOrder = async (items, address, paymentDetails = null) => {
+        const res = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items,
+                shippingAddress: {
+                    fullName: address.fullName,
+                    phone: address.phone,
+                    addressLine1: address.addressLine1,
+                    addressLine2: address.addressLine2,
+                    city: address.city,
+                    state: address.state,
+                    pincode: address.pincode
+                },
+                paymentMethod,
+                notes,
+                ...(paymentDetails && {
+                    razorpayOrderId: paymentDetails.razorpayOrderId,
+                    razorpayPaymentId: paymentDetails.razorpayPaymentId,
+                    razorpaySignature: paymentDetails.razorpaySignature,
+                })
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to place order');
+        }
+
+        // For COD orders, redirect immediately
+        if (paymentMethod === 'cod') {
+            clearCart();
+            router.push(`/orders/${data.order._id}?success=true`);
+        }
+
+        return data.order;
     };
 
     if (loading) {
@@ -421,7 +554,10 @@ export default function CheckoutPage() {
                             transition={{ delay: 0.1 }}
                             className="bg-white rounded-2xl shadow-lg p-6"
                         >
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Method</h2>
+                            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-amber-600" />
+                                Payment Method
+                            </h2>
                             <div className="space-y-3">
                                 {/* Cash on Delivery */}
                                 <motion.div
@@ -471,7 +607,12 @@ export default function CheckoutPage() {
                                             )}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-gray-900">Online Payment</h3>
+                                            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                                                Online Payment
+                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                                                    Secure
+                                                </span>
+                                            </h3>
                                             <p className="text-sm text-gray-600">Pay securely using UPI, Card, or Net Banking</p>
                                         </div>
                                     </div>
