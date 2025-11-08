@@ -21,6 +21,13 @@ export async function OPTIONS(request) {
 
 export async function POST(request) {
     try {
+        // Optional: Verify security token if configured in Shiprocket
+        // const apiKey = request.headers.get('anx-api-key');
+        // if (apiKey && apiKey !== process.env.SHIPROCKET_WEBHOOK_TOKEN) {
+        //     console.log('Invalid webhook security token');
+        //     return new Response(null, { status: 200, headers: corsHeaders });
+        // }
+
         const body = await request.json();
         
         console.log('Shiprocket webhook received:', JSON.stringify(body, null, 2));
@@ -164,18 +171,18 @@ export async function POST(request) {
 
         console.log(`Order ${order.orderNumber} updated via Shiprocket webhook`);
 
-        return NextResponse.json({ 
-            message: 'Webhook processed successfully',
-            orderNumber: order.orderNumber,
-            status: order.status
-        }, { headers: corsHeaders });
+        // Shiprocket requires ONLY status 200 response with no body
+        return new Response(null, { 
+            status: 200,
+            headers: corsHeaders 
+        });
     } catch (error) {
         console.error('Shiprocket webhook error:', error);
-        return NextResponse.json({ 
-            error: 'Webhook processing failed',
-            details: error.message 
-        }, { 
-            status: 500,
+        
+        // Even on error, return 200 to prevent Shiprocket from retrying
+        // Log the error for debugging but acknowledge receipt
+        return new Response(null, { 
+            status: 200,
             headers: corsHeaders 
         });
     }
