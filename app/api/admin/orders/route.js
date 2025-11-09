@@ -1,5 +1,6 @@
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import { verifyAuth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
@@ -70,16 +71,47 @@ export async function PUT(request) {
         }
 
         await connectDB();
+        
+        // Get the order before updating
+        const oldOrder = await Order.findById(orderId);
+        if (!oldOrder) {
+            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        }
+
+        // If order is being cancelled, restock the inventory
+        if (status === 'cancelled' && oldOrder.status !== 'cancelled') {
+            console.log('Order being cancelled, restocking inventory...');
+            
+            for (const item of oldOrder.items) {
+                try {
+                    const product = await Product.findById(item.productId);
+                    if (product) {
+                        if (item.selectedVariant && item.selectedVariant.sku) {
+                            // Restock variant
+                            const variantIndex = product.variants?.findIndex(v => v.sku === item.selectedVariant.sku);
+                            if (variantIndex !== -1) {
+                                product.variants[variantIndex].stock += item.quantity;
+                                console.log(`Restocked variant ${item.selectedVariant.sku}: +${item.quantity}`);
+                            }
+                        } else {
+                            // Restock main product
+                            product.stock += item.quantity;
+                            console.log(`Restocked product ${product.name}: +${item.quantity}`);
+                        }
+                        await product.save();
+                    }
+                } catch (err) {
+                    console.error(`Error restocking product ${item.productId}:`, err);
+                }
+            }
+        }
+
         const order = await Order.findByIdAndUpdate(
             orderId,
             { status },
             { new: true }
         ).populate('userId', 'name email')
          .populate('items.productId', 'name images');
-
-        if (!order) {
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-        }
 
         return NextResponse.json({ 
             message: 'Order status updated successfully',

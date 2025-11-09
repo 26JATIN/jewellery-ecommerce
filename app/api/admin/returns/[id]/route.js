@@ -1,6 +1,7 @@
 import connectDB from '@/lib/mongodb';
 import ReturnModel from '@/models/Return';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import { verifyAuth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
@@ -39,6 +40,32 @@ export async function PUT(request, { params }) {
             returnDoc.status = 'completed';
             await returnDoc.save();
 
+            // Restock inventory when return is completed
+            console.log('Return completed, restocking inventory...');
+            for (const item of returnDoc.items) {
+                try {
+                    const product = await Product.findById(item.productId);
+                    if (product) {
+                        // Check if it's a variant or main product
+                        if (item.variant && item.variant.sku) {
+                            // Restock variant
+                            const variantIndex = product.variants?.findIndex(v => v.sku === item.variant.sku);
+                            if (variantIndex !== -1) {
+                                product.variants[variantIndex].stock += item.quantity;
+                                console.log(`Restocked variant ${item.variant.sku}: +${item.quantity}`);
+                            }
+                        } else {
+                            // Restock main product
+                            product.stock += item.quantity;
+                            console.log(`Restocked product ${product.name}: +${item.quantity}`);
+                        }
+                        await product.save();
+                    }
+                } catch (err) {
+                    console.error(`Error restocking product ${item.productId}:`, err);
+                }
+            }
+
             // Update related order payment status
             try {
                 const order = await Order.findById(returnDoc.orderId);
@@ -56,7 +83,38 @@ export async function PUT(request, { params }) {
 
         // Other admin actions (e.g., update status)
         if (body.status) {
+            const oldStatus = returnDoc.status;
             returnDoc.status = body.status;
+            
+            // Restock inventory when status changes to 'returned_to_seller' or 'received'
+            if ((body.status === 'returned_to_seller' || body.status === 'received') && 
+                oldStatus !== 'returned_to_seller' && oldStatus !== 'received') {
+                console.log('Product received at warehouse, restocking inventory...');
+                
+                for (const item of returnDoc.items) {
+                    try {
+                        const product = await Product.findById(item.productId);
+                        if (product) {
+                            if (item.variant && item.variant.sku) {
+                                // Restock variant
+                                const variantIndex = product.variants?.findIndex(v => v.sku === item.variant.sku);
+                                if (variantIndex !== -1) {
+                                    product.variants[variantIndex].stock += item.quantity;
+                                    console.log(`Restocked variant ${item.variant.sku}: +${item.quantity}`);
+                                }
+                            } else {
+                                // Restock main product
+                                product.stock += item.quantity;
+                                console.log(`Restocked product ${product.name}: +${item.quantity}`);
+                            }
+                            await product.save();
+                        }
+                    } catch (err) {
+                        console.error(`Error restocking product ${item.productId}:`, err);
+                    }
+                }
+            }
+            
             await returnDoc.save();
             return NextResponse.json({ success: true, message: 'Return status updated', returnId: returnDoc._id });
         }
