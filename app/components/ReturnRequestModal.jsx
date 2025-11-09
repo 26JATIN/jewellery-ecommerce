@@ -1,13 +1,16 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Package, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [existingReturnNumber, setExistingReturnNumber] = useState('');
     const [success, setSuccess] = useState(false);
+    const [returnId, setReturnId] = useState(null);
     const [formData, setFormData] = useState({
         reason: '',
         accountName: '',
@@ -21,6 +24,7 @@ export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }
         setError('');
         setExistingReturnNumber('');
         setSuccess(false);
+        setReturnId(null);
         onClose();
     };
 
@@ -57,8 +61,13 @@ export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }
 
             if (res.ok) {
                 setSuccess(true);
+                setReturnId(data.returnId || data._id);
                 setTimeout(() => {
                     onSuccess && onSuccess();
+                    // Redirect to return details page
+                    if (data.returnId || data._id) {
+                        router.push(`/returns/${data.returnId || data._id}`);
+                    }
                     handleClose();
                 }, 2000);
             } else {
@@ -130,9 +139,20 @@ export default function ReturnRequestModal({ isOpen, onClose, order, onSuccess }
                                     <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" />
                                 </div>
                                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">Return Request Submitted!</h3>
-                                <p className="text-sm sm:text-base text-gray-600">
+                                <p className="text-sm sm:text-base text-gray-600 mb-6">
                                     We'll process your return shortly. You'll receive updates via email.
                                 </p>
+                                {returnId && (
+                                    <button
+                                        onClick={() => router.push(`/returns/${returnId}`)}
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-xl hover:shadow-lg hover:shadow-[#D4AF76]/30 transition-all duration-300 font-semibold"
+                                    >
+                                        View Return Details
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 pb-24 sm:pb-6">
