@@ -90,14 +90,12 @@ const ProductVariantSelector = ({
         if (currentVariant?.price) {
             return {
                 mrp: currentVariant.price.mrp,
-                sellingPrice: currentVariant.price.sellingPrice,
-                costPrice: currentVariant.price.costPrice
+                sellingPrice: currentVariant.price.sellingPrice
             };
         }
         return {
             mrp: product.mrp,
-            sellingPrice: product.sellingPrice,
-            costPrice: product.costPrice
+            sellingPrice: product.sellingPrice
         };
     };
 

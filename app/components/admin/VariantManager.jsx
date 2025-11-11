@@ -152,7 +152,6 @@ const VariantManager = ({
 
         // Get base prices from product data
         const baseMRP = parseFloat(productData.mrp) || 0;
-        const baseCostPrice = parseFloat(productData.costPrice) || 0;
         const baseSellingPrice = parseFloat(productData.sellingPrice) || 0;
 
         // Generate all combinations
@@ -177,7 +176,6 @@ const VariantManager = ({
                 optionCombination: combo.optionCombination,
                 price: {
                     mrp: baseMRP + totalPriceAdjustment,
-                    costPrice: baseCostPrice + totalPriceAdjustment,
                     sellingPrice: baseSellingPrice + totalPriceAdjustment
                 },
                 stock: 0,
@@ -545,18 +543,6 @@ const VariantManager = ({
                                                         type="number"
                                                         value={variant.price?.mrp || ''}
                                                         onChange={(e) => updateVariant(index, 'price.mrp', parseFloat(e.target.value) || 0)}
-                                                        className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
-                                                    />
-                                                </div>
-
-                                                <div className="lg:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                        Cost
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        value={variant.price?.costPrice || ''}
-                                                        onChange={(e) => updateVariant(index, 'price.costPrice', parseFloat(e.target.value) || 0)}
                                                         className="w-full text-sm border border-gray-300 rounded px-2 py-1.5"
                                                     />
                                                 </div>

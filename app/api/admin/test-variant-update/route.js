@@ -64,8 +64,7 @@ export async function GET(request) {
         name: product.name,
         basePrices: {
           mrp: product.mrp,
-          sellingPrice: product.sellingPrice,
-          costPrice: product.costPrice
+          sellingPrice: product.sellingPrice
         },
         hasVariants: product.hasVariants,
         variantOptionsCount: product.variantOptions?.length || 0,

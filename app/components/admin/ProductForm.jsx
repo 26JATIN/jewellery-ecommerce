@@ -9,7 +9,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         category: '',
         subcategory: '',
         mrp: '',
-        costPrice: '',
         sellingPrice: '',
         price: '',
         stock: '',
@@ -167,7 +166,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 category: product.category || '',
                 subcategory: product.subcategory?._id || product.subcategory || '',
                 mrp: product.mrp || '',
-                costPrice: product.costPrice || '',
                 sellingPrice: product.sellingPrice || '',
                 price: product.sellingPrice || '',
                 stock: product.stock || '',
@@ -590,7 +588,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         try {
             // Validation
             if (!formData.name || !formData.description || !formData.category || 
-                !formData.mrp || !formData.costPrice || !formData.sellingPrice || !formData.sku) {
+                !formData.mrp || !formData.sellingPrice || !formData.sku) {
                 alert('Please fill in all required fields');
                 setLoading(false);
                 return;
@@ -612,17 +610,10 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
             // Validate prices
             const mrp = parseFloat(formData.mrp);
-            const costPrice = parseFloat(formData.costPrice);
             const sellingPrice = parseFloat(formData.sellingPrice);
 
             if (sellingPrice > mrp) {
                 alert('Selling price cannot be greater than MRP');
-                setLoading(false);
-                return;
-            }
-
-            if (costPrice > sellingPrice) {
-                alert('Cost price cannot be greater than selling price');
                 setLoading(false);
                 return;
             }
@@ -703,7 +694,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 images: uploadedImages,
                 // Always use the form values for pricing (manual input or from calculated price)
                 mrp: parseFloat(formData.mrp),
-                costPrice: parseFloat(formData.costPrice),
                 sellingPrice: parseFloat(formData.sellingPrice),
                 price: parseFloat(formData.sellingPrice),
                 stock: parseInt(formData.stock) || 0,
@@ -738,7 +728,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                     optionCombination: variant.optionCombination || {},
                     price: {
                         mrp: parseFloat(variant.price?.mrp) || parseFloat(formData.mrp) || 0,
-                        costPrice: parseFloat(variant.price?.costPrice) || parseFloat(formData.costPrice) || 0,
                         sellingPrice: parseFloat(variant.price?.sellingPrice) || parseFloat(formData.sellingPrice) || 0
                     },
                     stock: parseInt(variant.stock) || 0,
@@ -1483,23 +1472,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Cost Price (₹) *
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="costPrice"
-                                        value={formData.costPrice}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        step="0.01"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
-                                        placeholder="Your Cost"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Selling Price (₹) *
                                     </label>
                                     <input
@@ -1521,24 +1493,6 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                         {formData.pricingMethod === 'dynamic' && (
                             <div className="space-y-6 mt-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Cost Price (₹) *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="costPrice"
-                                            value={formData.costPrice}
-                                            onChange={handleInputChange}
-                                            min="0"
-                                            step="0.01"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent transition-all"
-                                            placeholder="Your actual cost"
-                                            required
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">Your purchase/manufacturing cost</p>
-                                    </div>
-
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Discount (%)

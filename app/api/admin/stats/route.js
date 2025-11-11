@@ -50,7 +50,7 @@ export async function GET(req) {
             Product.countDocuments({ stock: 0 }),
             User.countDocuments(),
             Product.aggregate([
-                { $group: { _id: null, total: { $sum: { $multiply: ['$costPrice', '$stock'] } } } }
+                { $group: { _id: null, total: { $sum: { $multiply: ['$sellingPrice', '$stock'] } } } }
             ])
         ]);
 

@@ -166,7 +166,6 @@ export async function POST(request) {
                 ...variant.toObject ? variant.toObject() : variant,
                 price: {
                   mrp: variantMRP,
-                  costPrice: variant.price?.costPrice || 0, // Keep existing cost price
                   sellingPrice: variantSellingPrice
                 }
               };
@@ -176,7 +175,7 @@ export async function POST(request) {
             console.log(`Updated ${updatedVariants.length} variants for ${product.name}`);
           }
 
-          // Update product prices (MRP auto-calculated, selling price = MRP - discount%, cost price unchanged)
+          // Update product prices (MRP auto-calculated, selling price = MRP - discount%)
           await Product.findByIdAndUpdate(product._id, updateData);
 
           console.log(`Updated ${product.name} (${product.metalType}): MRP ₹${oldMRP} → ₹${newMRP}, Selling ₹${oldSellingPrice} → ₹${newSellingPrice}`);

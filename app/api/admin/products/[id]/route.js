@@ -149,7 +149,6 @@ export async function PUT(req, { params }) {
             // Get base prices for variants
             const baseMRP = parseFloat(data.mrp) || 0;
             const baseSellingPrice = parseFloat(data.sellingPrice) || 0;
-            const baseCostPrice = parseFloat(data.costPrice) || 0;
 
             // Process variants - ensure optionCombination is properly handled
             // AND calculate prices with adjustments
@@ -178,7 +177,6 @@ export async function PUT(req, { params }) {
                 // Apply the adjustment to the base prices
                 const variantMRP = baseMRP + variantPriceAdjustment;
                 const variantSellingPrice = baseSellingPrice + variantPriceAdjustment;
-                const variantCostPrice = baseCostPrice + variantPriceAdjustment;
 
                 return {
                     ...variant,
@@ -186,7 +184,6 @@ export async function PUT(req, { params }) {
                     optionCombination: variant.optionCombination || {},
                     price: {
                         mrp: variantMRP,
-                        costPrice: variantCostPrice,
                         sellingPrice: variantSellingPrice
                     },
                     stock: parseInt(variant.stock) || 0,
@@ -222,25 +219,11 @@ export async function PUT(req, { params }) {
                     { status: 400 }
                 );
             }
-
-            if (data.costPrice > data.sellingPrice) {
-                return NextResponse.json(
-                    { error: 'Cost price cannot be greater than selling price' },
-                    { status: 400 }
-                );
-            }
         } else {
             // For fixed pricing, validate price fields
             if (data.sellingPrice > data.mrp) {
                 return NextResponse.json(
                     { error: 'Selling price cannot be greater than MRP' },
-                    { status: 400 }
-                );
-            }
-
-            if (data.costPrice > data.sellingPrice) {
-                return NextResponse.json(
-                    { error: 'Cost price cannot be greater than selling price' },
                     { status: 400 }
                 );
             }

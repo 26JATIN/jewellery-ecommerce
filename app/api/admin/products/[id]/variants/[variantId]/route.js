@@ -79,7 +79,6 @@ export async function PUT(req, { params }) {
         if (isActive !== undefined) variant.isActive = isActive;
         if (price) {
             if (price.mrp !== undefined) variant.price.mrp = price.mrp;
-            if (price.costPrice !== undefined) variant.price.costPrice = price.costPrice;
             if (price.sellingPrice !== undefined) variant.price.sellingPrice = price.sellingPrice;
         }
 

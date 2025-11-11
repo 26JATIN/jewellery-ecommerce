@@ -82,7 +82,7 @@ export async function POST(req) {
         const data = await req.json();
 
         // Validate required fields (different for dynamic vs fixed pricing)
-        const basicRequiredFields = ['name', 'description', 'category', 'sku', 'costPrice'];
+        const basicRequiredFields = ['name', 'description', 'category', 'sku'];
         for (const field of basicRequiredFields) {
             if (!data[field]) {
                 return NextResponse.json(
@@ -131,14 +131,6 @@ export async function POST(req) {
 
             data.isDynamicPricing = true;
             data.pricingMethod = 'dynamic';
-
-            // Validate cost price is less than selling price
-            if (data.costPrice > data.sellingPrice) {
-                return NextResponse.json(
-                    { error: 'Cost price should be less than selling price for profitability' },
-                    { status: 400 }
-                );
-            }
         } else {
             // For fixed pricing, validate price fields
             const priceFields = ['sellingPrice', 'mrp'];
@@ -155,13 +147,6 @@ export async function POST(req) {
             if (data.sellingPrice > data.mrp) {
                 return NextResponse.json(
                     { error: 'Selling price cannot be greater than MRP' },
-                    { status: 400 }
-                );
-            }
-
-            if (data.costPrice > data.sellingPrice) {
-                return NextResponse.json(
-                    { error: 'Cost price cannot be greater than selling price' },
                     { status: 400 }
                 );
             }
@@ -208,7 +193,6 @@ export async function POST(req) {
             // Get base prices for variants
             const baseMRP = parseFloat(data.mrp) || 0;
             const baseSellingPrice = parseFloat(data.sellingPrice) || 0;
-            const baseCostPrice = parseFloat(data.costPrice) || 0;
 
             // Process variants - ensure optionCombination is properly handled as object
             // AND calculate prices with adjustments
@@ -241,7 +225,6 @@ export async function POST(req) {
                 // Apply the adjustment to the base prices
                 const variantMRP = baseMRP + variantPriceAdjustment;
                 const variantSellingPrice = baseSellingPrice + variantPriceAdjustment;
-                const variantCostPrice = baseCostPrice + variantPriceAdjustment;
 
                 const processedVariant = {
                     ...variant,
@@ -249,7 +232,6 @@ export async function POST(req) {
                     optionCombination: variant.optionCombination || {},
                     price: {
                         mrp: variantMRP,
-                        costPrice: variantCostPrice,
                         sellingPrice: variantSellingPrice
                     },
                     stock: parseInt(variant.stock) || 0,

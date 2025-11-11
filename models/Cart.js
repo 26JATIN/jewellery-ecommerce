@@ -27,7 +27,6 @@ const cartItemSchema = new mongoose.Schema({
         },
         price: {
             mrp: Number,
-            costPrice: Number,
             sellingPrice: Number
         },
         images: [{

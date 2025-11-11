@@ -41,12 +41,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
         return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
     };
 
-    const calculateProfit = (sellingPrice, costPrice) => {
-        const profit = sellingPrice - costPrice;
-        const profitPercentage = ((profit / costPrice) * 100).toFixed(1);
-        return { profit, profitPercentage };
-    };
-
     const calculateDiscount = (mrp, sellingPrice) => {
         const discount = ((mrp - sellingPrice) / mrp * 100).toFixed(1);
         return discount;
@@ -127,9 +121,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                 Stock
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Profit
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -156,7 +147,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                         ) : (
                             filteredProducts.flatMap((product) => {
                                 const stockStatus = getStockStatus(product);
-                                const profit = calculateProfit(product.sellingPrice, product.costPrice);
                                 const discount = calculateDiscount(product.mrp, product.sellingPrice);
 
                                 const rows = [
@@ -231,10 +221,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                                         <span className="text-gray-500">Selling:</span>
                                                         <span className="font-medium ml-1 text-green-600">₹{product.sellingPrice}</span>
                                                     </div>
-                                                    <div>
-                                                        <span className="text-gray-500">Cost:</span>
-                                                        <span className="font-medium ml-1">₹{product.costPrice}</span>
-                                                    </div>
                                                     {discount > 0 && (
                                                         <div className="text-xs text-red-600">
                                                             {discount}% off
@@ -285,52 +271,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {product.hasVariants ? (
-                                                <div className="text-sm">
-                                                    <div className="font-medium text-gray-700 text-xs mb-1">Variant Profits</div>
-                                                    {product.variants && product.variants.length > 0 ? (
-                                                        <>
-                                                            {(() => {
-                                                                const variantProfits = product.variants.map(v => {
-                                                                    const vPrice = v.price?.sellingPrice || v.price || 0;
-                                                                    const vCost = v.price?.costPrice || product.costPrice || 0;
-                                                                    return vPrice - vCost;
-                                                                });
-                                                                const minProfit = Math.min(...variantProfits);
-                                                                const maxProfit = Math.max(...variantProfits);
-                                                                const avgMargin = variantProfits.reduce((acc, profit, i) => {
-                                                                    const vCost = product.variants[i].price?.costPrice || product.costPrice || 1;
-                                                                    return acc + ((profit / vCost) * 100);
-                                                                }, 0) / variantProfits.length;
-                                                                
-                                                                return (
-                                                                    <>
-                                                                        <div className="font-medium text-green-600 text-xs">
-                                                                            ₹{minProfit.toFixed(0)} - ₹{maxProfit.toFixed(0)}
-                                                                        </div>
-                                                                        <div className="text-xs text-gray-500">
-                                                                            Avg: {avgMargin.toFixed(1)}% margin
-                                                                        </div>
-                                                                    </>
-                                                                );
-                                                            })()}
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-xs text-gray-500">No variants</div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="text-sm">
-                                                    <div className="font-medium text-green-600">
-                                                        ₹{profit.profit.toFixed(2)}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {profit.profitPercentage}% margin
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                     product.isActive
@@ -374,7 +314,7 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                 if (product.hasVariants && expandedProducts.has(product._id)) {
                                     rows.push(
                                         <tr key={`${product._id}-variants`} className="bg-gray-50">
-                                            <td colSpan="7" className="px-6 py-4">
+                                            <td colSpan="6" className="px-6 py-4">
                                                 <div className="bg-white rounded-lg border p-4">
                                                     <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                                                         🎨 Product Variants ({product.variants?.length || 0})
@@ -414,10 +354,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                                                         <div>
                                                                             <span className="text-gray-500">Selling:</span>
                                                                             <span className="font-medium ml-1 text-green-600">₹{variant.price?.sellingPrice || variant.price || 'N/A'}</span>
-                                                                        </div>
-                                                                        <div>
-                                                                            <span className="text-gray-500">Cost:</span>
-                                                                            <span className="font-medium ml-1">₹{variant.price?.costPrice || 'N/A'}</span>
                                                                         </div>
                                                                     </div>
                                                                     
@@ -477,7 +413,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                 ) : (
                     filteredProducts.map((product) => {
                         const stockStatus = getStockStatus(product);
-                        const profit = calculateProfit(product.sellingPrice, product.costPrice);
                         const discount = calculateDiscount(product.mrp, product.sellingPrice);
 
                         return (
@@ -563,41 +498,6 @@ export default function ProductList({ products, onEdit, onDelete }) {
                                                 </span>
                                             </div>
                                         )}
-                                    </div>
-
-                                    {/* Profit */}
-                                    <div className="bg-gray-50 rounded-lg p-2">
-                                        <p className="text-gray-500 mb-1 font-medium">Profit</p>
-                                        {product.hasVariants && product.variants && product.variants.length > 0 ? (
-                                            <div className="space-y-0.5">
-                                                {(() => {
-                                                    const variantProfits = product.variants.map(v => {
-                                                        const vPrice = v.price?.sellingPrice || v.price || 0;
-                                                        const vCost = v.price?.costPrice || product.costPrice || 0;
-                                                        return vPrice - vCost;
-                                                    });
-                                                    const minProfit = Math.min(...variantProfits);
-                                                    const maxProfit = Math.max(...variantProfits);
-                                                    return (
-                                                        <>
-                                                            <p className="text-green-600 font-medium">₹{minProfit.toFixed(0)} - ₹{maxProfit.toFixed(0)}</p>
-                                                            <p className="text-gray-600">Per variant</p>
-                                                        </>
-                                                    );
-                                                })()}
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-0.5">
-                                                <p className="text-green-600 font-medium">₹{profit.profit.toFixed(2)}</p>
-                                                <p className="text-gray-600">{profit.profitPercentage}% margin</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Cost Price */}
-                                    <div className="bg-gray-50 rounded-lg p-2">
-                                        <p className="text-gray-500 mb-1 font-medium">Cost Price</p>
-                                        <p className="text-gray-700 font-medium">₹{product.costPrice}</p>
                                     </div>
                                 </div>
 

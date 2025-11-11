@@ -209,7 +209,6 @@ export async function POST(req) {
         const productData = {
             ...data,
             mrp: data.mrp || data.sellingPrice,
-            costPrice: data.costPrice || data.sellingPrice * 0.7, // Default 30% margin
             sku: data.sku || `SKU${Date.now()}`,
             isActive: data.isActive !== undefined ? data.isActive : true
         };
