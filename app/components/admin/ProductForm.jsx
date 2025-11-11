@@ -11,7 +11,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         mrp: '',
         sellingPrice: '',
         price: '',
-        stock: '',
+        stock: '1',
         sku: '',
         image: '',
         images: [],
