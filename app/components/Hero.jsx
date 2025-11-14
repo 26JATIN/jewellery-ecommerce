@@ -36,7 +36,7 @@ export default function Hero() {
     };
 
     return (
-        <div className="relative w-full h-[calc(100vh-64px)] lg:h-screen overflow-hidden bg-black">
+        <div className="relative w-full h-[80vh] sm:h-[70vh] md:h-[70vh] lg:h-screen overflow-hidden bg-black">
             {/* Full-screen Image Slideshow */}
             <div className="absolute inset-0">
                 <AnimatePresence mode="wait">
