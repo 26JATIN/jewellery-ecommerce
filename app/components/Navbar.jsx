@@ -149,6 +149,19 @@ export default function Navbar() {
                                     </Link>
                                 </motion.div>
 
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.15 }}
+                                >
+                                    <Link 
+                                        href="/blogs"
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                                    >
+                                        Blog
+                                    </Link>
+                                </motion.div>
+
                                 {/* User Profile or Login */}
                                 {user ? (
                                     <div className="relative profile-menu">
@@ -363,6 +376,22 @@ export default function Navbar() {
                                 </svg>
                             </motion.div>
                             <span className="text-xs text-gray-600 font-medium">Browse</span>
+                        </Link>
+                    </motion.div>
+
+                    {/* Blog */}
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                        <Link href="/blogs" className="flex flex-col items-center p-2 space-y-1">
+                            <motion.div
+                                className="p-2 rounded-xl bg-gray-50"
+                                whileHover={{ backgroundColor: "#D4AF76", scale: 1.1 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </motion.div>
+                            <span className="text-xs text-gray-600 font-medium">Blog</span>
                         </Link>
                     </motion.div>
 

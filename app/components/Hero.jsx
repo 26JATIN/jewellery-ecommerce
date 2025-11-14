@@ -1,37 +1,22 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { CldImage } from 'next-cloudinary';
-import { useAuth } from '../context/AuthContext';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Hero() {
-    const { user } = useAuth();
     const router = useRouter();
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [isLoaded, setIsLoaded] = useState(false);
 
     const slides = [
         {
-            image: "carousel1_l76hra.jpg",
-            title: "Luxury, Redefined",
-            subtitle: "Exclusive Experience",
-            description: "Experience the pinnacle of artistry and craftsmanship with our signature collection. Every creation is a blend of timeless tradition, precision, and modern elegance.",
-            cta: "Shop Signature Collection",
+            image: "carousel1.png",
         },
         {
-            image: "carousel2_gycam4.jpg",
-            title: "Crafted by Hands, Perfected by Heart",
-            subtitle: "The Nandika Signature Collection",
-            description: "Every detail reflects devotion — from the artisan's touch to the final shine, our jewellery celebrates the soul of true craftsmanship.",
-            cta: "Discover the Artistry",
+            image: "carousel2.png",
         },
         {
-            image: "carousel3_xpvlxx.jpg",
-            title: "Unveil the New Era of Jewellery",
-            subtitle: "Exclusively Crafted for the Discerning Few",
-            description: "Step into a world of contemporary elegance — modern silhouettes inspired by heritage, designed to make every moment shine.",
-            cta: "Explore New Arrivals",
+            image: "carousel3.png",
         }
     ];
 
@@ -43,25 +28,8 @@ export default function Hero() {
         return () => clearInterval(timer);
     }, [slides.length]);
 
-    useEffect(() => {
-        setIsLoaded(true);
-    }, []);
-
     const goToSlide = (index) => {
         setCurrentSlide(index);
-    };
-
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    };
-
-    const scrollToProducts = () => {
-        // Navigate to products page
-        router.push('/products');
     };
 
     return (
@@ -77,99 +45,297 @@ export default function Hero() {
                         transition={{ duration: 1 }}
                         className="absolute inset-0"
                     >
-                        <CldImage
-                            src={slides[currentSlide].image}
-                            alt={slides[currentSlide].title}
+                        <Image
+                            src={`/${slides[currentSlide].image}`}
+                            alt="Nandika Jewellers"
                             fill
                             className="object-cover object-center"
                             priority
                             quality={90}
                         />
-                        {/* Simple dark overlay */}
-                        <div className="absolute inset-0 bg-black/40" />
                     </motion.div>
                 </AnimatePresence>
             </div>
 
-
-
-            {/* Content Overlay */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center px-4">
-                <div className="max-w-5xl mx-auto text-center text-white">
-                    <div className="space-y-3 lg:space-y-8">
-                        {/* Subtitle */}
-                        {slides[currentSlide].subtitle && (
-                            <div 
-                                key={`subtitle-${currentSlide}`}
-                                className="text-xs md:text-sm lg:text-base tracking-[0.2em] lg:tracking-[0.3em] uppercase text-white/90 font-light relative"
-                            >
-                                <span className="relative z-10">{slides[currentSlide].subtitle}</span>
-                                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
-                            </div>
-                        )}
-
-                        {/* Main Title */}
-                        <h1 
-                            key={`title-${currentSlide}`}
-                            className="text-2xl md:text-4xl lg:text-6xl xl:text-7xl font-light leading-tight tracking-tight px-2"
+            {/* Text Overlay - Only for first slide */}
+            {currentSlide === 0 && (
+                <div className="absolute inset-0 z-20">
+                    {/* Center Content - Main Heading */}
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                        <motion.h1 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="text-5xl md:text-7xl lg:text-8xl font-serif italic"
+                            style={{ 
+                                color: '#D1B48E',
+                                textShadow: '0 0 20px rgba(209, 180, 142, 0.3)',
+                                fontFamily: "'Playfair Display', serif"
+                            }}
                         >
-                            <span className="block text-white">{slides[currentSlide].title}</span>
-                        </h1>
-
-                        {/* Description */}
-                        <p
-                            key={`desc-${currentSlide}`}
-                            className="text-sm md:text-lg lg:text-xl xl:text-2xl leading-relaxed max-w-3xl mx-auto text-white/95 font-light px-4"
+                            Designing Moments
+                        </motion.h1>
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-2xl md:text-3xl lg:text-4xl mt-4 font-light"
+                            style={{ color: '#E0E0E0' }}
                         >
-                            {slides[currentSlide].description}
-                        </p>
+                            that last forever
+                        </motion.p>
+                    </div>
 
-                        {/* Enhanced CTA Section */}
-                        <div 
-                            key={`cta-section-${currentSlide}`}
-                            className="pt-3 lg:pt-8 space-y-3 lg:space-y-6"
-                        >
-                            {/* Primary CTA */}
-                            <button
-                                onClick={scrollToProducts}
-                                className="group relative px-6 py-3 lg:px-10 lg:py-5 bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-full hover:shadow-2xl transition-all duration-500 font-light tracking-wide shadow-xl overflow-hidden hover:scale-105 hover:-translate-y-0.5 active:scale-95"
+                    {/* Bottom Bar */}
+                    <div className="absolute bottom-0 left-0 right-0 px-6 lg:px-12 py-6 lg:py-8">
+                        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 lg:gap-8 text-sm lg:text-base" style={{ color: '#EAEAEA' }}>
+                            {/* Bottom Left - Contact Info */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 0.7 }}
+                                className="flex flex-col gap-2 items-center lg:items-start"
                             >
-                                <span className="relative z-10 flex items-center gap-2 lg:gap-3 text-sm lg:text-lg">
-                                    {slides[currentSlide].cta}
-                                    <svg className="w-4 h-4 lg:w-6 lg:h-6 group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-[#8B6B4C] to-[#D4AF76] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            </button>
-                            {/* Trust Indicators */}
-                            <div 
-                                className="hidden lg:flex items-center justify-center gap-8 pt-8"
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">nandikajewellers.in</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">+91 9993439307</span>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom Middle - Empty for first slide */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 1, delay: 0.9 }}
+                                className="flex items-center gap-2"
                             >
-                                <div className="flex items-center gap-2 text-white/80">
-                                    <svg className="w-5 h-5 text-[#D4AF76]" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    <span className="text-sm font-light">Rated 4.9/5</span>
+                            </motion.div>
+
+                            {/* Bottom Right - Features/Certifications */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 1.1 }}
+                                className="flex items-center gap-4 lg:gap-6"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Rated 4.9/5</span>
                                 </div>
                                 <div className="w-px h-4 bg-white/30" />
-                                <div className="flex items-center gap-2 text-white/80">
-                                    <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                    </svg>
-                                    <span className="text-sm font-light">Certified Quality</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Certified Quality</span>
                                 </div>
                                 <div className="w-px h-4 bg-white/30" />
-                                <div className="flex items-center gap-2 text-white/80">
-                                    <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
-                                    </svg>
-                                    <span className="text-sm font-light">Free Returns</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Free Returns</span>
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Text Overlay - For second slide */}
+            {currentSlide === 1 && (
+                <div className="absolute inset-0 z-20">
+                    {/* Center Content - Second Slide */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                        <motion.h2 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4"
+                            style={{ 
+                                background: 'linear-gradient(to bottom, #D1D1D1, #9A9A9A)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}
+                        >
+                            Trusted Quality
+                        </motion.h2>
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-2xl md:text-4xl lg:text-5xl mb-6 font-light italic"
+                            style={{ 
+                                color: '#FFFFFF',
+                                fontFamily: "'Playfair Display', serif"
+                            }}
+                        >
+                            timeless bond
+                        </motion.p>
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.7 }}
+                            className="text-lg md:text-2xl lg:text-3xl font-light"
+                            style={{ color: '#C4A75A' }}
+                        >
+                            Guaranteed Purity and Intricate Craftsmanship
+                        </motion.p>
+                    </div>
+
+                    {/* Bottom Bar for second slide */}
+                    <div className="absolute bottom-0 left-0 right-0 px-6 lg:px-12 py-6 lg:py-8">
+                        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 lg:gap-8 text-sm lg:text-base" style={{ color: '#EAEAEA' }}>
+                            {/* Bottom Left - Contact Info */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 0.9 }}
+                                className="flex flex-col gap-2 items-center lg:items-start"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">nandikajewellers.in</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">+91 9993439307</span>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom Middle - Empty */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 1, delay: 1.1 }}
+                                className="flex items-center gap-2"
+                            >
+                            </motion.div>
+
+                            {/* Bottom Right - Features/Certifications */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 1.3 }}
+                                className="flex items-center gap-4 lg:gap-6"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Rated 4.9/5</span>
+                                </div>
+                                <div className="w-px h-4 bg-white/30" />
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Certified Quality</span>
+                                </div>
+                                <div className="w-px h-4 bg-white/30" />
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Free Returns</span>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Text Overlay - For third slide */}
+            {currentSlide === 2 && (
+                <div className="absolute inset-0 z-20">
+                    {/* Center Content - Third Slide */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="text-3xl md:text-5xl lg:text-6xl mb-2 font-light"
+                            style={{ 
+                                color: '#DCC180',
+                                fontFamily: "'Cormorant Garamond', serif"
+                            }}
+                        >
+                            Your
+                        </motion.p>
+                        <motion.h2 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-5xl md:text-7xl lg:text-9xl mb-6 font-light"
+                            style={{ 
+                                color: '#DCC180',
+                                fontFamily: "'Cormorant Garamond', serif"
+                            }}
+                        >
+                            Destination
+                        </motion.h2>
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.7 }}
+                            className="text-xl md:text-2xl lg:text-3xl font-light"
+                            style={{ color: '#FFFFFF' }}
+                        >
+                            for Hallmarked Gold & Pure Silver
+                        </motion.p>
+                    </div>
+
+                    {/* Bottom Bar for third slide */}
+                    <div className="absolute bottom-0 left-0 right-0 px-6 lg:px-12 py-6 lg:py-8">
+                        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 lg:gap-8 text-sm lg:text-base" style={{ color: '#FFFFFF' }}>
+                            {/* Bottom Left - Contact Info */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 0.9 }}
+                                className="flex flex-col gap-2 items-center lg:items-start"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">nandikajewellers.in</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">+91 9993439307</span>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom Middle - Address */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 1, delay: 1.1 }}
+                                className="flex items-center gap-2 text-center lg:text-left"
+                            >
+                                <span className="font-light max-w-md">Soni Gali, Kankari Chok, Malwa, Barod, Madhya Pradesh - 465550</span>
+                            </motion.div>
+
+                            {/* Bottom Right - Features/Certifications */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, delay: 1.3 }}
+                                className="flex items-center gap-4 lg:gap-6"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Rated 4.9/5</span>
+                                </div>
+                                <div className="w-px h-4 bg-white/30" />
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Certified Quality</span>
+                                </div>
+                                <div className="w-px h-4 bg-white/30" />
+                                <div className="flex items-center gap-2">
+                                    <span className="font-light">Free Returns</span>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Slide Navigation Dots */}
+            <div className="absolute bottom-24 lg:bottom-28 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+                {slides.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => goToSlide(index)}
+                        className={`transition-all duration-300 ${
+                            currentSlide === index 
+                                ? 'w-8 h-2 bg-[#D1B48E]' 
+                                : 'w-2 h-2 bg-white/50 hover:bg-white/70'
+                        } rounded-full`}
+                        aria-label={`Go to slide ${index + 1}`}
+                    />
+                ))}
             </div>
         </div>
     );
