@@ -84,9 +84,9 @@ export default function Hero() {
                         {/* Mobile Image - Only for small mobile devices, positioned below search */}
                         {slides[currentSlide].mobileImage && (
                             <motion.div 
-                                className="sm:hidden w-full h-full pt-16"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
+                                className="sm:hidden w-full h-full"
+                                initial={{ opacity: 0, scale: 1.05 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 transition={{ 
                                     duration: 1,
                                     delay: 0.2,
@@ -97,7 +97,7 @@ export default function Hero() {
                                     src={`/${slides[currentSlide].mobileImage}`}
                                     alt="Nandika Jewellers Mobile"
                                     fill
-                                    className="object-contain object-top"
+                                    className="object-cover object-center"
                                     priority
                                     quality={90}
                                 />
