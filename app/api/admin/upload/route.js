@@ -101,7 +101,8 @@ export async function POST(req) {
 
         return NextResponse.json({
             success: true,
-            imageUrl: uploadResult.secure_url,
+            url: uploadResult.secure_url,
+            imageUrl: uploadResult.secure_url, // Keep for backward compatibility
             publicId: uploadResult.public_id
         });
 

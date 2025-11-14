@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Search, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CATEGORIES = [
@@ -25,6 +25,8 @@ export default function BlogManagement() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [pagination, setPagination] = useState({});
+    const [uploading, setUploading] = useState(false);
+    const [imagePreview, setImagePreview] = useState('');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -154,6 +156,7 @@ export default function BlogManagement() {
                 keywords: blog.seo?.keywords?.join(', ') || ''
             }
         });
+        setImagePreview(blog.featuredImage?.url || '');
         setShowForm(true);
     };
 
@@ -173,6 +176,7 @@ export default function BlogManagement() {
                 keywords: ''
             }
         });
+        setImagePreview('');
     };
 
     const generateSlug = (title) => {
@@ -180,6 +184,64 @@ export default function BlogManagement() {
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '');
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image file');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image size should be less than 5MB');
+            return;
+        }
+
+        try {
+            setUploading(true);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'blogs');
+
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setFormData(prev => ({
+                    ...prev,
+                    featuredImage: {
+                        ...prev.featuredImage,
+                        url: data.url
+                    }
+                }));
+                setImagePreview(data.url);
+                toast.success('Image uploaded successfully');
+            } else {
+                toast.error(data.error || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Failed to upload image');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const removeImage = () => {
+        setFormData(prev => ({
+            ...prev,
+            featuredImage: { ...prev.featuredImage, url: '' }
+        }));
+        setImagePreview('');
     };
 
     if (showForm) {
@@ -282,30 +344,99 @@ export default function BlogManagement() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-light mb-3 text-gray-700">Featured Image URL</label>
-                            <Input
-                                value={formData.featuredImage.url}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    featuredImage: { ...formData.featuredImage, url: e.target.value }
-                                })}
-                                placeholder="https://..."
-                                className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
-                            />
+                    <div className="space-y-4">
+                        <label className="block text-sm font-light mb-3 text-gray-700">Featured Image</label>
+                        
+                        {/* Image Preview */}
+                        {imagePreview && (
+                            <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 bg-gray-50 group">
+                                <img 
+                                    src={imagePreview} 
+                                    alt="Preview" 
+                                    className="w-full h-64 object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={removeImage}
+                                    className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Upload Button */}
+                        <div className="flex gap-4">
+                            <label className="flex-1">
+                                <div className={`
+                                    flex items-center justify-center gap-3 p-6 border-2 border-dashed rounded-2xl cursor-pointer
+                                    transition-all hover:border-[#D4AF76] hover:bg-[#D4AF76]/5
+                                    ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
+                                    ${imagePreview ? 'border-gray-200' : 'border-gray-300'}
+                                `}>
+                                    {uploading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-[#D4AF76]"></div>
+                                            <span className="text-sm font-light text-gray-600">Uploading...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-5 h-5 text-[#8B6B4C]" />
+                                            <span className="text-sm font-light text-gray-700">
+                                                {imagePreview ? 'Change Image' : 'Upload Image'}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    disabled={uploading}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+                        <p className="text-xs text-gray-500 font-light">Maximum file size: 5MB. Supported formats: JPG, PNG, WebP</p>
+
+                        {/* Alternative: URL Input */}
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-white text-gray-500 font-light">or enter URL</span>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-light mb-3 text-gray-700">Image Alt Text</label>
-                            <Input
-                                value={formData.featuredImage.alt}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    featuredImage: { ...formData.featuredImage, alt: e.target.value }
-                                })}
-                                className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Input
+                                    value={formData.featuredImage.url}
+                                    onChange={(e) => {
+                                        const url = e.target.value;
+                                        setFormData({
+                                            ...formData,
+                                            featuredImage: { ...formData.featuredImage, url }
+                                        });
+                                        setImagePreview(url);
+                                    }}
+                                    placeholder="https://..."
+                                    className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
+                                />
+                            </div>
+
+                            <div>
+                                <Input
+                                    value={formData.featuredImage.alt}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        featuredImage: { ...formData.featuredImage, alt: e.target.value }
+                                    })}
+                                    placeholder="Image Alt Text"
+                                    className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
+                                />
+                            </div>
                         </div>
                     </div>
 
