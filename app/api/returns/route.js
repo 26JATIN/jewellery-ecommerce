@@ -52,7 +52,7 @@ export async function POST(request) {
 
         // Create Shiprocket return order
         try {
-            const { createReturnOrder, processShipment, generatePickup, generateManifest } = await import('@/lib/shiprocket');
+            const { createReturnOrder, processShipment, generatePickup, generateManifest, printManifest } = await import('@/lib/shiprocket');
 
             // Prepare return items for Shiprocket
             const shiprocketReturnItems = items.map(item => ({
@@ -111,6 +111,15 @@ export async function POST(request) {
                             console.log(`📋 Generating manifest for return ${returnDoc._id}...`);
                             const manifestResponse = await generateManifest([shiprocketResponse.shipment_id]);
                             console.log(`✅ Manifest generated for return ${returnDoc._id}:`, manifestResponse);
+                            
+                            // Step 4: Print Manifest for return
+                            try {
+                                console.log(`🖨️ Printing manifest for return ${returnDoc._id}...`);
+                                const printResponse = await printManifest([shiprocketResponse.order_id]);
+                                console.log(`✅ Manifest printed for return ${returnDoc._id}:`, printResponse);
+                            } catch (printError) {
+                                console.error(`⚠️ Failed to print manifest for return ${returnDoc._id}:`, printError);
+                            }
                         } catch (manifestError) {
                             console.error(`⚠️ Failed to generate manifest for return ${returnDoc._id}:`, manifestError);
                         }

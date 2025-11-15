@@ -146,7 +146,7 @@ export async function POST(request) {
 
         // Create Shiprocket order
         try {
-            const { createShiprocketOrder, processShipment, generatePickup, generateManifest } = await import('@/lib/shiprocket');
+            const { createShiprocketOrder, processShipment, generatePickup, generateManifest, printManifest } = await import('@/lib/shiprocket');
             
             // Prepare order items for Shiprocket
             const shiprocketItems = items.map(item => ({
@@ -215,9 +215,20 @@ export async function POST(request) {
                             const manifestResponse = await generateManifest([shiprocketResponse.shipment_id]);
                             console.log(`✅ Manifest generated for order ${order.orderNumber}:`, manifestResponse);
                             
-                            // Update order notes with full automation status
-                            order.notes = (order.notes ? order.notes + '\n' : '') + 
-                                `[SYSTEM] Shipment fully automated: AWB assigned, pickup scheduled & manifest generated`;
+                            // Step 4: Print Manifest (makes it visible in Shiprocket)
+                            try {
+                                console.log(`🖨️ Printing manifest for order ${order.orderNumber}...`);
+                                const printResponse = await printManifest([shiprocketResponse.order_id]);
+                                console.log(`✅ Manifest printed for order ${order.orderNumber}:`, printResponse);
+                                
+                                // Update order notes with full automation status
+                                order.notes = (order.notes ? order.notes + '\n' : '') + 
+                                    `[SYSTEM] Shipment fully automated: AWB assigned, pickup scheduled, manifest generated & printed`;
+                            } catch (printError) {
+                                console.error(`⚠️ Failed to print manifest for order ${order.orderNumber}:`, printError);
+                                order.notes = (order.notes ? order.notes + '\n' : '') + 
+                                    `[SYSTEM] Shipment automated: AWB assigned, pickup scheduled & manifest generated\n[WARNING] Manifest print failed: ${printError.message}`;
+                            }
                         } catch (manifestError) {
                             console.error(`⚠️ Failed to generate manifest for order ${order.orderNumber}:`, manifestError);
                             order.notes = (order.notes ? order.notes + '\n' : '') + 
