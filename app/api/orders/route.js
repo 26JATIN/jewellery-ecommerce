@@ -146,7 +146,7 @@ export async function POST(request) {
 
         // Create Shiprocket order
         try {
-            const { createShiprocketOrder, getAvailableCouriers, generateAWB } = await import('@/lib/shiprocket');
+            const { createShiprocketOrder } = await import('@/lib/shiprocket');
             
             // Prepare order items for Shiprocket
             const shiprocketItems = items.map(item => ({
@@ -188,57 +188,16 @@ export async function POST(request) {
 
             const shiprocketResponse = await createShiprocketOrder(shiprocketData);
 
-            // Update order with Shiprocket details
+            // Update order with Shiprocket details and mark confirmed
             if (shiprocketResponse.order_id) {
                 order.shiprocketOrderId = shiprocketResponse.order_id;
                 order.shiprocketShipmentId = shiprocketResponse.shipment_id;
                 order.status = 'confirmed';
-                
-                // Log shipment creation
+
+                // Log shipment creation (courier assignment will be handled by Shiprocket)
                 logShipmentCreated(order.orderNumber, shiprocketResponse.order_id, 'Pending courier assignment');
 
-                // Get pickup pincode from environment or config
-                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '110001';
-                
-                // Get available couriers and find the cheapest one
-                try {
-                    const codAmount = paymentMethod === 'cod' ? totalAmount : 0;
-                    const couriersResponse = await getAvailableCouriers(
-                        pickupPincode,
-                        shippingAddress.pincode,
-                        totalWeight,
-                        codAmount
-                    );
-
-                    if (couriersResponse.data?.available_courier_companies?.length > 0) {
-                        // Sort by total charge (rate) to find cheapest
-                        const sortedCouriers = couriersResponse.data.available_courier_companies.sort(
-                            (a, b) => a.rate - b.rate
-                        );
-                        
-                        const cheapestCourier = sortedCouriers[0];
-                        console.log(`Selected cheapest courier: ${cheapestCourier.courier_name} - ₹${cheapestCourier.rate}`);
-
-                        // Generate AWB with the cheapest courier
-                        try {
-                            const awbResponse = await generateAWB(
-                                shiprocketResponse.shipment_id,
-                                cheapestCourier.courier_company_id
-                            );
-
-                            if (awbResponse.awb_code) {
-                                order.awbCode = awbResponse.awb_code;
-                                order.courierName = cheapestCourier.courier_name;
-                                console.log(`AWB generated: ${awbResponse.awb_code} for order ${order.orderNumber}`);
-                            }
-                        } catch (awbError) {
-                            console.error('Failed to generate AWB:', awbError);
-                        }
-                    }
-                } catch (courierError) {
-                    console.error('Failed to get available couriers:', courierError);
-                }
-
+                // Persist order without attempting to auto-select couriers or generate AWB
                 await order.save();
             }
         } catch (shiprocketError) {

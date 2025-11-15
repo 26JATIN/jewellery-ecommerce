@@ -52,7 +52,7 @@ export async function POST(request) {
 
         // Create Shiprocket return order
         try {
-            const { createReturnOrder, getAvailableCouriers, generateAWB } = await import('@/lib/shiprocket');
+            const { createReturnOrder } = await import('@/lib/shiprocket');
 
             // Prepare return items for Shiprocket
             const shiprocketReturnItems = items.map(item => ({
@@ -94,49 +94,7 @@ export async function POST(request) {
                 returnDoc.shiprocketReturnShipmentId = shiprocketResponse.shipment_id;
                 returnDoc.status = 'pickup_scheduled';
 
-                // Get pickup pincode from environment or use customer's pincode
-                const pickupPincode = order.shippingAddress.pincode;
-                const deliveryPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '110001';
-
-                // Get available couriers and select cheapest
-                try {
-                    const couriersResponse = await getAvailableCouriers(
-                        pickupPincode,
-                        deliveryPincode,
-                        totalWeight,
-                        0 // No COD for returns
-                    );
-
-                    if (couriersResponse.data?.available_courier_companies?.length > 0) {
-                        // Sort by total charge to find cheapest
-                        const sortedCouriers = couriersResponse.data.available_courier_companies.sort(
-                            (a, b) => a.rate - b.rate
-                        );
-
-                        const cheapestCourier = sortedCouriers[0];
-                        console.log(`Selected cheapest courier for return: ${cheapestCourier.courier_name} - ₹${cheapestCourier.rate}`);
-
-                        // Generate AWB with the cheapest courier
-                        try {
-                            const awbResponse = await generateAWB(
-                                shiprocketResponse.shipment_id,
-                                cheapestCourier.courier_company_id
-                            );
-
-                            if (awbResponse.awb_code) {
-                                returnDoc.shiprocketReturnAwb = awbResponse.awb_code;
-                                returnDoc.courierName = cheapestCourier.courier_name;
-                                returnDoc.estimatedPickupDate = cheapestCourier.pickup_performance || null;
-                                console.log(`AWB generated for return: ${awbResponse.awb_code}`);
-                            }
-                        } catch (awbError) {
-                            console.error('Failed to generate AWB for return:', awbError);
-                        }
-                    }
-                } catch (courierError) {
-                    console.error('Failed to get available couriers for return:', courierError);
-                }
-
+                // Persist return without auto-selecting courier or generating AWB
                 await returnDoc.save();
                 console.log(`Shiprocket return created: ${shiprocketResponse.order_id} for return ${returnDoc._id}`);
             }
