@@ -146,7 +146,7 @@ export async function POST(request) {
 
         // Create Shiprocket order
         try {
-            const { createShiprocketOrder } = await import('@/lib/shiprocket');
+            const { createShiprocketOrder, processShipment } = await import('@/lib/shiprocket');
             
             // Prepare order items for Shiprocket
             const shiprocketItems = items.map(item => ({
@@ -194,10 +194,26 @@ export async function POST(request) {
                 order.shiprocketShipmentId = shiprocketResponse.shipment_id;
                 order.status = 'confirmed';
 
-                // Log shipment creation (courier assignment will be handled by Shiprocket)
-                logShipmentCreated(order.orderNumber, shiprocketResponse.order_id, 'Pending courier assignment');
+                // Log shipment creation
+                logShipmentCreated(order.orderNumber, shiprocketResponse.order_id, 'Shipment created, processing...');
 
-                // Persist order without attempting to auto-select couriers or generate AWB
+                // Automatically trigger "Ship Now" (Request AWB)
+                try {
+                    console.log(`🚚 Processing shipment (Ship Now) for order ${order.orderNumber}...`);
+                    const processResponse = await processShipment(shiprocketResponse.shipment_id);
+                    console.log(`✅ Ship Now processed for order ${order.orderNumber}:`, processResponse);
+                    
+                    // Update order notes with Ship Now status
+                    order.notes = (order.notes ? order.notes + '\n' : '') + 
+                        `[SYSTEM] Shipment processed automatically (Ship Now triggered)`;
+                } catch (shipNowError) {
+                    console.error(`⚠️ Failed to process Ship Now for order ${order.orderNumber}:`, shipNowError);
+                    // Don't fail the order if Ship Now fails - can be done manually
+                    order.notes = (order.notes ? order.notes + '\n' : '') + 
+                        `[WARNING] Auto Ship Now failed: ${shipNowError.message}. Manual action may be required.`;
+                }
+
+                // Persist order
                 await order.save();
             }
         } catch (shiprocketError) {

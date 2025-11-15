@@ -52,7 +52,7 @@ export async function POST(request) {
 
         // Create Shiprocket return order
         try {
-            const { createReturnOrder } = await import('@/lib/shiprocket');
+            const { createReturnOrder, processShipment } = await import('@/lib/shiprocket');
 
             // Prepare return items for Shiprocket
             const shiprocketReturnItems = items.map(item => ({
@@ -94,7 +94,17 @@ export async function POST(request) {
                 returnDoc.shiprocketReturnShipmentId = shiprocketResponse.shipment_id;
                 returnDoc.status = 'pickup_scheduled';
 
-                // Persist return without auto-selecting courier or generating AWB
+                // Automatically trigger "Ship Now" for return pickup
+                try {
+                    console.log(`🚚 Processing return shipment (Ship Now) for return ${returnDoc._id}...`);
+                    const processResponse = await processShipment(shiprocketResponse.shipment_id);
+                    console.log(`✅ Ship Now processed for return ${returnDoc._id}:`, processResponse);
+                } catch (shipNowError) {
+                    console.error(`⚠️ Failed to process Ship Now for return ${returnDoc._id}:`, shipNowError);
+                    // Don't fail if Ship Now fails - can be done manually
+                }
+
+                // Persist return
                 await returnDoc.save();
                 console.log(`Shiprocket return created: ${shiprocketResponse.order_id} for return ${returnDoc._id}`);
             }
