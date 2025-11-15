@@ -39,69 +39,44 @@ export default function Hero() {
         <div className="relative w-full h-[80vh] sm:h-[70vh] md:h-[70vh] lg:h-screen overflow-hidden bg-black">
             {/* Full-screen Image Slideshow */}
             <div className="absolute inset-0">
-                <AnimatePresence mode="wait">
+                <AnimatePresence initial={false}>
                     <motion.div
                         key={currentSlide}
                         initial={{ 
                             opacity: 0,
-                            scale: 1.1,
                         }}
                         animate={{ 
                             opacity: 1,
-                            scale: 1,
                         }}
                         exit={{ 
                             opacity: 0,
-                            scale: 0.95,
                         }}
                         transition={{ 
-                            duration: 1.2,
-                            ease: [0.43, 0.13, 0.23, 0.96], // Custom easing for smooth, luxurious feel
+                            duration: 0.8,
+                            ease: "easeInOut",
                         }}
                         className="absolute inset-0"
                     >
                         {/* Desktop & Tablet Image - Hidden only on small mobile if mobile version exists */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ 
-                                duration: 1,
-                                delay: 0.2,
-                                ease: "easeOut"
-                            }}
-                            className="w-full h-full"
-                        >
+                        <Image
+                            src={`/${slides[currentSlide].image}`}
+                            alt="Nandika Jewellers"
+                            fill
+                            className={`object-cover object-center ${slides[currentSlide].mobileImage ? 'hidden sm:block' : ''}`}
+                            priority={currentSlide === 0}
+                            quality={90}
+                        />
+                        
+                        {/* Mobile Image - Only for small mobile devices */}
+                        {slides[currentSlide].mobileImage && (
                             <Image
-                                src={`/${slides[currentSlide].image}`}
-                                alt="Nandika Jewellers"
+                                src={`/${slides[currentSlide].mobileImage}`}
+                                alt="Nandika Jewellers Mobile"
                                 fill
-                                className={`object-cover object-center ${slides[currentSlide].mobileImage ? 'hidden sm:block' : ''}`}
-                                priority
+                                className="sm:hidden object-cover object-center"
+                                priority={currentSlide === 0}
                                 quality={90}
                             />
-                        </motion.div>
-                        
-                        {/* Mobile Image - Only for small mobile devices, positioned below search */}
-                        {slides[currentSlide].mobileImage && (
-                            <motion.div 
-                                className="sm:hidden w-full h-full"
-                                initial={{ opacity: 0, scale: 1.05 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ 
-                                    duration: 1,
-                                    delay: 0.2,
-                                    ease: "easeOut"
-                                }}
-                            >
-                                <Image
-                                    src={`/${slides[currentSlide].mobileImage}`}
-                                    alt="Nandika Jewellers Mobile"
-                                    fill
-                                    className="object-cover object-center"
-                                    priority
-                                    quality={90}
-                                />
-                            </motion.div>
                         )}
                     </motion.div>
                 </AnimatePresence>
