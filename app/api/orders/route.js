@@ -146,7 +146,7 @@ export async function POST(request) {
 
         // Create Shiprocket order
         try {
-            const { createShiprocketOrder, processShipment } = await import('@/lib/shiprocket');
+            const { createShiprocketOrder, processShipment, schedulePickup } = await import('@/lib/shiprocket');
             
             // Prepare order items for Shiprocket
             const shiprocketItems = items.map(item => ({
@@ -203,9 +203,19 @@ export async function POST(request) {
                     const processResponse = await processShipment(shiprocketResponse.shipment_id);
                     console.log(`✅ Ship Now processed for order ${order.orderNumber}:`, processResponse);
                     
-                    // Update order notes with Ship Now status
-                    order.notes = (order.notes ? order.notes + '\n' : '') + 
-                        `[SYSTEM] Shipment processed automatically (Ship Now triggered)`;
+                    // Schedule pickup for next available day (excluding Sundays)
+                    try {
+                        console.log(`📦 Scheduling pickup for order ${order.orderNumber}...`);
+                        const pickupResponse = await schedulePickup(shiprocketResponse.shipment_id);
+                        console.log(`✅ Pickup scheduled for order ${order.orderNumber}:`, pickupResponse);
+                        
+                        order.notes = (order.notes ? order.notes + '\n' : '') + 
+                            `[SYSTEM] Shipment processed and pickup scheduled automatically for next available day`;
+                    } catch (pickupError) {
+                        console.error(`⚠️ Failed to schedule pickup for order ${order.orderNumber}:`, pickupError);
+                        order.notes = (order.notes ? order.notes + '\n' : '') + 
+                            `[WARNING] Shipment processed but auto-pickup scheduling failed: ${pickupError.message}`;
+                    }
                 } catch (shipNowError) {
                     console.error(`⚠️ Failed to process Ship Now for order ${order.orderNumber}:`, shipNowError);
                     // Don't fail the order if Ship Now fails - can be done manually

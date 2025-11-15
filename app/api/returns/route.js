@@ -52,7 +52,7 @@ export async function POST(request) {
 
         // Create Shiprocket return order
         try {
-            const { createReturnOrder, processShipment } = await import('@/lib/shiprocket');
+            const { createReturnOrder, processShipment, schedulePickup } = await import('@/lib/shiprocket');
 
             // Prepare return items for Shiprocket
             const shiprocketReturnItems = items.map(item => ({
@@ -99,6 +99,15 @@ export async function POST(request) {
                     console.log(`🚚 Processing return shipment (Ship Now) for return ${returnDoc._id}...`);
                     const processResponse = await processShipment(shiprocketResponse.shipment_id);
                     console.log(`✅ Ship Now processed for return ${returnDoc._id}:`, processResponse);
+                    
+                    // Schedule return pickup for next available day (excluding Sundays)
+                    try {
+                        console.log(`📦 Scheduling return pickup for return ${returnDoc._id}...`);
+                        const pickupResponse = await schedulePickup(shiprocketResponse.shipment_id);
+                        console.log(`✅ Return pickup scheduled for return ${returnDoc._id}:`, pickupResponse);
+                    } catch (pickupError) {
+                        console.error(`⚠️ Failed to schedule return pickup for return ${returnDoc._id}:`, pickupError);
+                    }
                 } catch (shipNowError) {
                     console.error(`⚠️ Failed to process Ship Now for return ${returnDoc._id}:`, shipNowError);
                     // Don't fail if Ship Now fails - can be done manually
