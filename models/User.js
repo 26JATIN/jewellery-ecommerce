@@ -5,9 +5,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    phone: {
+        type: String,
+        required: true,
+        unique: true
+    },
     email: {
         type: String,
-        required: true
+        required: false,
+        default: null
     },
     password: {
         type: String,
@@ -29,6 +35,10 @@ const userSchema = new mongoose.Schema({
         phone: {
             type: String,
             required: true
+        },
+        email: {
+            type: String,
+            required: false
         },
         addressLine1: {
             type: String,
@@ -57,7 +67,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Create indexes for better query performance
-userSchema.index({ email: 1 }, { unique: true }); // Unique email index
+userSchema.index({ phone: 1 }, { unique: true }); // Unique phone index
+userSchema.index({ email: 1 }, { sparse: true }); // Sparse index for optional email
 userSchema.index({ isAdmin: 1 }); // For admin queries
 userSchema.index({ isActive: 1 }); // For active user queries
 userSchema.index({ createdAt: -1 }); // For user listing by registration date

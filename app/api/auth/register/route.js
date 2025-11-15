@@ -6,12 +6,19 @@ import { hashPassword } from '@/lib/auth';
 export async function POST(req) {
     try {
         await connectDB();
-        const { name, email, password } = await req.json();
+        const { name, phone, email, password } = await req.json();
 
-        const existingUser = await User.findOne({ email });
+        if (!name || !phone || !password) {
+            return NextResponse.json(
+                { error: 'Name, phone number, and password are required' },
+                { status: 400 }
+            );
+        }
+
+        const existingUser = await User.findOne({ phone });
         if (existingUser) {
             return NextResponse.json(
-                { error: 'Email already exists' },
+                { error: 'Phone number already registered' },
                 { status: 400 }
             );
         }
@@ -19,7 +26,8 @@ export async function POST(req) {
         const hashedPassword = await hashPassword(password);
         const user = await User.create({
             name,
-            email,
+            phone,
+            email: email || null,
             password: hashedPassword
         });
 
@@ -27,6 +35,7 @@ export async function POST(req) {
             message: 'User created successfully'
         });
     } catch (error) {
+        console.error('Registration error:', error);
         return NextResponse.json(
             { error: 'Failed to create user' },
             { status: 500 }

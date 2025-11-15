@@ -11,6 +11,7 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
 
     const [formData, setFormData] = useState({
         name: '',
+        phone: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -38,6 +39,7 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                 },
                 body: JSON.stringify({
                     name: formData.name,
+                    phone: formData.phone,
                     email: formData.email,
                     password: formData.password,
                 }),
@@ -148,15 +150,31 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
 
                                     <div>
                                         <label className="block text-[#2C2C2C] text-sm font-light mb-2">
-                                            Email Address
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            required
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            placeholder="10-digit mobile number"
+                                            pattern="[0-9]{10}"
+                                            maxLength="10"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                            Email Address (Optional)
                                         </label>
                                         <input
                                             type="email"
                                             name="email"
-                                            required
                                             value={formData.email}
                                             onChange={handleChange}
-                                            placeholder="you@example.com"
+                                            placeholder="you@example.com (for order updates)"
                                             className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                         />
                                     </div>

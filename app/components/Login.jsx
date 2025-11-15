@@ -10,7 +10,7 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
     const searchParams = useSearchParams();
     const redirectHandlerRef = useRef(null);
     const [formData, setFormData] = useState({
-        email: '',
+        phone: '',
         password: '',
     });
     const [error, setError] = useState('');
@@ -114,15 +114,17 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                                 
                                 <div>
                                     <label className="block text-[#2C2C2C] text-sm font-light mb-2">
-                                        Email Address
+                                        Phone Number
                                     </label>
                                     <input
-                                        type="email"
-                                        name="email"
+                                        type="tel"
+                                        name="phone"
                                         required
-                                        value={formData.email}
+                                        value={formData.phone}
                                         onChange={handleChange}
-                                        placeholder="you@example.com"
+                                        placeholder="10-digit mobile number"
+                                        pattern="[0-9]{10}"
+                                        maxLength="10"
                                         className="w-full px-6 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
                                     />
                                 </div>

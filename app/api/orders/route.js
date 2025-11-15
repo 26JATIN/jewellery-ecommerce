@@ -170,7 +170,7 @@ export async function POST(request) {
                 billingCity: shippingAddress.city,
                 billingPincode: shippingAddress.pincode,
                 billingState: shippingAddress.state,
-                billingEmail: user.email || 'customer@nandikajewellers.com',
+                billingEmail: shippingAddress.email || user.email || 'customer@nandikajewellers.com',
                 billingPhone: shippingAddress.phone,
                 shippingCustomerName: shippingAddress.fullName,
                 shippingAddress: shippingAddress.addressLine1 + (shippingAddress.addressLine2 ? ', ' + shippingAddress.addressLine2 : ''),

@@ -68,6 +68,7 @@ export default function CheckoutPage() {
     const [formData, setFormData] = useState({
         fullName: '',
         phone: '',
+        email: '',
         addressLine1: '',
         addressLine2: '',
         city: '',
@@ -135,6 +136,7 @@ export default function CheckoutPage() {
                 setFormData({
                     fullName: '',
                     phone: '',
+                    email: '',
                     addressLine1: '',
                     addressLine2: '',
                     city: '',
@@ -319,6 +321,7 @@ export default function CheckoutPage() {
                 shippingAddress: {
                     fullName: address.fullName,
                     phone: address.phone,
+                    email: address.email,
                     addressLine1: address.addressLine1,
                     addressLine2: address.addressLine2,
                     city: address.city,
@@ -425,9 +428,18 @@ export default function CheckoutPage() {
                                                 value={formData.phone}
                                                 onChange={handleInputChange}
                                                 required
+                                                pattern="[0-9]{10}"
                                                 className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                         </div>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="Email Address (for order updates)"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                        />
                                         <input
                                             type="text"
                                             name="addressLine1"
@@ -544,6 +556,9 @@ export default function CheckoutPage() {
                                                             )}
                                                         </div>
                                                         <p className="text-sm text-gray-600">{address.phone}</p>
+                                                        {address.email && (
+                                                            <p className="text-sm text-gray-600">{address.email}</p>
+                                                        )}
                                                         <p className="text-sm text-gray-700 mt-2">
                                                             {address.addressLine1}
                                                             {address.addressLine2 && `, ${address.addressLine2}`}

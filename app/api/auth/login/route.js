@@ -6,16 +6,16 @@ import { verifyPassword, generateToken } from '@/lib/auth';
 export async function POST(req) {
     try {
         await connectDB();
-        const { email, password } = await req.json();
+        const { phone, password } = await req.json();
 
-        if (!email || !password) {
+        if (!phone || !password) {
             return NextResponse.json(
-                { error: 'Email and password are required' },
+                { error: 'Phone number and password are required' },
                 { status: 400 }
             );
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ phone });
         if (!user) {
             return NextResponse.json(
                 { error: 'Invalid credentials' },
@@ -61,7 +61,7 @@ export async function POST(req) {
         });
 
         // Log successful login (without sensitive data)
-        console.log(`User logged in: ${user.email} (Admin: ${user.isAdmin})`);
+        console.log(`User logged in: ${user.phone} (Admin: ${user.isAdmin})`);
 
         return response;
     } catch (error) {
