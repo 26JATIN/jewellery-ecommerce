@@ -214,9 +214,14 @@ async function handleOrderUpdate(webhookData) {
 
     const receivedStatus = (shipment_status || current_status || '').toUpperCase().trim();
     console.log('📊 Received status:', receivedStatus);
+    console.log('📋 Current order status:', order.status);
+    console.log('💳 Payment method:', order.paymentMethod);
+    console.log('💰 Payment status:', order.paymentStatus);
+    console.log('🔄 Refund status:', order.refundStatus);
 
     if (receivedStatus && statusMapping[receivedStatus]) {
         const newStatus = statusMapping[receivedStatus];
+        console.log('🎯 Mapped to internal status:', newStatus);
         
         if (order.status !== newStatus) {
             const oldStatus = order.status;
@@ -235,7 +240,8 @@ async function handleOrderUpdate(webhookData) {
             // =============================================
             // AUTOMATIC REFUND ON SHIPMENT CANCELLATION
             // =============================================
-            if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+            if (newStatus === 'cancelled') {
+                console.log('🚨 Detected cancellation! Old status was:', oldStatus);
                 console.log('\n' + '🚨'.repeat(30));
                 console.log('🚨 SHIPMENT CANCELLED - Checking refund eligibility');
                 console.log('🚨'.repeat(30));
@@ -247,6 +253,13 @@ async function handleOrderUpdate(webhookData) {
                     order.refundStatus !== 'completed' &&
                     order.razorpayPaymentId
                 );
+
+                console.log('🔍 Refund eligibility check:');
+                console.log('   - Payment Method:', order.paymentMethod, '(need: online)');
+                console.log('   - Payment Status:', order.paymentStatus, '(need: paid)');
+                console.log('   - Refund Status:', order.refundStatus, '(need: NOT completed)');
+                console.log('   - Payment ID:', order.razorpayPaymentId ? 'EXISTS' : 'MISSING');
+                console.log('   - RESULT:', needsRefund ? '✅ QUALIFIES' : '❌ DOES NOT QUALIFY');
 
                 if (needsRefund) {
                     console.log('💰 Order qualifies for automatic refund:');

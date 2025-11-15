@@ -86,12 +86,22 @@ const orderSchema = new mongoose.Schema({
     razorpayPaymentId: String,
     razorpaySignature: String,
     paidAt: Date,
+    // Refund fields
+    razorpayRefundId: String,
+    refundStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed'],
+        default: null
+    },
+    refundAmount: Number,
+    refundDate: Date,
     // Shiprocket integration fields
     shiprocketOrderId: String,
     shiprocketShipmentId: String,
     awbCode: String,
     courierName: String,
     trackingUrl: String,
+    estimatedDeliveryDate: String,
     notes: String
 }, {
     timestamps: true
