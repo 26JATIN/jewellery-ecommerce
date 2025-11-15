@@ -1,5 +1,6 @@
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import ReturnModel from '@/models/Return';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
@@ -299,6 +300,50 @@ async function handleOrderUpdate(webhookData) {
                                 refund.id,
                                 order.totalAmount
                             );
+
+                            // =============================================
+                            // RESTORE STOCK TO INVENTORY
+                            // =============================================
+                            console.log('\n📦 Restoring stock to inventory...');
+                            try {
+                                for (const item of order.items) {
+                                    const product = await Product.findById(item.productId);
+                                    
+                                    if (!product) {
+                                        console.log(`⚠️  Product not found: ${item.productId}`);
+                                        continue;
+                                    }
+
+                                    // Check if product has variants
+                                    if (product.hasVariants && item.selectedVariant) {
+                                        // Find the specific variant
+                                        const variantIndex = product.variants.findIndex(v => 
+                                            v.sku === item.selectedVariant.sku || 
+                                            JSON.stringify(v.optionCombination) === JSON.stringify(item.selectedVariant.optionCombination)
+                                        );
+
+                                        if (variantIndex !== -1) {
+                                            product.variants[variantIndex].stock += item.quantity;
+                                            console.log(`✅ Restored ${item.quantity}x ${product.name} (Variant: ${item.selectedVariant.name || 'SKU: ' + item.selectedVariant.sku}) - New stock: ${product.variants[variantIndex].stock}`);
+                                        } else {
+                                            console.log(`⚠️  Variant not found for: ${product.name}`);
+                                        }
+                                    } else {
+                                        // Simple product without variants
+                                        product.stock += item.quantity;
+                                        console.log(`✅ Restored ${item.quantity}x ${product.name} - New stock: ${product.stock}`);
+                                    }
+
+                                    await product.save();
+                                }
+                                
+                                console.log('✅ Stock restoration completed');
+                                order.notes += `\n[${new Date().toISOString()}] Stock restored to inventory`;
+                                
+                            } catch (stockError) {
+                                console.error('❌ Stock restoration failed:', stockError);
+                                order.notes += `\n[${new Date().toISOString()}] WARNING: Stock restoration failed. Manual adjustment required.`;
+                            }
                             
                         } catch (refundError) {
                             console.error('❌ REFUND FAILED:', refundError);
