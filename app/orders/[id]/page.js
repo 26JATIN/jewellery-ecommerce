@@ -103,6 +103,7 @@ export default function OrderDetailPage({ params }) {
     const [returnModalOpen, setReturnModalOpen] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [resolvedParams, setResolvedParams] = useState(null);
+    const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
     // Resolve params first (Next.js 15 requirement)
     useEffect(() => {
@@ -156,6 +157,31 @@ export default function OrderDetailPage({ params }) {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const handleDownloadInvoice = async () => {
+        if (!order?.shiprocketOrderId) {
+            alert('Invoice not available yet. Please wait for the order to be shipped.');
+            return;
+        }
+
+        setDownloadingInvoice(true);
+        try {
+            const res = await fetch(`/api/orders/${order._id}/invoice`);
+            const data = await res.json();
+
+            if (res.ok && data.invoiceUrl) {
+                // Open invoice in new tab
+                window.open(data.invoiceUrl, '_blank');
+            } else {
+                alert(data.error || 'Failed to generate invoice');
+            }
+        } catch (err) {
+            console.error('Error downloading invoice:', err);
+            alert('Failed to download invoice. Please try again.');
+        } finally {
+            setDownloadingInvoice(false);
+        }
     };
 
     if (loading) {
@@ -358,6 +384,47 @@ export default function OrderDetailPage({ params }) {
                                     <ExternalLink className="w-4 h-4" />
                                 </a>
                             )}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Download Invoice Section */}
+                {order.shiprocketOrderId && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25 }}
+                        className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl shadow-lg border-2 border-amber-200 p-4 sm:p-6"
+                    >
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-amber-100 rounded-xl flex-shrink-0">
+                                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                                </div>
+                                <div>
+                                    <h4 className="text-base sm:text-lg font-bold text-amber-900 mb-1">Invoice Available</h4>
+                                    <p className="text-xs sm:text-sm text-amber-700">
+                                        Download your order invoice for records
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleDownloadInvoice}
+                                disabled={downloadingInvoice}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 transition text-sm whitespace-nowrap self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {downloadingInvoice ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Loading...
+                                    </>
+                                ) : (
+                                    <>
+                                        Download Invoice
+                                        <ExternalLink className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </motion.div>
                 )}

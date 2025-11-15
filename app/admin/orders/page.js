@@ -33,6 +33,7 @@ export default function AdminOrdersPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [downloadingDocs, setDownloadingDocs] = useState({});
 
     useEffect(() => {
         fetchOrders();
@@ -81,6 +82,48 @@ export default function AdminOrdersPage() {
             }
         } catch (err) {
             console.error('Error updating order status:', err);
+        }
+    };
+
+    const handleDownloadDocuments = async (orderId, docType = 'all') => {
+        setDownloadingDocs(prev => ({ ...prev, [`${orderId}-${docType}`]: true }));
+        
+        try {
+            const res = await fetch(`/api/admin/orders/${orderId}/documents`);
+            const data = await res.json();
+
+            if (res.ok && data.documents) {
+                const docs = data.documents;
+                
+                // Open requested documents
+                if (docType === 'all') {
+                    if (docs.manifestUrl) window.open(docs.manifestUrl, '_blank');
+                    if (docs.labelUrl) window.open(docs.labelUrl, '_blank');
+                    if (docs.invoiceUrl) window.open(docs.invoiceUrl, '_blank');
+                } else if (docType === 'manifest' && docs.manifestUrl) {
+                    window.open(docs.manifestUrl, '_blank');
+                } else if (docType === 'label' && docs.labelUrl) {
+                    window.open(docs.labelUrl, '_blank');
+                } else if (docType === 'invoice' && docs.invoiceUrl) {
+                    window.open(docs.invoiceUrl, '_blank');
+                }
+
+                // Show errors if any
+                if (docs.manifestError || docs.labelError || docs.invoiceError) {
+                    const errors = [];
+                    if (docs.manifestError) errors.push(`Manifest: ${docs.manifestError}`);
+                    if (docs.labelError) errors.push(`Label: ${docs.labelError}`);
+                    if (docs.invoiceError) errors.push(`Invoice: ${docs.invoiceError}`);
+                    alert('Some documents could not be generated:\n' + errors.join('\n'));
+                }
+            } else {
+                alert(data.error || 'Failed to generate documents');
+            }
+        } catch (err) {
+            console.error('Error downloading documents:', err);
+            alert('Failed to download documents. Please try again.');
+        } finally {
+            setDownloadingDocs(prev => ({ ...prev, [`${orderId}-${docType}`]: false }));
         }
     };
 
@@ -261,6 +304,73 @@ export default function AdminOrdersPage() {
                                                         </div>
                                                     )}
                                                 </div>
+
+                                                {/* Document Downloads */}
+                                                {order.shiprocketOrderId && order.shiprocketShipmentId && (
+                                                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                                        <p className="text-sm font-medium text-amber-900 mb-3">
+                                                            Shipping Documents
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <button
+                                                                onClick={() => handleDownloadDocuments(order._id, 'manifest')}
+                                                                disabled={downloadingDocs[`${order._id}-manifest`]}
+                                                                className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {downloadingDocs[`${order._id}-manifest`] ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        Loading...
+                                                                    </span>
+                                                                ) : (
+                                                                    'Download Manifest'
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDownloadDocuments(order._id, 'label')}
+                                                                disabled={downloadingDocs[`${order._id}-label`]}
+                                                                className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {downloadingDocs[`${order._id}-label`] ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        Loading...
+                                                                    </span>
+                                                                ) : (
+                                                                    'Download Label'
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDownloadDocuments(order._id, 'invoice')}
+                                                                disabled={downloadingDocs[`${order._id}-invoice`]}
+                                                                className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {downloadingDocs[`${order._id}-invoice`] ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        Loading...
+                                                                    </span>
+                                                                ) : (
+                                                                    'Download Invoice'
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDownloadDocuments(order._id, 'all')}
+                                                                disabled={downloadingDocs[`${order._id}-all`]}
+                                                                className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {downloadingDocs[`${order._id}-all`] ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        Loading...
+                                                                    </span>
+                                                                ) : (
+                                                                    'Download All'
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 {/* Status Update */}
                                                 <div>
