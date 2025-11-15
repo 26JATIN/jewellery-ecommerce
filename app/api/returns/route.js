@@ -52,7 +52,7 @@ export async function POST(request) {
 
         // Create Shiprocket return order
         try {
-            const { createReturnOrder, processShipment, schedulePickup } = await import('@/lib/shiprocket');
+            const { createReturnOrder, processShipment, generatePickup } = await import('@/lib/shiprocket');
 
             // Prepare return items for Shiprocket
             const shiprocketReturnItems = items.map(item => ({
@@ -100,13 +100,14 @@ export async function POST(request) {
                     const processResponse = await processShipment(shiprocketResponse.shipment_id);
                     console.log(`✅ Ship Now processed for return ${returnDoc._id}:`, processResponse);
                     
-                    // Schedule return pickup for next available day (excluding Sundays)
+                    // Step 2: Generate Pickup Request for return
                     try {
-                        console.log(`📦 Scheduling return pickup for return ${returnDoc._id}...`);
-                        const pickupResponse = await schedulePickup(shiprocketResponse.shipment_id);
-                        console.log(`✅ Return pickup scheduled for return ${returnDoc._id}:`, pickupResponse);
+                        console.log(`📦 Generating return pickup request for return ${returnDoc._id}...`);
+                        const pickupResponse = await generatePickup(shiprocketResponse.shipment_id);
+                        console.log(`✅ Return pickup request generated for return ${returnDoc._id}:`, pickupResponse);
                     } catch (pickupError) {
-                        console.error(`⚠️ Failed to schedule return pickup for return ${returnDoc._id}:`, pickupError);
+                        console.error(`⚠️ Failed to generate return pickup for return ${returnDoc._id}:`, pickupError);
+                        // Don't fail - can be done manually
                     }
                 } catch (shipNowError) {
                     console.error(`⚠️ Failed to process Ship Now for return ${returnDoc._id}:`, shipNowError);

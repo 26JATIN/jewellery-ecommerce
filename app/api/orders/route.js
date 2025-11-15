@@ -146,7 +146,7 @@ export async function POST(request) {
 
         // Create Shiprocket order
         try {
-            const { createShiprocketOrder, processShipment, schedulePickup } = await import('@/lib/shiprocket');
+            const { createShiprocketOrder, processShipment, generatePickup } = await import('@/lib/shiprocket');
             
             // Prepare order items for Shiprocket
             const shiprocketItems = items.map(item => ({
@@ -203,30 +203,19 @@ export async function POST(request) {
                     const processResponse = await processShipment(shiprocketResponse.shipment_id);
                     console.log(`✅ Ship Now processed for order ${order.orderNumber}:`, processResponse);
                     
-                    // Wait a moment for Shiprocket to update shipment status
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Schedule pickup for next available day (excluding Sundays)
+                    // Step 2: Generate Pickup Request
                     try {
-                        console.log(`📦 Scheduling pickup for order ${order.orderNumber} (Shipment ID: ${shiprocketResponse.shipment_id})...`);
-                        const pickupResponse = await schedulePickup(shiprocketResponse.shipment_id);
-                        console.log(`✅ Pickup scheduled for order ${order.orderNumber}:`, pickupResponse);
+                        console.log(`📦 Generating pickup request for order ${order.orderNumber}...`);
+                        const pickupResponse = await generatePickup(shiprocketResponse.shipment_id);
+                        console.log(`✅ Pickup request generated for order ${order.orderNumber}:`, pickupResponse);
                         
+                        // Update order notes with full automation status
                         order.notes = (order.notes ? order.notes + '\n' : '') + 
-                            `[SYSTEM] Shipment processed and pickup scheduled automatically for next available day`;
+                            `[SYSTEM] Shipment fully automated: AWB assigned & pickup scheduled`;
                     } catch (pickupError) {
-                        console.error(`⚠️ Failed to schedule pickup for order ${order.orderNumber}:`, pickupError.message);
-                        console.error('Full pickup error:', pickupError);
-                        
-                        // Check if it's because pickup is already scheduled
-                        if (pickupError.message?.includes('already') || pickupError.message?.includes('scheduled')) {
-                            console.log(`ℹ️  Pickup may already be scheduled by Shiprocket Direct Shipment`);
-                            order.notes = (order.notes ? order.notes + '\n' : '') + 
-                                `[INFO] Shipment processed. Pickup automatically scheduled by Shiprocket.`;
-                        } else {
-                            order.notes = (order.notes ? order.notes + '\n' : '') + 
-                                `[WARNING] Shipment processed but auto-pickup scheduling failed: ${pickupError.message}`;
-                        }
+                        console.error(`⚠️ Failed to generate pickup for order ${order.orderNumber}:`, pickupError);
+                        order.notes = (order.notes ? order.notes + '\n' : '') + 
+                            `[WARNING] AWB assigned but pickup generation failed: ${pickupError.message}. Manual pickup scheduling may be required.`;
                     }
                 } catch (shipNowError) {
                     console.error(`⚠️ Failed to process Ship Now for order ${order.orderNumber}:`, shipNowError);
