@@ -3,6 +3,8 @@ import Order from '@/models/Order';
 import ReturnModel from '@/models/Return';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { createRefund } from '@/lib/razorpay';
+import { logRefund, logRefundFailed, LogLevel, TransactionType } from '@/lib/transactionLogger';
 
 /**
  * Shiprocket Webhook Handler
@@ -228,6 +230,97 @@ async function handleOrderUpdate(webhookData) {
                 order.paymentStatus !== 'paid') {
                 order.paymentStatus = 'paid';
                 console.log('💰 COD payment marked as received');
+            }
+
+            // =============================================
+            // AUTOMATIC REFUND ON SHIPMENT CANCELLATION
+            // =============================================
+            if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+                console.log('\n' + '🚨'.repeat(30));
+                console.log('🚨 SHIPMENT CANCELLED - Checking refund eligibility');
+                console.log('🚨'.repeat(30));
+                
+                // Check if refund is needed
+                const needsRefund = (
+                    order.paymentMethod === 'online' && 
+                    order.paymentStatus === 'paid' &&
+                    order.refundStatus !== 'completed' &&
+                    order.razorpayPaymentId
+                );
+
+                if (needsRefund) {
+                    console.log('💰 Order qualifies for automatic refund:');
+                    console.log('   - Payment Method: online');
+                    console.log('   - Payment Status: paid');
+                    console.log('   - Refund Status:', order.refundStatus || 'none');
+                    console.log('   - Payment ID:', order.razorpayPaymentId);
+                    
+                    // Check environment flag
+                    const autoRefundEnabled = process.env.SHIPROCKET_FAILURE_AUTO_REFUND === 'true';
+                    
+                    if (autoRefundEnabled) {
+                        console.log('✅ AUTO_REFUND enabled - Processing refund...');
+                        
+                        try {
+                            // Initiate refund via Razorpay
+                            const refund = await createRefund(order.razorpayPaymentId);
+                            
+                            // Update order with refund details
+                            order.refundStatus = 'completed';
+                            order.refundAmount = order.totalAmount;
+                            order.refundDate = new Date();
+                            order.razorpayRefundId = refund.id;
+                            order.notes = order.notes || '';
+                            order.notes += `\n[${new Date().toISOString()}] Automatic refund initiated due to shipment cancellation. Refund ID: ${refund.id}`;
+                            
+                            console.log('✅ Refund successful!');
+                            console.log('   - Refund ID:', refund.id);
+                            console.log('   - Amount:', order.totalAmount);
+                            console.log('   - Status:', refund.status);
+                            
+                            // Log successful refund
+                            await logRefund(
+                                order.orderNumber,
+                                order.razorpayPaymentId,
+                                refund.id,
+                                order.totalAmount,
+                                'Automatic refund - Shipment cancelled via Shiprocket',
+                                order.user?.toString()
+                            );
+                            
+                        } catch (refundError) {
+                            console.error('❌ REFUND FAILED:', refundError);
+                            console.error('Stack:', refundError.stack);
+                            
+                            // Mark refund as failed
+                            order.refundStatus = 'failed';
+                            order.notes = order.notes || '';
+                            order.notes += `\n[${new Date().toISOString()}] CRITICAL: Automatic refund failed for cancelled shipment. Error: ${refundError.message}. MANUAL INTERVENTION REQUIRED.`;
+                            
+                            // Log failed refund
+                            await logRefundFailed(
+                                order.orderNumber,
+                                order.razorpayPaymentId,
+                                order.totalAmount,
+                                refundError.message,
+                                'Automatic refund attempt - Shipment cancelled via Shiprocket',
+                                order.user?.toString()
+                            );
+                            
+                            console.log('⚠️  Order marked as requiring manual refund processing');
+                        }
+                    } else {
+                        console.log('⚠️  AUTO_REFUND disabled - Manual refund required');
+                        order.notes = order.notes || '';
+                        order.notes += `\n[${new Date().toISOString()}] Shipment cancelled. Manual refund required for payment ID: ${order.razorpayPaymentId}`;
+                    }
+                } else {
+                    console.log('ℹ️  No refund needed:');
+                    console.log('   - Payment Method:', order.paymentMethod);
+                    console.log('   - Payment Status:', order.paymentStatus);
+                    console.log('   - Refund Status:', order.refundStatus || 'none');
+                    console.log('   - Payment ID:', order.razorpayPaymentId || 'none');
+                }
             }
         } else {
             console.log('ℹ️  Status unchanged:', order.status);
