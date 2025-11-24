@@ -132,8 +132,8 @@ export default function ProductsPage() {
             
             // Build query parameters
             const params = new URLSearchParams();
-            params.append('limit', '2000'); // Fetch all products
-            params.append('page', '1'); // Explicitly set page 1
+            params.append('limit', '1000'); // Fetch 1000 products for client-side pagination
+            params.append('page', '1'); // Always fetch page 1, pagination done client-side
             params.append('_', Date.now()); // Cache busting
             
             if (selectedCategory !== 'All' && selectedCategory) {

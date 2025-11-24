@@ -18,21 +18,40 @@ import withAdminAuth from '../../components/withAdminAuth';
 
 function AdminProductsPage() {
     const [products, setProducts] = useState([]);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 20,
+        totalProducts: 0,
+        totalPages: 0
+    });
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('list'); // 'list' or 'new'
     const [editingProduct, setEditingProduct] = useState(null);
     const [mounted, setMounted] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [activeFilter, setActiveFilter] = useState('all');
 
     useEffect(() => {
         setMounted(true);
         fetchProducts();
-    }, []);
+    }, [pagination.page, searchTerm, categoryFilter, activeFilter]);
 
     const fetchProducts = async () => {
         try {
             console.log('Fetching products from /api/admin/products...');
-            const timestamp = Date.now()
-            const res = await fetch(`/api/admin/products?_=${timestamp}`, {
+            const timestamp = Date.now();
+            const params = new URLSearchParams({
+                page: pagination.page.toString(),
+                limit: pagination.limit.toString(),
+                _: timestamp.toString()
+            });
+            
+            if (searchTerm) params.append('search', searchTerm);
+            if (categoryFilter !== 'all') params.append('category', categoryFilter);
+            if (activeFilter !== 'all') params.append('isActive', activeFilter);
+            
+            const res = await fetch(`/api/admin/products?${params.toString()}`, {
                 cache: 'no-store',
                 headers: {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -42,9 +61,25 @@ function AdminProductsPage() {
             console.log('Response status:', res.status);
             
             if (res.ok) {
-                const data = await res.json();
-                console.log('Products fetched:', data.length, 'products');
-                setProducts(data);
+                const response = await res.json();
+                
+                // Handle both old format (array) and new format (object with pagination)
+                if (response.success && response.data) {
+                    console.log('Products fetched:', response.data.length, 'products');
+                    setProducts(response.data);
+                    setPagination(prev => ({
+                        ...prev,
+                        totalProducts: response.pagination.totalProducts,
+                        totalPages: response.pagination.totalPages
+                    }));
+                } else if (Array.isArray(response)) {
+                    // Backward compatibility with old format
+                    console.log('Products fetched (old format):', response.length, 'products');
+                    setProducts(response);
+                } else {
+                    console.error('Unexpected response format:', response);
+                    setProducts([]);
+                }
             } else {
                 const errorData = await res.json().catch(() => ({}));
                 console.error('Failed to fetch products:', res.status, res.statusText, errorData);
@@ -233,7 +268,7 @@ function AdminProductsPage() {
                         <div className="flex items-center gap-3">
                             <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
                                 <p className="text-xs sm:text-sm text-gray-600">Total Products</p>
-                                <p className="text-xl sm:text-2xl font-bold text-[#8B6B4C]">{products.length}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-[#8B6B4C]">{pagination.totalProducts}</p>
                             </div>
                         </div>
                     </div>
@@ -259,7 +294,7 @@ function AdminProductsPage() {
                                         ? 'bg-white/20 text-white'
                                         : 'bg-gray-100 text-gray-600'
                                 }`}>
-                                    {products.length}
+                                    {pagination.totalProducts}
                                 </span>
                             </button>
                             <button
@@ -287,47 +322,188 @@ function AdminProductsPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     {activeTab === 'list' ? (
                         <div className="p-4 sm:p-6">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                                <div>
-                                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">All Products</h2>
-                                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Browse and manage your product inventory</p>
+                            {/* Filters Bar */}
+                            <div className="mb-6 space-y-4">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">All Products</h2>
+                                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                            {pagination.totalProducts > 0 
+                                                ? `Showing ${((pagination.page - 1) * pagination.limit) + 1} - ${Math.min(pagination.page * pagination.limit, pagination.totalProducts)} of ${pagination.totalProducts} products`
+                                                : 'No products found'
+                                            }
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={handleAddProduct}
+                                        className="bg-[#8B6B4C] text-white px-4 sm:px-5 py-2.5 rounded-lg hover:bg-[#725939] transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-sm sm:text-base"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <span>Quick Add</span>
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleAddProduct}
-                                    className="bg-[#8B6B4C] text-white px-4 sm:px-5 py-2.5 rounded-lg hover:bg-[#725939] transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-sm sm:text-base"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <span>Quick Add</span>
-                                </button>
+                                
+                                {/* Search and Filters */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {/* Search */}
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search products..."
+                                            value={searchTerm}
+                                            onChange={(e) => {
+                                                setSearchTerm(e.target.value);
+                                                setPagination(prev => ({ ...prev, page: 1 }));
+                                            }}
+                                            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                        />
+                                        <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    
+                                    {/* Category Filter */}
+                                    <select
+                                        value={categoryFilter}
+                                        onChange={(e) => {
+                                            setCategoryFilter(e.target.value);
+                                            setPagination(prev => ({ ...prev, page: 1 }));
+                                        }}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                    >
+                                        <option value="all">All Categories</option>
+                                        <option value="Rings">Rings</option>
+                                        <option value="Necklaces">Necklaces</option>
+                                        <option value="Earrings">Earrings</option>
+                                        <option value="Bracelets">Bracelets</option>
+                                        <option value="Bangles">Bangles</option>
+                                    </select>
+                                    
+                                    {/* Status Filter */}
+                                    <select
+                                        value={activeFilter}
+                                        onChange={(e) => {
+                                            setActiveFilter(e.target.value);
+                                            setPagination(prev => ({ ...prev, page: 1 }));
+                                        }}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm"
+                                    >
+                                        <option value="all">All Status</option>
+                                        <option value="true">Active</option>
+                                        <option value="false">Inactive</option>
+                                    </select>
+                                </div>
                             </div>
                             
-                            {products.length === 0 ? (
+                            {products.length === 0 && !loading ? (
                                 <div className="text-center py-12 sm:py-16">
                                     <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 mb-4">
                                         <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-                                    <p className="text-sm sm:text-base text-gray-600 mb-6">Get started by creating your first product</p>
-                                    <button
-                                        onClick={handleAddProduct}
-                                        className="bg-[#8B6B4C] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-[#725939] transition-all duration-200 font-medium shadow-sm hover:shadow-md inline-flex items-center gap-2 text-sm sm:text-base"
-                                    >
-                                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        <span>Create Your First Product</span>
-                                    </button>
+                                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
+                                        {searchTerm || categoryFilter !== 'all' || activeFilter !== 'all' 
+                                            ? 'No products match your filters' 
+                                            : 'No products yet'}
+                                    </h3>
+                                    <p className="text-sm sm:text-base text-gray-600 mb-6">
+                                        {searchTerm || categoryFilter !== 'all' || activeFilter !== 'all'
+                                            ? 'Try adjusting your filters'
+                                            : 'Get started by creating your first product'}
+                                    </p>
+                                    {!(searchTerm || categoryFilter !== 'all' || activeFilter !== 'all') && (
+                                        <button
+                                            onClick={handleAddProduct}
+                                            className="bg-[#8B6B4C] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-[#725939] transition-all duration-200 font-medium shadow-sm hover:shadow-md inline-flex items-center gap-2 text-sm sm:text-base"
+                                        >
+                                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span>Create Your First Product</span>
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
-                                <ProductList
-                                    products={products}
-                                    onEdit={handleEditProduct}
-                                    onDelete={handleDeleteProduct}
-                                />
+                                <>
+                                    <ProductList
+                                        products={products}
+                                        onEdit={handleEditProduct}
+                                        onDelete={handleDeleteProduct}
+                                    />
+                                    
+                                    {/* Pagination Controls */}
+                                    {pagination.totalPages > 1 && (
+                                        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
+                                            <div className="text-sm text-gray-600">
+                                                Page {pagination.page} of {pagination.totalPages}
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-2">
+                                                {/* Previous Button */}
+                                                <button
+                                                    onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                                                    disabled={pagination.page === 1}
+                                                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                                                        pagination.page === 1
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-[#8B6B4C] text-white hover:bg-[#725939]'
+                                                    }`}
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                    </svg>
+                                                </button>
+                                                
+                                                {/* Page Numbers */}
+                                                <div className="flex items-center gap-1">
+                                                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                                                        .filter(page => {
+                                                            return (
+                                                                page === 1 ||
+                                                                page === pagination.totalPages ||
+                                                                Math.abs(page - pagination.page) <= 1
+                                                            );
+                                                        })
+                                                        .map((page, index, array) => (
+                                                            <div key={page} className="flex items-center gap-1">
+                                                                {index > 0 && array[index - 1] !== page - 1 && (
+                                                                    <span className="px-2 text-gray-400">...</span>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => setPagination(prev => ({ ...prev, page }))}
+                                                                    className={`w-10 h-10 rounded-lg font-medium text-sm transition-all ${
+                                                                        pagination.page === page
+                                                                            ? 'bg-[#8B6B4C] text-white'
+                                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                                    }`}
+                                                                >
+                                                                    {page}
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                </div>
+                                                
+                                                {/* Next Button */}
+                                                <button
+                                                    onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.totalPages, prev.page + 1) }))}
+                                                    disabled={pagination.page === pagination.totalPages}
+                                                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                                                        pagination.page === pagination.totalPages
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-[#8B6B4C] text-white hover:bg-[#725939]'
+                                                    }`}
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     ) : (

@@ -22,16 +22,10 @@ const CouponManagement = () => {
     validUntil: '',
     usageLimit: '',
     userUsageLimit: '1',
-    applicableCategories: [],
-    excludedCategories: [],
+    applicableMetalType: 'all', // Changed from categories to metal type
     firstTimeUserOnly: false,
     isActive: true
   });
-
-  const categories = [
-    'Diamond', 'Gold', 'Silver', 
-    'Wedding', 'Vintage', 'Contemporary', 'Traditional'
-  ];
 
   const fetchCoupons = useCallback(async () => {
     try {
@@ -61,25 +55,6 @@ const CouponManagement = () => {
     }));
   };
 
-  const handleCategoryChange = (category, type) => {
-    setFormData(prev => {
-      const field = type === 'applicable' ? 'applicableCategories' : 'excludedCategories';
-      const currentList = prev[field];
-      
-      if (currentList.includes(category)) {
-        return {
-          ...prev,
-          [field]: currentList.filter(c => c !== category)
-        };
-      } else {
-        return {
-          ...prev,
-          [field]: [...currentList, category]
-        };
-      }
-    });
-  };
-
   const resetForm = () => {
     setFormData({
       code: '',
@@ -92,8 +67,7 @@ const CouponManagement = () => {
       validUntil: '',
       usageLimit: '',
       userUsageLimit: '1',
-      applicableCategories: [],
-      excludedCategories: [],
+      applicableMetalType: 'all',
       firstTimeUserOnly: false,
       isActive: true
     });
@@ -147,8 +121,7 @@ const CouponManagement = () => {
       validUntil: new Date(coupon.validUntil).toISOString().split('T')[0],
       usageLimit: coupon.usageLimit?.toString() || '',
       userUsageLimit: coupon.userUsageLimit.toString(),
-      applicableCategories: coupon.applicableCategories || [],
-      excludedCategories: coupon.excludedCategories || [],
+      applicableMetalType: coupon.applicableMetalType || 'all',
       firstTimeUserOnly: coupon.firstTimeUserOnly,
       isActive: coupon.isActive
     });
@@ -501,26 +474,23 @@ const CouponManagement = () => {
                   />
                 </div>
 
-                {/* Category Restrictions */}
+                {/* Metal Type Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Applicable Categories (Optional)
+                    Applicable Metal Type
                   </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {categories.map(category => (
-                      <label key={category} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.applicableCategories.includes(category)}
-                          onChange={() => handleCategoryChange(category, 'applicable')}
-                          className="h-4 w-4 text-[#8B6B4C] focus:ring-[#8B6B4C] border-gray-300 rounded"
-                        />
-                        <span className="text-sm text-gray-700">{category}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <select
+                    name="applicableMetalType"
+                    value={formData.applicableMetalType}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B6B4C]"
+                  >
+                    <option value="all">All Jewelry (Gold & Silver)</option>
+                    <option value="gold">Gold Jewelry Only</option>
+                    <option value="silver">Silver Jewelry Only</option>
+                  </select>
                   <p className="text-xs text-gray-500 mt-1">
-                    Leave empty to apply to all categories
+                    Select which type of jewelry this coupon applies to
                   </p>
                 </div>
 

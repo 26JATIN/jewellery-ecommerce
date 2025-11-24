@@ -38,7 +38,7 @@ async function checkAdminAccess() {
     }
 }
 
-export async function GET() {
+export async function GET(req) {
     try {
         const authError = await checkAdminAccess();
 
@@ -50,10 +50,116 @@ export async function GET() {
         }
 
         await connectDB();
-        const products = await Product.find({})
-            .populate('subcategory', 'name slug')
-            .sort({ createdAt: -1 });
-        return NextResponse.json(products, {
+        
+        // Get query parameters for pagination and filtering
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get('page')) || 1;
+        const limit = parseInt(searchParams.get('limit')) || 50; // Default 50 for admin
+        const category = searchParams.get('category');
+        const subcategory = searchParams.get('subcategory');
+        const search = searchParams.get('search');
+        const sortBy = searchParams.get('sortBy') || 'createdAt';
+        const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+        const isActive = searchParams.get('isActive'); // Filter by active/inactive
+        const pricingMethod = searchParams.get('pricingMethod'); // Filter by pricing method
+        const metalType = searchParams.get('metalType'); // Filter by metal type
+        
+        // Validate pagination parameters
+        if (page < 1 || limit < 1 || limit > 1000) {
+            return NextResponse.json(
+                { error: 'Invalid pagination parameters. Page must be >= 1, limit must be 1-1000.' },
+                { status: 400 }
+            );
+        }
+        
+        // Build query
+        const query = {};
+        
+        // Add active filter
+        if (isActive !== null && isActive !== undefined && isActive !== '') {
+            query.isActive = isActive === 'true';
+        }
+        
+        // Add category filter
+        if (category && category !== 'all' && category !== 'All') {
+            query.category = category;
+        }
+        
+        // Add subcategory filter
+        if (subcategory && subcategory !== 'all' && subcategory !== 'All') {
+            query.subcategory = subcategory;
+        }
+        
+        // Add pricing method filter
+        if (pricingMethod && (pricingMethod === 'dynamic' || pricingMethod === 'fixed')) {
+            query.pricingMethod = pricingMethod;
+        }
+        
+        // Add metal type filter
+        if (metalType && ['gold', 'silver', 'mixed'].includes(metalType)) {
+            query.metalType = metalType;
+        }
+        
+        // Add search filter
+        if (search && search.trim() !== '') {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } },
+                { sku: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        // Calculate skip value
+        const skip = (page - 1) * limit;
+        
+        // Build sort object
+        const sort = {};
+        sort[sortBy] = sortOrder;
+        
+        // Execute query with pagination (parallel execution)
+        const [products, totalCount] = await Promise.all([
+            Product.find(query)
+                .populate('subcategory', 'name slug')
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .lean()
+                .maxTimeMS(15000), // Add MongoDB query timeout
+            Product.countDocuments(query).maxTimeMS(10000)
+        ]);
+        
+        // Calculate pagination metadata
+        const totalPages = Math.ceil(totalCount / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+        
+        const response = {
+            success: true,
+            data: products,
+            pagination: {
+                page,
+                limit,
+                totalProducts: totalCount,
+                totalPages,
+                hasNextPage,
+                hasPrevPage,
+                nextPage: hasNextPage ? page + 1 : null,
+                prevPage: hasPrevPage ? page - 1 : null
+            },
+            filters: {
+                category: category || 'all',
+                subcategory: subcategory || 'all',
+                search: search || '',
+                isActive: isActive || 'all',
+                pricingMethod: pricingMethod || 'all',
+                metalType: metalType || 'all',
+                sortBy,
+                sortOrder: sortOrder === 1 ? 'asc' : 'desc'
+            }
+        };
+        
+        return NextResponse.json(response, {
             headers: {
                 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
                 'Pragma': 'no-cache',

@@ -2,21 +2,38 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 export default function CouponShowcase() {
     const [coupons, setCoupons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copiedCode, setCopiedCode] = useState(null);
     const { user } = useAuth();
+    const { cart } = useCart();
 
     useEffect(() => {
         fetchActiveCoupons();
-    }, []);
+    }, [user, cart]);
 
     const fetchActiveCoupons = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/coupons/showcase');
+            
+            // Build query params
+            const params = new URLSearchParams();
+            if (user?._id) {
+              params.append('userId', user._id);
+            }
+            if (cart?.length > 0) {
+              // Send minimal cart data for filtering
+              const cartItems = cart.map(item => ({
+                productId: item.productId || item._id,
+                quantity: item.quantity
+              }));
+              params.append('cartItems', JSON.stringify(cartItems));
+            }
+            
+            const response = await fetch(`/api/coupons/showcase?${params.toString()}`);
             if (response.ok) {
                 const data = await response.json();
                 setCoupons(data.coupons || []);

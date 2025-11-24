@@ -58,14 +58,12 @@ const couponSchema = new mongoose.Schema({
         default: 1, // How many times a single user can use this coupon
         min: 1
     },
-    applicableCategories: [{
+    // Metal type filter - simpler than category selection
+    applicableMetalType: {
         type: String,
-        enum: ['Diamond', 'Gold', 'Silver', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
-    }],
-    excludedCategories: [{
-        type: String,
-        enum: ['Diamond', 'Gold', 'Silver', 'Wedding', 'Vintage', 'Contemporary', 'Traditional']
-    }],
+        enum: ['all', 'gold', 'silver'],
+        default: 'all'
+    },
     applicableProducts: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
@@ -128,7 +126,7 @@ couponSchema.methods.canUserUseCoupon = function(userId) {
 };
 
 // Method to calculate discount for given cart
-couponSchema.methods.calculateDiscount = function(cartItems, cartTotal) {
+couponSchema.methods.calculateDiscount = async function(cartItems, cartTotal) {
     if (!this.isCurrentlyValid) {
         return { valid: false, error: 'Coupon is not valid' };
     }
@@ -140,31 +138,41 @@ couponSchema.methods.calculateDiscount = function(cartItems, cartTotal) {
         };
     }
 
-    // Check category restrictions
-    if (this.applicableCategories.length > 0) {
-        const hasApplicableItems = cartItems.some(item => 
-            this.applicableCategories.includes(item.category)
-        );
+    // Check metal type restrictions (simpler than category-based)
+    if (this.applicableMetalType && this.applicableMetalType !== 'all') {
+        console.log('Checking metal type restriction:', this.applicableMetalType);
+        console.log('Cart items metal types:', cartItems.map(item => ({ name: item.name, metalType: item.metalType })));
+        
+        const hasApplicableItems = cartItems.some(item => {
+            // Check if item's metal type matches coupon's metal type
+            // Products have metalType field (e.g., 'gold', 'silver')
+            const matches = item.metalType && item.metalType.toLowerCase() === this.applicableMetalType.toLowerCase();
+            console.log(`Item "${item.name}": metalType="${item.metalType}" matches=${matches}`);
+            return matches;
+        });
+        
+        console.log('Has applicable items:', hasApplicableItems);
+        
         if (!hasApplicableItems) {
             return { 
                 valid: false, 
-                error: `Coupon only applicable to ${this.applicableCategories.join(', ')} items` 
+                error: `Coupon only applicable to ${this.applicableMetalType} jewelry` 
             };
         }
-    }
-
-    if (this.excludedCategories.length > 0) {
-        const eligibleTotal = cartItems
-            .filter(item => !this.excludedCategories.includes(item.category))
-            .reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
-        if (eligibleTotal === 0) {
+        // Calculate total only from applicable items
+        cartTotal = cartItems
+            .filter(item => item.metalType && item.metalType.toLowerCase() === this.applicableMetalType.toLowerCase())
+            .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+        console.log('Filtered cart total:', cartTotal);
+            
+        if (cartTotal === 0) {
             return { 
                 valid: false, 
-                error: `Coupon not applicable to ${this.excludedCategories.join(', ')} items` 
+                error: `Coupon only applicable to ${this.applicableMetalType} jewelry` 
             };
         }
-        cartTotal = eligibleTotal;
     }
 
     let discountAmount = 0;
