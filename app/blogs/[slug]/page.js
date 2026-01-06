@@ -83,8 +83,11 @@ export default function BlogPostPage({ params }) {
                             <CloudinaryImage
                                 src={blog.featuredImage.url}
                                 alt={blog.featuredImage.alt || blog.title}
+                                width={1200}
+                                height={500}
                                 className="w-full h-full object-cover"
                             />
+
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                         </div>
                     )}
@@ -135,15 +138,75 @@ export default function BlogPostPage({ params }) {
                         </div>
 
                         {/* Content */}
+                        <style jsx global>{`
+                            .blog-content h2 {
+                                font-size: 1.875rem;
+                                font-weight: 300;
+                                color: #1f2937;
+                                margin-top: 2rem;
+                                margin-bottom: 1rem;
+                                line-height: 1.3;
+                            }
+                            .blog-content h3 {
+                                font-size: 1.5rem;
+                                font-weight: 300;
+                                color: #374151;
+                                margin-top: 1.5rem;
+                                margin-bottom: 0.75rem;
+                                line-height: 1.4;
+                            }
+                            .blog-content p {
+                                margin-bottom: 1rem;
+                                line-height: 1.8;
+                            }
+                            .blog-content strong {
+                                font-weight: 600;
+                                color: #1f2937;
+                            }
+                            .blog-content em {
+                                font-style: italic;
+                            }
+                            .blog-content u {
+                                text-decoration: underline;
+                            }
+                            .blog-content ul {
+                                list-style-type: disc;
+                                padding-left: 1.5rem;
+                                margin-bottom: 1rem;
+                            }
+                            .blog-content ol {
+                                list-style-type: decimal;
+                                padding-left: 1.5rem;
+                                margin-bottom: 1rem;
+                            }
+                            .blog-content li {
+                                margin-bottom: 0.5rem;
+                            }
+                            .blog-content blockquote {
+                                border-left: 4px solid #D4AF76;
+                                padding-left: 1.5rem;
+                                font-style: italic;
+                                color: #4b5563;
+                                background-color: #f9fafb;
+                                padding: 1rem 1.5rem;
+                                border-radius: 0 0.5rem 0.5rem 0;
+                                margin: 1rem 0;
+                            }
+                            .blog-content a {
+                                color: #D4AF76;
+                                text-decoration: underline;
+                            }
+                            .blog-content a:hover {
+                                color: #8B6B4C;
+                            }
+                        `}</style>
                         <div 
-                            className="prose prose-lg max-w-none mb-10 font-light leading-relaxed text-gray-800"
-                            style={{ 
-                                whiteSpace: 'pre-wrap',
-                                lineHeight: '1.8'
-                            }}
-                        >
-                            {blog.content}
-                        </div>
+                            className="blog-content max-w-none mb-10 font-light leading-relaxed text-gray-800"
+                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                        />
+
+
+
 
                         {/* Tags */}
                         {blog.tags && blog.tags.length > 0 && (
@@ -181,8 +244,11 @@ export default function BlogPostPage({ params }) {
                                             <CloudinaryImage
                                                 src={relatedBlog.featuredImage.url}
                                                 alt={relatedBlog.featuredImage.alt || relatedBlog.title}
+                                                width={400}
+                                                height={176}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
+
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                         </div>
                                     ) : (

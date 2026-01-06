@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Eye, Search, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Search, Upload, X, Image as ImageIcon, Bold, Italic, Underline, List, ListOrdered, Quote, Link as LinkIcon, Type } from 'lucide-react';
+
 import { toast } from 'react-hot-toast';
 
 const CATEGORIES = [
@@ -308,14 +309,180 @@ export default function BlogManagement() {
 
                     <div>
                         <label className="block text-sm font-light mb-3 text-gray-700">Content *</label>
-                        <Textarea
-                            value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            rows={18}
-                            required
-                            className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
-                        />
+                        
+                        <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-[#D4AF76] focus-within:border-transparent transition-all shadow-sm hover:shadow-md bg-white">
+                            {/* Rich Text Toolbar */}
+                            <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 border-b border-gray-200">
+                                {/* Font Family */}
+                                <select
+                                    onChange={(e) => {
+                                        const font = e.target.value;
+                                        if (font) {
+                                            const tag = `<span style="font-family: ${font};">`;
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                content: prev.content + tag + '</span>'
+                                            }));
+                                        }
+                                    }}
+                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors mr-2"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Font Family</option>
+                                    <option value="'Playfair Display', serif">Playfair Display</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                    <option value="'Arial', sans-serif">Arial</option>
+                                    <option value="'Helvetica', sans-serif">Helvetica</option>
+                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                                </select>
+
+                                {/* Font Size */}
+                                <select
+                                    onChange={(e) => {
+                                        const size = e.target.value;
+                                        if (size) {
+                                            const tag = `<span style="font-size: ${size};">`;
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                content: prev.content + tag + '</span>'
+                                            }));
+                                        }
+                                    }}
+                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors mr-2"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Size</option>
+                                    <option value="0.875rem">Small</option>
+                                    <option value="1rem">Normal</option>
+                                    <option value="1.25rem">Large</option>
+                                    <option value="1.5rem">Extra Large</option>
+                                    <option value="2rem">Heading</option>
+                                </select>
+
+                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+
+                                {/* Heading Tags */}
+                                <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<h2>' + '</h2>' }))}
+                                        className="p-1 px-2 text-xs font-bold text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Heading 2"
+                                    >
+                                        H2
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<h3>' + '</h3>' }))}
+                                        className="p-1 px-2 text-xs font-bold text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Heading 3"
+                                    >
+                                        H3
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<p>' + '</p>' }))}
+                                        className="p-1 px-2 text-xs font-bold text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Paragraph"
+                                    >
+                                        P
+                                    </button>
+                                </div>
+
+                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+
+                                {/* Text Formatting */}
+                                <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<strong>' + '</strong>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Bold"
+                                    >
+                                        <Bold className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<em>' + '</em>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Italic"
+                                    >
+                                        <Italic className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<u>' + '</u>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Underline"
+                                    >
+                                        <Underline className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+
+                                {/* Lists */}
+                                <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<ul>\n  <li></li>\n</ul>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Bullet List"
+                                    >
+                                        <List className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<ol>\n  <li></li>\n</ol>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Numbered List"
+                                    >
+                                        <ListOrdered className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+
+                                {/* Blockquote & Link */}
+                                <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<blockquote>' + '</blockquote>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Blockquote"
+                                    >
+                                        <Quote className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + '<a href="">' + '</a>' }))}
+                                        className="p-1.5 text-gray-600 hover:text-[#D4AF76] hover:bg-gray-50 rounded transition-colors"
+                                        title="Link"
+                                    >
+                                        <LinkIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Content Textarea */}
+                            <Textarea
+                                value={formData.content}
+                                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                rows={20}
+                                required
+                                placeholder="Start writing your beautiful story..."
+                                className="border-0 rounded-none focus:ring-0 resize-y min-h-[400px] font-light font-mono text-sm leading-relaxed p-6 bg-white outline-none active:outline-none focus:outline-none focus-visible:ring-0"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2 font-light flex items-center gap-1.5 pl-1">
+                            <Type className="w-3.5 h-3.5" />
+                            Select text to apply formatting, or click a button to insert a new block.
+                        </p>
                     </div>
+
+
 
                     <div className="grid grid-cols-2 gap-6">
                         <div>

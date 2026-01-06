@@ -534,13 +534,7 @@ export default function ProductDetail({ productId }) {
                                     </div>
                                 )}
 
-                                {/* Making charge */}
-                                {product.makingChargePercent > 0 && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Making Charge:</span>
-                                        <span className="text-[#2C2C2C] font-medium">{product.makingChargePercent}%</span>
-                                    </div>
-                                )}
+
 
                                 {/* Stone value */}
                                 {product.stoneValue > 0 && (
