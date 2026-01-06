@@ -37,7 +37,7 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.3",
     "motion": "^12.23.24",
-    "next": "15.5.4",
+    "next": "^15.5.9",
     "next-cloudinary": "^6.16.0",
     "ogl": "^1.0.11",
     "puppeteer": "^24.25.0",
