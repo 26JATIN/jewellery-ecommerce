@@ -251,7 +251,7 @@ export default function AdminLayout({ children }) {
             </header>
 
             {/* Mobile Sidebar Backdrop */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {isMobileSidebarOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -299,7 +299,7 @@ export default function AdminLayout({ children }) {
                 </aside>
 
                 {/* Mobile Sidebar */}
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                     {isMobileSidebarOpen && (
                         <motion.aside
                             initial={{ x: '-100%' }}
