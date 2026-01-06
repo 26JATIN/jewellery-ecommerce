@@ -80,11 +80,12 @@ const blogSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-blogSchema.index({ slug: 1 });
+// Note: slug index is already created by unique: true constraint
 blogSchema.index({ isPublished: 1, publishedAt: -1 });
 blogSchema.index({ category: 1, isPublished: 1 });
 blogSchema.index({ tags: 1 });
 blogSchema.index({ createdAt: -1 });
+
 
 // Generate slug from title before saving
 blogSchema.pre('save', function(next) {
