@@ -6,6 +6,7 @@ import { NavbarProvider } from "./context/NavbarContext";
 import ConditionalNavbar from "./components/ConditionalNavbar";
 import PWARegister from "./components/PWARegister";
 import InstallPrompt from "./components/InstallPrompt";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,6 +48,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={inter.className}>
+        <Toaster position="top-right" richColors />
         <PWARegister />
         <InstallPrompt />
         <AuthProvider>

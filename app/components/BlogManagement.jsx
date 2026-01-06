@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Eye, Search, Upload, X, Image as ImageIcon, Bold, Italic, Underline, List, ListOrdered, Quote, Link as LinkIcon, Type } from 'lucide-react';
 
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
+
 
 const CATEGORIES = [
     'jewellery-care',
