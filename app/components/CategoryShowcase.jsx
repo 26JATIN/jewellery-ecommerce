@@ -249,21 +249,10 @@ export default function CategoryShowcase() {
   const scrollToSection = useCallback(() => {
     if (sectionRef.current) {
       const sectionTop = sectionRef.current.offsetTop;
-      
-      // Use Lenis for smooth scrolling if available
-      if (window.lenis) {
-        window.lenis.scrollTo(sectionTop, {
-          offset: -20, // Small offset from the top
-          duration: 1.2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-        });
-      } else {
-        // Fallback to native smooth scroll
-        window.scrollTo({
-          top: sectionTop - -80,
-          behavior: 'smooth'
-        });
-      }
+      window.scrollTo({
+        top: sectionTop - 80,
+        behavior: 'smooth'
+      });
     }
   }, []);
 
