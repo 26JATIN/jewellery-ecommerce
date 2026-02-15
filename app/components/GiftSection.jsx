@@ -2,20 +2,21 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const giftCategories = [
     {
         id: 'women',
         title: 'Gifts for Her',
-        subtitle: 'Elegant pieces for the special woman',
-        description: 'Discover stunning jewelry that speaks to her heart',
-        image: '/images/gift-her.jpg',
-        gradient: 'from-rose-100 via-pink-50 to-rose-50',
-        accentColor: '#E8B4B8',
-        iconBg: 'bg-rose-100',
+        subtitle: 'Elegant pieces for the special woman in your life',
+        image: '/images/gift-her.png',
+        accentColor: '#D4AF76',
+        accentLight: '#F5E6D3',
+        cardBg: 'bg-[#FFF8F6]',
+        borderHover: 'hover:border-rose-200',
         link: '/products?tag=Women',
         icon: (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
         ),
@@ -25,14 +26,14 @@ const giftCategories = [
         id: 'men',
         title: 'Gifts for Him',
         subtitle: 'Sophisticated designs for the modern man',
-        description: 'Timeless pieces that complement his style',
-        image: '/images/gift-him.jpg',
-        gradient: 'from-slate-100 via-gray-50 to-slate-50',
-        accentColor: '#8B8B8B',
-        iconBg: 'bg-slate-100',
+        image: '/images/gift-him.png',
+        accentColor: '#D4AF76',
+        accentLight: '#F0E8DA',
+        cardBg: 'bg-[#F7F6F4]',
+        borderHover: 'hover:border-amber-200',
         link: '/products?tag=Men',
         icon: (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
         ),
@@ -74,62 +75,77 @@ export default function GiftSection() {
                             transition={{ duration: 0.6, delay: index * 0.15 }}
                         >
                             <Link href={category.link}>
-                                <div className={`relative group cursor-pointer rounded-3xl overflow-hidden bg-gradient-to-br ${category.gradient} p-6 md:p-8 lg:p-10 min-h-[320px] md:min-h-[380px] transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-gray-100/50`}>
-                                    {/* Decorative Elements */}
-                                    <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 opacity-20 transform translate-x-8 -translate-y-8">
-                                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                                            <circle cx="50" cy="50" r="45" stroke={category.accentColor} strokeWidth="0.5" fill="none" />
-                                            <circle cx="50" cy="50" r="35" stroke={category.accentColor} strokeWidth="0.5" fill="none" />
-                                            <circle cx="50" cy="50" r="25" stroke={category.accentColor} strokeWidth="0.5" fill="none" />
-                                        </svg>
+                                <div 
+                                    className={`group cursor-pointer rounded-3xl overflow-hidden ${category.cardBg} border border-gray-100 ${category.borderHover} transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] hover:-translate-y-2`}
+                                >
+                                    {/* Image Container */}
+                                    <div className="relative aspect-[4/3] overflow-hidden">
+                                        <Image
+                                            src={category.image}
+                                            alt={category.title}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                            priority
+                                        />
+                                        {/* Subtle bottom fade into card */}
+                                        <div 
+                                            className="absolute bottom-0 left-0 right-0 h-16"
+                                            style={{ background: category.id === 'women' 
+                                                ? 'linear-gradient(to top, #FFF8F6, transparent)' 
+                                                : 'linear-gradient(to top, #F7F6F4, transparent)' 
+                                            }}
+                                        />
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="relative z-10">
-                                        {/* Icon */}
-                                        <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl ${category.iconBg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`} style={{ color: category.accentColor }}>
-                                            {category.icon}
+                                    {/* Text Content */}
+                                    <div className="px-6 md:px-8 pb-7 pt-3 md:pb-8">
+                                        {/* Icon + Title row */}
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div 
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110"
+                                                style={{ backgroundColor: category.accentLight, color: category.accentColor }}
+                                            >
+                                                {category.icon}
+                                            </div>
+                                            <h3 className="text-xl md:text-2xl font-medium text-[#2C2C2C] group-hover:text-[#D4AF76] transition-colors duration-300">
+                                                {category.title}
+                                            </h3>
                                         </div>
 
-                                        {/* Title & Subtitle */}
-                                        <h3 className="text-2xl md:text-3xl lg:text-4xl font-light text-[#2C2C2C] mb-2 group-hover:text-[#D4AF76] transition-colors duration-300">
-                                            {category.title}
-                                        </h3>
-                                        <p className="text-sm md:text-base text-gray-600 font-light mb-4">
+                                        {/* Subtitle */}
+                                        <p className="text-sm text-gray-500 font-light mb-5 ml-[52px]">
                                             {category.subtitle}
                                         </p>
 
                                         {/* Items Tags */}
-                                        <div className="flex flex-wrap gap-2 mb-6">
+                                        <div className="flex flex-wrap gap-2 mb-5">
                                             {category.items.map((item, i) => (
                                                 <span 
                                                     key={i}
-                                                    className="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-xs text-gray-600 font-light border border-gray-200/50"
+                                                    className="px-3.5 py-1.5 bg-white rounded-full text-xs text-[#5C5C5C] font-light border border-gray-200/80 shadow-sm"
                                                 >
                                                     {item}
                                                 </span>
                                             ))}
                                         </div>
 
-                                        {/* CTA Button */}
-                                        <div className="flex items-center gap-2 text-[#D4AF76] font-medium text-sm group-hover:gap-4 transition-all duration-300">
-                                            <span>Explore Collection</span>
-                                            <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        {/* CTA */}
+                                        <div className="flex items-center gap-2 group-hover:gap-3 transition-all duration-300">
+                                            <span 
+                                                className="text-sm font-medium tracking-wide"
+                                                style={{ color: category.accentColor }}
+                                            >
+                                                Explore Collection
+                                            </span>
+                                            <svg 
+                                                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                style={{ color: category.accentColor }}
+                                            >
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                             </svg>
                                         </div>
-                                    </div>
-
-                                    {/* Hover Glow Effect */}
-                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                                        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-white/30 to-transparent" />
-                                    </div>
-
-                                    {/* Gift Box Icon - Bottom Right */}
-                                    <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
-                                        <svg className="w-24 h-24 md:w-32 md:h-32" fill="currentColor" viewBox="0 0 24 24" style={{ color: category.accentColor }}>
-                                            <path d="M20 7h-4.586l1.293-1.293a1 1 0 10-1.414-1.414L12 7.586 8.707 4.293a1 1 0 00-1.414 1.414L8.586 7H4a2 2 0 00-2 2v2a1 1 0 001 1h1v6a2 2 0 002 2h12a2 2 0 002-2v-6h1a1 1 0 001-1V9a2 2 0 00-2-2zm-9 11H6v-6h5v6zm0-8H5V9h6v1zm7 8h-5v-6h5v6zm1-8h-6V9h6v1z"/>
-                                        </svg>
                                     </div>
                                 </div>
                             </Link>
