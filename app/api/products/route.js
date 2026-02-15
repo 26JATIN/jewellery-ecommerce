@@ -23,6 +23,7 @@ export async function GET(req) {
         const search = searchParams.get('search');
         const sortBy = searchParams.get('sortBy') || 'createdAt';
         const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+        const tags = searchParams.get('tags'); // Comma-separated tags e.g. "Women,Men"
         const minPrice = parseFloat(searchParams.get('minPrice')) || 0;
         const maxPrice = parseFloat(searchParams.get('maxPrice')) || Infinity;
         
@@ -35,7 +36,7 @@ export async function GET(req) {
         }
         
         // Generate cache key based on query parameters
-        const cacheKey = `products:${page}:${limit}:${category || 'all'}:${subcategory || 'all'}:${search || ''}:${sortBy}:${sortOrder}:${minPrice}:${maxPrice}`;
+        const cacheKey = `products:${page}:${limit}:${category || 'all'}:${subcategory || 'all'}:${search || ''}:${tags || ''}:${sortBy}:${sortOrder}:${minPrice}:${maxPrice}`;
         
         // Check cache first (only for non-admin requests)
         const cachedData = cache.get(cacheKey);
@@ -68,6 +69,14 @@ export async function GET(req) {
                 { description: { $regex: search, $options: 'i' } },
                 { category: { $regex: search, $options: 'i' } }
             ];
+        }
+        
+        // Add tags filter (comma-separated, match ANY)
+        if (tags && tags.trim() !== '') {
+            const tagList = tags.split(',').map(t => t.trim()).filter(Boolean);
+            if (tagList.length > 0) {
+                query.tags = { $in: tagList };
+            }
         }
         
         // Add price filter

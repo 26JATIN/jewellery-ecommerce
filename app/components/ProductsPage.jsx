@@ -21,6 +21,8 @@ export default function ProductsPage() {
     const [selectedTags, setSelectedTags] = useState([]);
     const [metalTypeFilter, setMetalTypeFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalProductsCount, setTotalProductsCount] = useState(0);
+    const [totalPagesFromServer, setTotalPagesFromServer] = useState(0);
     const [dataReady, setDataReady] = useState(false); // Track when categories/subcategories are loaded
     
     const PRODUCTS_PER_PAGE = 20;
@@ -33,6 +35,7 @@ export default function ProductsPage() {
         const searchFromUrl = searchParams.get('search');
         const categoryFromUrl = searchParams.get('category');
         const subcategoryFromUrl = searchParams.get('subcategory');
+        const tagFromUrl = searchParams.get('tag');
         
         if (searchFromUrl) {
             setSearchTerm(searchFromUrl);
@@ -42,6 +45,9 @@ export default function ProductsPage() {
         }
         if (subcategoryFromUrl) {
             setSelectedSubcategory(subcategoryFromUrl);
+        }
+        if (tagFromUrl) {
+            setSelectedTags([tagFromUrl]);
         }
     }, [searchParams]);
     
@@ -118,7 +124,7 @@ export default function ProductsPage() {
         loadInitialData();
     }, [fetchCategories, fetchSubcategories]);
 
-    // Fetch products with abort controller
+    // Fetch products with abort controller (server-side pagination)
     const fetchProducts = useCallback(async () => {
         // Abort previous request
         if (abortControllerRef.current) {
@@ -131,10 +137,10 @@ export default function ProductsPage() {
         try {
             setLoading(true);
             
-            // Build query parameters
+            // Build query parameters — use server-side pagination
             const params = new URLSearchParams();
-            params.append('limit', '1000'); // Fetch 1000 products for client-side pagination
-            params.append('page', '1'); // Always fetch page 1, pagination done client-side
+            params.append('limit', String(PRODUCTS_PER_PAGE));
+            params.append('page', String(currentPage));
             params.append('_', Date.now()); // Cache busting
             
             if (selectedCategory !== 'All' && selectedCategory) {
@@ -145,6 +151,23 @@ export default function ProductsPage() {
             }
             if (searchTerm) {
                 params.append('search', searchTerm);
+            }
+            if (selectedTags.length > 0) {
+                params.append('tags', selectedTags.join(','));
+            }
+            
+            // Map sort values to API params
+            if (sortBy && sortBy !== 'featured') {
+                if (sortBy === 'price-low') {
+                    params.append('sortBy', 'sellingPrice');
+                    params.append('sortOrder', 'asc');
+                } else if (sortBy === 'price-high') {
+                    params.append('sortBy', 'sellingPrice');
+                    params.append('sortOrder', 'desc');
+                } else if (sortBy === 'newest') {
+                    params.append('sortBy', 'createdAt');
+                    params.append('sortOrder', 'desc');
+                }
             }
             
             const queryString = params.toString();
@@ -168,12 +191,21 @@ export default function ProductsPage() {
             // API returns paginated response with data nested
             if (data.success && Array.isArray(data.data)) {
                 setProducts(data.data);
+                // Store server-side pagination metadata
+                if (data.pagination) {
+                    setTotalProductsCount(data.pagination.totalProducts || 0);
+                    setTotalPagesFromServer(data.pagination.totalPages || 0);
+                }
             } else if (Array.isArray(data)) {
                 // Backward compatibility if API returns direct array
                 setProducts(data);
+                setTotalProductsCount(data.length);
+                setTotalPagesFromServer(1);
             } else {
                 console.error('Unexpected API response format:', data);
                 setProducts([]);
+                setTotalProductsCount(0);
+                setTotalPagesFromServer(0);
             }
         } catch (error) {
             // Ignore abort errors
@@ -185,7 +217,7 @@ export default function ProductsPage() {
         } finally {
             setLoading(false);
         }
-    }, [selectedCategory, selectedSubcategory, searchTerm]);
+    }, [selectedCategory, selectedSubcategory, searchTerm, currentPage, sortBy, selectedTags]);
     
     // Fetch products when filters change OR when data becomes ready
     useEffect(() => {
@@ -205,7 +237,7 @@ export default function ProductsPage() {
         };
     }, [fetchProducts, dataReady]);
 
-    // Memoize filtered products
+    // Filter products client-side for tags and metal type (these are not API-level filters)
     const filteredProducts = useMemo(() => {
         return (Array.isArray(products) ? products : [])
             .filter(product => {
@@ -214,28 +246,15 @@ export default function ProductsPage() {
                 const matchesMetalType = metalTypeFilter === 'all' || 
                     product.metalType === metalTypeFilter;
                 return matchesTags && matchesMetalType;
-            })
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case 'price-low':
-                        return (a.sellingPrice || a.price) - (b.sellingPrice || b.price);
-                    case 'price-high':
-                        return (b.sellingPrice || b.price) - (a.sellingPrice || a.price);
-                    case 'newest':
-                        return new Date(b.createdAt) - new Date(a.createdAt);
-                    default:
-                        return 0;
-                }
             });
-    }, [products, selectedTags, sortBy, metalTypeFilter]);
+    }, [products, selectedTags, metalTypeFilter]);
     
-    // Pagination calculations
-    const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+    // Use server-side pagination values
+    const totalPages = totalPagesFromServer;
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
     const endIndex = startIndex + PRODUCTS_PER_PAGE;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
     
-    // Reset to page 1 when filters change
+    // Reset to page 1 when filters change (not when page itself changes)
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, sortBy, metalTypeFilter]);
@@ -635,7 +654,7 @@ export default function ProductsPage() {
                 </motion.div>
 
                 {/* Filter & Sort Bar */}
-                {!loading && filteredProducts.length > 0 && (
+                {!loading && totalProductsCount > 0 && (
                     <motion.div 
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -648,7 +667,7 @@ export default function ProductsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                             <span className="text-xs md:text-sm font-medium text-[#2C2C2C]">
-                                {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
+                                {totalProductsCount} {totalProductsCount === 1 ? 'Product' : 'Products'}
                                 {selectedCategory !== 'All' && <span className="hidden sm:inline"> in {selectedCategory}</span>}
                                 {totalPages > 1 && (
                                     <span className="text-gray-500 ml-1">
@@ -742,7 +761,7 @@ export default function ProductsPage() {
                 ) : (
                     <AnimatePresence mode="wait">
                         <motion.div 
-                            key={`${selectedCategory}-${viewMode}-${currentPage}`}
+                            key={`${selectedCategory}-${viewMode}-${currentPage}-${sortBy}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
@@ -753,7 +772,7 @@ export default function ProductsPage() {
                                     : "space-y-4"
                             }
                         >
-                            {paginatedProducts.map((product, index) => (
+                            {filteredProducts.map((product, index) => (
                                 viewMode === 'grid' ? (
                                     <ProductCard key={product._id} product={product} index={index} />
                                 ) : (
@@ -775,8 +794,8 @@ export default function ProductsPage() {
                         {/* Page Info */}
                         <div className="text-sm text-gray-600">
                             Showing <span className="font-medium text-[#D4AF76]">{startIndex + 1}</span> to{' '}
-                            <span className="font-medium text-[#D4AF76]">{Math.min(endIndex, filteredProducts.length)}</span> of{' '}
-                            <span className="font-medium text-[#D4AF76]">{filteredProducts.length}</span> products
+                            <span className="font-medium text-[#D4AF76]">{Math.min(endIndex, totalProductsCount)}</span> of{' '}
+                            <span className="font-medium text-[#D4AF76]">{totalProductsCount}</span> products
                         </div>
                         
                         {/* Pagination Buttons */}
