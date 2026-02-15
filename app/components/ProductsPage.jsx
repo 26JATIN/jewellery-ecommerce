@@ -29,6 +29,7 @@ export default function ProductsPage() {
     
     // Use refs to prevent unnecessary re-fetches
     const abortControllerRef = useRef(null);
+    const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
     
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
@@ -49,6 +50,7 @@ export default function ProductsPage() {
         if (tagFromUrl) {
             setSelectedTags([tagFromUrl]);
         }
+        setUrlParamsProcessed(true);
     }, [searchParams]);
     
     // Update subcategories when category changes
@@ -221,8 +223,8 @@ export default function ProductsPage() {
     
     // Fetch products when filters change OR when data becomes ready
     useEffect(() => {
-        // Wait for initial data to load
-        if (!dataReady) {
+        // Wait for BOTH initial data AND URL params to be processed
+        if (!dataReady || !urlParamsProcessed) {
             return;
         }
         
@@ -235,7 +237,7 @@ export default function ProductsPage() {
                 abortControllerRef.current.abort();
             }
         };
-    }, [fetchProducts, dataReady]);
+    }, [fetchProducts, dataReady, urlParamsProcessed]);
 
     // Filter products client-side for tags and metal type (these are not API-level filters)
     const filteredProducts = useMemo(() => {
