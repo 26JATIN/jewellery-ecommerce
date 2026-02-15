@@ -29,7 +29,15 @@ export default function ProductsPage() {
     
     // Use refs to prevent unnecessary re-fetches
     const abortControllerRef = useRef(null);
+    const productsGridRef = useRef(null);
     const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
+
+    // Scroll to products grid (not page top) for better UX
+    const scrollToProducts = () => {
+        if (productsGridRef.current) {
+            productsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
     
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
@@ -657,7 +665,8 @@ export default function ProductsPage() {
 
                 {/* Filter & Sort Bar */}
                 {!loading && totalProductsCount > 0 && (
-                    <motion.div 
+                    <motion.div
+                        ref={productsGridRef}
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
@@ -808,7 +817,7 @@ export default function ProductsPage() {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => {
                                     setCurrentPage(prev => Math.max(1, prev - 1));
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    scrollToProducts();
                                 }}
                                 disabled={currentPage === 1}
                                 className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${
@@ -845,7 +854,7 @@ export default function ProductsPage() {
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={() => {
                                                     setCurrentPage(page);
-                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                    scrollToProducts();
                                                 }}
                                                 className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-medium text-sm transition-all ${
                                                     currentPage === page
@@ -865,7 +874,7 @@ export default function ProductsPage() {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => {
                                     setCurrentPage(prev => Math.min(totalPages, prev + 1));
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    scrollToProducts();
                                 }}
                                 disabled={currentPage === totalPages}
                                 className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${

@@ -31,10 +31,13 @@ function AdminProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeSearchTerm, setActiveSearchTerm] = useState(''); // Only updates on Enter
     const [categoryFilter, setCategoryFilter] = useState('all');
+    const [subcategoryFilter, setSubcategoryFilter] = useState('all');
     const [activeFilter, setActiveFilter] = useState('all');
     const [metalTypeFilter, setMetalTypeFilter] = useState('all');
     const [sortBy, setSortBy] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState('desc');
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
     
     // Use ref to track if initial fetch has been done
     const initialFetchDone = useRef(false);
@@ -61,6 +64,7 @@ function AdminProductsPage() {
             
             if (activeSearchTerm) params.append('search', activeSearchTerm);
             if (categoryFilter !== 'all') params.append('category', categoryFilter);
+            if (subcategoryFilter !== 'all') params.append('subcategory', subcategoryFilter);
             if (activeFilter !== 'all') params.append('isActive', activeFilter);
             if (metalTypeFilter !== 'all') params.append('metalType', metalTypeFilter);
             if (sortBy) params.append('sortBy', sortBy);
@@ -108,9 +112,27 @@ function AdminProductsPage() {
         }
     };
 
-    // Initial mount effect
+    // Initial mount effect — also fetch categories and subcategories
     useEffect(() => {
         setMounted(true);
+        // Fetch categories for filter dropdown
+        fetch('/api/categories')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setCategories(data);
+                else if (data.data && Array.isArray(data.data)) setCategories(data.data);
+                else if (data.categories && Array.isArray(data.categories)) setCategories(data.categories);
+            })
+            .catch(err => console.error('Failed to fetch categories:', err));
+        // Fetch subcategories for filter dropdown
+        fetch('/api/subcategories')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setSubcategories(data);
+                else if (data.subcategories && Array.isArray(data.subcategories)) setSubcategories(data.subcategories);
+                else if (data.data && Array.isArray(data.data)) setSubcategories(data.data);
+            })
+            .catch(err => console.error('Failed to fetch subcategories:', err));
     }, []);
 
     // Initial fetch on mount
@@ -126,7 +148,7 @@ function AdminProductsPage() {
         if (initialFetchDone.current && mounted) {
             fetchProducts();
         }
-    }, [activeSearchTerm, categoryFilter, activeFilter, metalTypeFilter, sortBy, sortOrder, pagination.page, pagination.limit]);
+    }, [activeSearchTerm, categoryFilter, subcategoryFilter, activeFilter, metalTypeFilter, sortBy, sortOrder, pagination.page, pagination.limit]);
 
     const handleAddProduct = () => {
         setEditingProduct(null);
@@ -381,7 +403,7 @@ function AdminProductsPage() {
                                 </div>
                                 
                                 {/* Search and Filters */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                                     {/* Search */}
                                     <div className="relative sm:col-span-2 lg:col-span-1">
                                         <input
@@ -416,16 +438,32 @@ function AdminProductsPage() {
                                         value={categoryFilter}
                                         onChange={(e) => {
                                             setCategoryFilter(e.target.value);
+                                            setSubcategoryFilter('all'); // Reset subcategory when category changes
                                             setPagination(prev => ({ ...prev, page: 1 }));
                                         }}
                                         className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm bg-white"
                                     >
                                         <option value="all">All Categories</option>
-                                        <option value="Rings">Rings</option>
-                                        <option value="Necklaces">Necklaces</option>
-                                        <option value="Earrings">Earrings</option>
-                                        <option value="Bracelets">Bracelets</option>
-                                        <option value="Bangles">Bangles</option>
+                                        {categories.map(cat => (
+                                            <option key={cat._id || cat.name} value={cat.name}>{cat.name}</option>
+                                        ))}
+                                    </select>
+                                    
+                                    {/* Subcategory Filter */}
+                                    <select
+                                        value={subcategoryFilter}
+                                        onChange={(e) => {
+                                            setSubcategoryFilter(e.target.value);
+                                            setPagination(prev => ({ ...prev, page: 1 }));
+                                        }}
+                                        className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B6B4C] focus:border-transparent text-sm bg-white"
+                                    >
+                                        <option value="all">All Subcategories</option>
+                                        {subcategories
+                                            .filter(sub => categoryFilter === 'all' || sub.category?.name === categoryFilter || sub.category === categoryFilter)
+                                            .map(sub => (
+                                                <option key={sub._id} value={sub._id}>{sub.name}</option>
+                                            ))}
                                     </select>
                                     
                                     {/* Status Filter */}
@@ -465,7 +503,7 @@ function AdminProductsPage() {
                                 </div>
                                 
                                 {/* Active Filters Display */}
-                                {(metalTypeFilter !== 'all' || categoryFilter !== 'all' || activeFilter !== 'all' || activeSearchTerm) && (
+                                {(metalTypeFilter !== 'all' || categoryFilter !== 'all' || subcategoryFilter !== 'all' || activeFilter !== 'all' || activeSearchTerm) && (
                                     <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
                                         <span className="text-xs text-gray-500">Active filters:</span>
                                         {activeSearchTerm && (
@@ -483,7 +521,13 @@ function AdminProductsPage() {
                                         {categoryFilter !== 'all' && (
                                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
                                                 {categoryFilter}
-                                                <button onClick={() => setCategoryFilter('all')} className="hover:text-purple-900">×</button>
+                                                <button onClick={() => { setCategoryFilter('all'); setSubcategoryFilter('all'); }} className="hover:text-purple-900">×</button>
+                                            </span>
+                                        )}
+                                        {subcategoryFilter !== 'all' && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full">
+                                                {subcategories.find(s => s._id === subcategoryFilter)?.name || subcategoryFilter}
+                                                <button onClick={() => setSubcategoryFilter('all')} className="hover:text-indigo-900">×</button>
                                             </span>
                                         )}
                                         {activeFilter !== 'all' && (
@@ -498,6 +542,7 @@ function AdminProductsPage() {
                                                 setActiveSearchTerm('');
                                                 setMetalTypeFilter('all');
                                                 setCategoryFilter('all');
+                                                setSubcategoryFilter('all');
                                                 setActiveFilter('all');
                                                 setSortBy('createdAt');
                                                 setSortOrder('desc');
