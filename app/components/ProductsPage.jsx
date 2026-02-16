@@ -31,6 +31,8 @@ export default function ProductsPage() {
     const abortControllerRef = useRef(null);
     const productsGridRef = useRef(null);
     const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
+    const categoryScrollRef = useRef(null);
+    const subcategoryScrollRef = useRef(null);
 
     // Scroll to products grid (not page top) for better UX
     const scrollToProducts = () => {
@@ -38,6 +40,35 @@ export default function ProductsPage() {
             productsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
+
+    // Scroll selected item to center of its container
+    const scrollSelectedToCenter = useCallback((containerRef, selectedSelector) => {
+        if (!containerRef.current) return;
+        const container = containerRef.current;
+        const selectedEl = container.querySelector(selectedSelector);
+        if (!selectedEl) return;
+        const containerRect = container.getBoundingClientRect();
+        const selectedRect = selectedEl.getBoundingClientRect();
+        const scrollLeft = container.scrollLeft + (selectedRect.left - containerRect.left) - (containerRect.width / 2) + (selectedRect.width / 2);
+        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }, []);
+
+    // Auto-scroll category selector when selected category changes
+    useEffect(() => {
+        // Small delay to ensure DOM is updated
+        const timer = setTimeout(() => {
+            scrollSelectedToCenter(categoryScrollRef, '[data-category-selected="true"]');
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [selectedCategory, categories, scrollSelectedToCenter]);
+
+    // Auto-scroll subcategory selector when selected subcategory changes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            scrollSelectedToCenter(subcategoryScrollRef, '[data-subcategory-selected="true"]');
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [selectedSubcategory, subcategories, scrollSelectedToCenter]);
     
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
@@ -60,6 +91,22 @@ export default function ProductsPage() {
         }
         setUrlParamsProcessed(true);
     }, [searchParams]);
+
+    // Auto-select parent category when subcategory comes from URL
+    useEffect(() => {
+        if (!dataReady || !urlParamsProcessed) return;
+        
+        const subcategoryFromUrl = searchParams.get('subcategory');
+        const categoryFromUrl = searchParams.get('category');
+        
+        // Only auto-resolve if subcategory is set from URL but category is not
+        if (subcategoryFromUrl && !categoryFromUrl && allSubcategories.length > 0) {
+            const matchedSub = allSubcategories.find(sub => sub._id === subcategoryFromUrl);
+            if (matchedSub && matchedSub.category?.name) {
+                setSelectedCategory(matchedSub.category.name);
+            }
+        }
+    }, [dataReady, urlParamsProcessed, allSubcategories, searchParams]);
     
     // Update subcategories when category changes
     useEffect(() => {
@@ -335,10 +382,11 @@ export default function ProductsPage() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="mb-6 md:mb-8 lg:mb-10"
                 >
-                    <div className="flex gap-3 md:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide py-2 px-1">
+                    <div ref={categoryScrollRef} className="flex gap-3 md:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide py-2 px-1">
                         {categories.map((category, index) => (
                             <motion.button
                                 key={category.name}
+                                data-category-selected={selectedCategory === category.name ? "true" : undefined}
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -443,7 +491,7 @@ export default function ProductsPage() {
                         </div>
                         
                         {/* Story-style Scrollable Badges */}
-                        <div className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide py-2 px-1">
+                        <div ref={subcategoryScrollRef} className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide py-2 px-1">
                             {/* All Collections Badge */}
                             <motion.button
                                 initial={{ opacity: 0, scale: 0.8 }}
@@ -452,6 +500,7 @@ export default function ProductsPage() {
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleSubcategoryClick('All')}
+                                data-subcategory-selected={selectedSubcategory === 'All' ? "true" : undefined}
                                 className="flex flex-col items-center gap-1.5 md:gap-2 min-w-[70px] md:min-w-[80px] lg:min-w-[90px] group"
                             >
                                 {/* Circular Image Container with Story Ring */}
@@ -501,6 +550,7 @@ export default function ProductsPage() {
                             {subcategories.map((subcategory, index) => (
                                 <motion.button
                                     key={subcategory._id}
+                                    data-subcategory-selected={selectedSubcategory === subcategory._id ? "true" : undefined}
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: (index + 1) * 0.05 }}

@@ -939,9 +939,9 @@ export default function ProductDetail({ productId }) {
                             <Link 
                                 href={`/products${
                                     product?.subcategory?._id 
-                                        ? `?subcategory=${product.subcategory._id}` 
+                                        ? `?category=${encodeURIComponent(product.category)}&subcategory=${product.subcategory._id}` 
                                         : product?.category 
-                                        ? `?category=${product.category}` 
+                                        ? `?category=${encodeURIComponent(product.category)}` 
                                         : ''
                                 }`}
                                 className="hidden md:flex items-center gap-2 text-sm text-[#D4AF76] hover:text-[#8B6B4C] transition-colors font-medium"
@@ -1004,9 +1004,9 @@ export default function ProductDetail({ productId }) {
                             <Link 
                                 href={`/products${
                                     product?.subcategory?._id 
-                                        ? `?subcategory=${product.subcategory._id}` 
+                                        ? `?category=${encodeURIComponent(product.category)}&subcategory=${product.subcategory._id}` 
                                         : product?.category 
-                                        ? `?category=${product.category}` 
+                                        ? `?category=${encodeURIComponent(product.category)}` 
                                         : ''
                                 }`}
                                 className="inline-flex items-center gap-2 text-sm text-[#D4AF76] hover:text-[#8B6B4C] transition-colors font-medium"
