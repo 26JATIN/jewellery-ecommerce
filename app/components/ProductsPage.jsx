@@ -33,6 +33,7 @@ export default function ProductsPage() {
     const [urlParamsProcessed, setUrlParamsProcessed] = useState(false);
     const categoryScrollRef = useRef(null);
     const subcategoryScrollRef = useRef(null);
+    const isInternalUrlUpdate = useRef(false);
 
     // Scroll to products grid (not page top) for better UX
     const scrollToProducts = () => {
@@ -72,6 +73,11 @@ export default function ProductsPage() {
     
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
+        // Skip if this URL change was triggered by our own sync effect
+        if (isInternalUrlUpdate.current) {
+            isInternalUrlUpdate.current = false;
+            return;
+        }
         const searchFromUrl = searchParams.get('search');
         const categoryFromUrl = searchParams.get('category');
         const subcategoryFromUrl = searchParams.get('subcategory');
@@ -329,6 +335,33 @@ export default function ProductsPage() {
         setSearchTerm('');
     }, []);
 
+    // Sync URL with current filter state so refresh always reflects what the user sees
+    useEffect(() => {
+        if (!urlParamsProcessed || !dataReady) return;
+
+        const params = new URLSearchParams();
+        if (selectedCategory && selectedCategory !== 'All') {
+            params.set('category', selectedCategory);
+        }
+        if (selectedSubcategory && selectedSubcategory !== 'All') {
+            params.set('subcategory', selectedSubcategory);
+        }
+        if (searchTerm) {
+            params.set('search', searchTerm);
+        }
+        if (selectedTags.length > 0) {
+            params.set('tag', selectedTags[0]);
+        }
+
+        const newUrl = params.toString() ? `/products?${params.toString()}` : '/products';
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+        if (newUrl !== currentUrl) {
+            isInternalUrlUpdate.current = true;
+            router.replace(newUrl, { scroll: false });
+        }
+    }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, urlParamsProcessed, dataReady, router]);
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-black pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
@@ -389,7 +422,7 @@ export default function ProductsPage() {
                                 data-category-selected={selectedCategory === category.name ? "true" : undefined}
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                transition={{ duration: 0.2 }}
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleCategoryClick(category.name)}
@@ -496,7 +529,7 @@ export default function ProductsPage() {
                             <motion.button
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.2 }}
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleSubcategoryClick('All')}
@@ -553,7 +586,7 @@ export default function ProductsPage() {
                                     data-subcategory-selected={selectedSubcategory === subcategory._id ? "true" : undefined}
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.3, delay: (index + 1) * 0.05 }}
+                                    transition={{ duration: 0.2 }}
                                     whileHover={{ scale: 1.05, y: -2 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleSubcategoryClick(subcategory._id)}
@@ -949,9 +982,9 @@ export default function ProductsPage() {
 function ProductCard({ product, index }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
@@ -993,9 +1026,9 @@ function ProductCard({ product, index }) {
 function ProductListItem({ product, index }) {
     return (
         <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
+            transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
