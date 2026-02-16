@@ -4,12 +4,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Smooth theme transition — only active during toggle */
-.theme-transitioning,
-.theme-transitioning *,
-.theme-transitioning *::before,
-.theme-transitioning *::after {
-  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, 
-              box-shadow 0.4s ease, fill 0.4s ease, stroke 0.4s ease !important;
+.theme-transitioning {
+  transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+.theme-transitioning > *,
+.theme-transitioning main,
+.theme-transitioning nav,
+.theme-transitioning header,
+.theme-transitioning footer,
+.theme-transitioning section {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
 :root {

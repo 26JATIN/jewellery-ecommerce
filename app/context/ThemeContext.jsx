@@ -52,7 +52,7 @@ export function ThemeProvider({ children }) {
             // Remove transition class after animation completes
             setTimeout(() => {
                 root.classList.remove('theme-transitioning');
-            }, 500);
+            }, 350);
         }
     };
 
