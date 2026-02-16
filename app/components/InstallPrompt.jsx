@@ -20,10 +20,14 @@ export default function InstallPrompt() {
     const hasBeenDismissed = localStorage.getItem('pwa-install-dismissed');
     
     const handler = (e) => {
+      // Prevent Chrome's default mini-infobar
       e.preventDefault();
+      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
       
-      // Show prompt after 30 seconds on first visit
+      console.log('beforeinstallprompt event captured');
+      
+      // Show our custom prompt after a short delay on first visit
       if (!hasBeenDismissed) {
         setTimeout(() => {
           setShowPrompt(true);
@@ -33,21 +37,48 @@ export default function InstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handler);
 
+    // Listen for successful install
+    const onInstalled = () => {
+      console.log('PWA was installed');
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+    };
+    window.addEventListener('appinstalled', onInstalled);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', onInstalled);
     };
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.warn('No deferred prompt available');
+      return;
+    }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    console.log(`User response to install prompt: ${outcome}`);
-
-    setDeferredPrompt(null);
-    setShowPrompt(false);
+    try {
+      // Show the browser's install prompt
+      await deferredPrompt.prompt();
+      
+      // Wait for the user's response
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${outcome}`);
+      
+      // Clear the prompt regardless of outcome — it can only be used once
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+      
+      if (outcome === 'dismissed') {
+        // User dismissed, remember so we don't pester them
+        localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+      }
+    } catch (error) {
+      console.error('Install prompt error:', error);
+      // Clear prompt on error as well — stale prompts can't be reused
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+    }
   };
 
   const handleDismiss = () => {

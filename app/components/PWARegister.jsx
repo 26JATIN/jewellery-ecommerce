@@ -5,7 +5,8 @@ import { useEffect } from 'react';
 export default function PWARegister() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      // Register service worker after page load
+      const registerSW = () => {
         navigator.serviceWorker
           .register('/sw.js')
           .then((registration) => {
@@ -39,12 +40,17 @@ export default function PWARegister() {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload();
         });
-      });
+      };
+
+      if (document.readyState === 'complete') {
+        registerSW();
+      } else {
+        window.addEventListener('load', registerSW);
+      }
 
       // Handle online/offline status
       window.addEventListener('online', () => {
         console.log('Back online');
-        // Trigger background sync if available
         if ('sync' in navigator.serviceWorker) {
           navigator.serviceWorker.ready.then((registration) => {
             registration.sync.register('sync-cart').catch((err) => {
@@ -59,23 +65,12 @@ export default function PWARegister() {
       });
     }
 
-    // Handle app installation
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      
-      // Show custom install prompt (optional)
-      console.log('PWA install prompt available');
-      
-      // You can trigger this later with a custom UI
-      // Example: showInstallPromotion();
-    });
+    // NOTE: beforeinstallprompt is handled ONLY by InstallPrompt.jsx
+    // Do NOT intercept it here — two handlers calling e.preventDefault()
+    // will race and can prevent the install prompt from working.
 
     window.addEventListener('appinstalled', () => {
       console.log('PWA installed successfully');
-      deferredPrompt = null;
     });
   }, []);
 

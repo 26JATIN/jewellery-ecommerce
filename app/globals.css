@@ -95,18 +95,24 @@ html {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  overscroll-behavior: none;
+  overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
 }
 
 body {
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
   overscroll-behavior-x: none;
+  /* NOTE: Do NOT use user-select:none or -webkit-touch-callout:none on body.
+     These block single-finger scrolling on mobile Chrome/Safari.
+     Apply them only to specific elements (e.g., buttons, images) that need it. */
+}
+
+/* Prevent text selection and long-press only on interactive/visual elements */
+button,
+a,
+img,
+.no-select {
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   -webkit-touch-callout: none;
 }
 

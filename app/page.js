@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 
 export default function Home() {
   return (
-    <main className="min-h-screen relative overflow-hidden">
+    <main className="min-h-screen relative overflow-x-hidden">
       {/* Gradient Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-white via-[#FEFEFE] to-[#F8F6F3] -z-10" />
 

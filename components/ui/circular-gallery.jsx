@@ -430,6 +430,7 @@ class App {
     this.start = e.touches ? e.touches[0].clientX : e.clientX;
     this.startY = e.touches ? e.touches[0].clientY : e.clientY;
     this.hasMoved = false;
+    this.directionLocked = false;
   }
   onTouchMove(e) {
     if (!this.isDown) return;
@@ -439,17 +440,25 @@ class App {
     
     const deltaX = this.start - x;
     const deltaY = this.startY - y;
-    
-    // Only prevent default and move gallery if horizontal movement is dominant
-    if (!this.hasMoved && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      this.hasMoved = true;
-      if (e.touches) {
-        e.preventDefault(); // Prevent page scroll only when we're sure it's horizontal
+
+    // Determine swipe direction once, then lock it
+    if (!this.directionLocked && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+      this.directionLocked = true;
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe — control the gallery
+        this.hasMoved = true;
+      } else {
+        // Vertical swipe — let the browser scroll the page
+        this.isDown = false;
+        return;
       }
     }
     
     // Only update gallery if we've determined this is horizontal movement
     if (this.hasMoved) {
+      if (e.cancelable && e.touches) {
+        e.preventDefault(); // Prevent page scroll only for horizontal gallery swipe
+      }
       // More sensitive touch movement on mobile
       const isMobile = this.screen.width <= 768;
       const multiplier = isMobile ? 0.04 : 0.025; // More sensitive on mobile
@@ -525,12 +534,13 @@ class App {
     this.container.addEventListener('wheel', this.boundOnWheel);
     this.container.addEventListener('mousedown', this.boundOnTouchDown);
     this.container.addEventListener('touchstart', this.boundOnTouchDown, { passive: true });
+    // Touch move on container only (not document) to avoid blocking page scroll
+    this.container.addEventListener('touchmove', this.boundOnTouchMove, { passive: false });
+    this.container.addEventListener('touchend', this.boundOnTouchUp);
     
-    // Document-level for drag continuation outside container
+    // Document-level only for mouse drag continuation outside container
     document.addEventListener('mousemove', this.boundOnTouchMove);
     document.addEventListener('mouseup', this.boundOnTouchUp);
-    document.addEventListener('touchmove', this.boundOnTouchMove, { passive: false }); // Non-passive to allow preventDefault
-    document.addEventListener('touchend', this.boundOnTouchUp);
   }
   destroy() {
     window.cancelAnimationFrame(this.raf);
@@ -544,13 +554,13 @@ class App {
       this.container.removeEventListener('wheel', this.boundOnWheel);
       this.container.removeEventListener('mousedown', this.boundOnTouchDown);
       this.container.removeEventListener('touchstart', this.boundOnTouchDown);
+      this.container.removeEventListener('touchmove', this.boundOnTouchMove);
+      this.container.removeEventListener('touchend', this.boundOnTouchUp);
     }
     
     // Remove document events
     document.removeEventListener('mousemove', this.boundOnTouchMove);
     document.removeEventListener('mouseup', this.boundOnTouchUp);
-    document.removeEventListener('touchmove', this.boundOnTouchMove);
-    document.removeEventListener('touchend', this.boundOnTouchUp);
     
     if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas);
@@ -574,5 +584,5 @@ export default function CircularGallery({
       app.destroy();
     };
   }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
-  return <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />;
+  return <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" style={{ touchAction: 'pan-y' }} ref={containerRef} />;
 }
