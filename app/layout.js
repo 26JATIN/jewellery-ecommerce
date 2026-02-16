@@ -12,6 +12,14 @@ import ThemeToaster from "./components/ThemeToaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
+
 export const metadata = {
   title: "Nandika Jewellers",
   description: "A Bond of trust & Quality - Premium jewelry crafted with precision and passion",
@@ -24,13 +32,6 @@ export const metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Nandika Jewellers",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
   },
   icons: {
     icon: [
