@@ -17,14 +17,14 @@ export function ThemeProvider({ children }) {
 
     useEffect(() => {
         setMounted(true);
-        // Read from localStorage or system preference
+        // Read from localStorage — default to light if no preference stored
         const stored = localStorage.getItem('theme');
-        if (stored === 'dark' || stored === 'light') {
-            setTheme(stored);
-            applyTheme(stored);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        if (stored === 'dark') {
             setTheme('dark');
             applyTheme('dark');
+        } else {
+            setTheme('light');
+            applyTheme('light');
         }
     }, []);
 
