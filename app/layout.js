@@ -29,6 +29,7 @@ export const metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
+    viewportFit: "cover",
   },
   icons: {
     icon: [

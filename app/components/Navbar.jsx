@@ -364,7 +364,8 @@ export default function Navbar() {
                     backgroundColor: "var(--navbar-bg)",
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
-                    boxShadow: "var(--navbar-shadow)"
+                    boxShadow: "var(--navbar-shadow)",
+                    paddingBottom: "env(safe-area-inset-bottom, 0px)"
                 }}
                 initial={{ y: 100 }}
                 animate={{ 
