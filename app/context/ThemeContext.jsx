@@ -42,6 +42,12 @@ export function ThemeProvider({ children }) {
             root.classList.remove('dark');
         }
 
+        // Update theme-color meta to match navbar bg
+        const meta = document.getElementById('theme-color-meta');
+        if (meta) {
+            meta.content = newTheme === 'dark' ? '#000000' : '#ffffff';
+        }
+
         if (animate) {
             // Remove transition class after animation completes
             setTimeout(() => {

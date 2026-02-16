@@ -16,7 +16,10 @@ export const metadata = {
   title: "Nandika Jewellers",
   description: "A Bond of trust & Quality - Premium jewelry crafted with precision and passion",
   manifest: "/manifest.json",
-  themeColor: "#d4af37",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -26,7 +29,6 @@ export const metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
-    viewportFit: "cover",
   },
   icons: {
     icon: [
@@ -45,16 +47,20 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#d4af37" />
+        <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             try {
               var theme = localStorage.getItem('theme');
+              var meta = document.getElementById('theme-color-meta');
               if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
+                if (meta) meta.content = '#000000';
+              } else {
+                if (meta) meta.content = '#ffffff';
               }
             } catch(e) {}
           })();
