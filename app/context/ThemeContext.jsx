@@ -28,12 +28,25 @@ export function ThemeProvider({ children }) {
         }
     }, []);
 
-    const applyTheme = (newTheme) => {
+    const applyTheme = (newTheme, animate = false) => {
         const root = document.documentElement;
+
+        if (animate) {
+            // Add transition class to enable smooth theme switch
+            root.classList.add('theme-transitioning');
+        }
+
         if (newTheme === 'dark') {
             root.classList.add('dark');
         } else {
             root.classList.remove('dark');
+        }
+
+        if (animate) {
+            // Remove transition class after animation completes
+            setTimeout(() => {
+                root.classList.remove('theme-transitioning');
+            }, 500);
         }
     };
 
@@ -41,7 +54,7 @@ export function ThemeProvider({ children }) {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
+        applyTheme(newTheme, true);
     };
 
     const isDark = theme === 'dark';
