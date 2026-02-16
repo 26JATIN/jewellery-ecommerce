@@ -8,6 +8,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
+import { toast } from 'sonner';
 
 export default function ProductDetail({ productId }) {
     const router = useRouter();
@@ -147,7 +148,7 @@ export default function ProductDetail({ productId }) {
 
         // Check if product has variants and a variant is selected
         if (product?.hasVariants && !selectedVariant) {
-            alert('Please select all product options before adding to cart');
+            toast.warning('Please select all product options before adding to cart');
             return;
         }
 
@@ -160,12 +161,12 @@ export default function ProductDetail({ productId }) {
             const stockMessage = selectedVariant 
                 ? `Only ${availableStock} items available for this variant`
                 : `Only ${availableStock} items available`;
-            alert(stockMessage);
+            toast.warning(stockMessage);
             return;
         }
 
         if (availableStock === 0) {
-            alert('This item is currently out of stock');
+            toast.error('This item is currently out of stock');
             return;
         }
 
@@ -189,7 +190,7 @@ export default function ProductDetail({ productId }) {
             setIsCartOpen(true);
         } catch (error) {
             console.error('Error adding to cart:', error);
-            alert('Failed to add item to cart. Please try again.');
+            toast.error('Failed to add item to cart. Please try again.');
         } finally {
             setAddingToCart(false);
         }
@@ -201,14 +202,14 @@ export default function ProductDetail({ productId }) {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-4 md:pt-6 lg:pt-8 bg-gradient-to-b from-white to-[#FAFAFA]">
+            <div className="min-h-screen pt-4 md:pt-6 lg:pt-8 bg-gradient-to-b from-white to-[#FAFAFA] dark:from-black dark:to-[#0A0A0A]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col items-center justify-center h-96">
                         <div className="relative mb-8">
                             <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#D4AF76]/20"></div>
                             <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-[#D4AF76] absolute top-0 left-0"></div>
                         </div>
-                        <p className="text-gray-600 font-light">Loading product...</p>
+                        <p className="text-gray-600 dark:text-gray-400 font-light">Loading product...</p>
                     </div>
                 </div>
             </div>
@@ -217,22 +218,22 @@ export default function ProductDetail({ productId }) {
 
     if (error || !product) {
         return (
-            <div className="min-h-screen pt-4 md:pt-6 lg:pt-8 bg-gradient-to-b from-white to-[#FAFAFA]">
+            <div className="min-h-screen pt-4 md:pt-6 lg:pt-8 bg-gradient-to-b from-white to-[#FAFAFA] dark:from-black dark:to-[#0A0A0A]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center py-20"
                     >
-                        <div className="bg-red-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                        <div className="bg-red-50 dark:bg-red-500/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
                             <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-light text-gray-900 mb-3">
+                        <h3 className="text-2xl font-light text-gray-900 dark:text-gray-100 mb-3">
                             {error === 'Invalid product ID' ? 'Invalid Product' : 'Product Not Found'}
                         </h3>
-                        <p className="text-gray-600 font-light mb-6">
+                        <p className="text-gray-600 dark:text-gray-400 font-light mb-6">
                             {error === 'Invalid product ID' 
                                 ? 'The product link appears to be invalid.'
                                 : error || "The product you're looking for doesn't exist or has been removed."}
@@ -293,13 +294,13 @@ export default function ProductDetail({ productId }) {
     const isOutOfStock = effectiveStock <= 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white pt-4 md:pt-6 lg:pt-8 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pt-4 md:pt-6 lg:pt-8 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Breadcrumb */}
                 <motion.nav 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center space-x-2 text-sm text-gray-500 mb-8"
+                    className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-8"
                 >
                     <Link href="/" className="hover:text-[#D4AF76] transition-colors">Home</Link>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,7 +310,7 @@ export default function ProductDetail({ productId }) {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    <span className="text-[#2C2C2C] font-light line-clamp-1">{product.name}</span>
+                    <span className="text-[#2C2C2C] dark:text-gray-200 font-light line-clamp-1">{product.name}</span>
                 </motion.nav>
 
                 {/* Product Details */}
@@ -322,7 +323,7 @@ export default function ProductDetail({ productId }) {
                         className="space-y-4"
                     >
                         {/* Main Image */}
-                        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+                        <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] overflow-hidden">
                             <div className="aspect-square relative">
                                 <AnimatePresence mode="wait">
                                     <motion.div
@@ -376,7 +377,7 @@ export default function ProductDetail({ productId }) {
                                         className={`aspect-square rounded-2xl overflow-hidden transition-all ${
                                             selectedImage === index 
                                                 ? 'ring-4 ring-[#D4AF76] shadow-lg' 
-                                                : 'ring-2 ring-gray-200 hover:ring-[#D4AF76]/50'
+                                                : 'ring-2 ring-gray-200 dark:ring-white/[0.06] hover:ring-[#D4AF76]/50'
                                         }`}
                                     >
                                         <SafeImage
@@ -408,20 +409,20 @@ export default function ProductDetail({ productId }) {
                         </div>
 
                         {/* Product Name */}
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] leading-tight">
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] dark:text-gray-100 leading-tight">
                             {product.name}
                         </h1>
 
                         {/* SKU */}
                         {product.sku && (
-                            <p className="text-sm text-gray-500 font-light">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-light">
                                 SKU: <span className="font-medium">{product.sku}</span>
                             </p>
                         )}
 
                         {/* Price */}
-                        <div className="flex items-baseline gap-4 py-4 border-y border-gray-200">
-                            <span className="text-4xl font-light text-[#2C2C2C]">
+                        <div className="flex items-baseline gap-4 py-4 border-y border-gray-200 dark:border-white/[0.06]">
+                            <span className="text-4xl font-light text-[#2C2C2C] dark:text-gray-100">
                                 ₹{currentPrice.sellingPrice?.toLocaleString('en-IN')}
                             </span>
                             {currentPrice.mrp && currentPrice.mrp > currentPrice.sellingPrice && (
@@ -429,7 +430,7 @@ export default function ProductDetail({ productId }) {
                                     <span className="text-xl text-gray-400 line-through font-light">
                                         ₹{currentPrice.mrp.toLocaleString('en-IN')}
                                     </span>
-                                    <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
+                                    <span className="text-sm text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">
                                         Save {discount}%
                                     </span>
                                 </>
@@ -438,8 +439,8 @@ export default function ProductDetail({ productId }) {
 
                         {/* Product Variants */}
                         {product?.hasVariants && (
-                            <div className="bg-gradient-to-br from-[#FAFAFA] to-white rounded-2xl p-6">
-                                <h3 className="text-lg font-light text-[#2C2C2C] mb-4">Select Options</h3>
+                            <div className="bg-gradient-to-br from-[#FAFAFA] to-white dark:from-[#0A0A0A] dark:to-[#111] rounded-2xl p-6 dark:border dark:border-white/[0.06]">
+                                <h3 className="text-lg font-light text-[#2C2C2C] dark:text-gray-100 mb-4">Select Options</h3>
                                 <ProductVariantSelector
                                     product={product}
                                     selectedVariant={selectedVariant}
@@ -449,9 +450,9 @@ export default function ProductDetail({ productId }) {
                         )}
 
                         {/* Stock Information */}
-                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 rounded-2xl p-4 dark:border dark:border-white/[0.06]">
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-700 font-light">Availability:</span>
+                                <span className="text-gray-700 dark:text-gray-300 font-light">Availability:</span>
                                 <span className={`font-medium ${effectiveStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {effectiveStock > 0 ? (
                                         selectedVariant ? `${effectiveStock} in stock` : 
@@ -461,28 +462,28 @@ export default function ProductDetail({ productId }) {
                                 </span>
                             </div>
                             {product?.hasVariants && !selectedVariant && effectiveStock > 0 && (
-                                <p className="text-xs text-gray-500 mt-1">Select a variant to see specific availability</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Select a variant to see specific availability</p>
                             )}
                         </div>
 
                         {/* Description */}
                         <div>
-                            <h3 className="text-lg font-light text-[#2C2C2C] mb-3">Description</h3>
-                            <p className="text-gray-600 font-light leading-relaxed">
+                            <h3 className="text-lg font-light text-[#2C2C2C] dark:text-gray-100 mb-3">Description</h3>
+                            <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
                                 {product.description}
                             </p>
                         </div>
 
                         {/* Specifications */}
                         {(product.metal || product.metalType || product.weight || product.goldWeight || product.silverWeight || product.purity || product.goldPurity || product.silverPurity) && (
-                            <div className="bg-gradient-to-br from-[#FAFAFA] to-white rounded-2xl p-6 space-y-3">
-                                <h3 className="text-lg font-light text-[#2C2C2C] mb-4">Specifications</h3>
+                            <div className="bg-gradient-to-br from-[#FAFAFA] to-white dark:from-[#0A0A0A] dark:to-[#111] rounded-2xl p-6 space-y-3 dark:border dark:border-white/[0.06]">
+                                <h3 className="text-lg font-light text-[#2C2C2C] dark:text-gray-100 mb-4">Specifications</h3>
                                 
                                 {/* Metal Type */}
                                 {(product.metal || product.metalType) && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Metal:</span>
-                                        <span className="text-[#2C2C2C] font-medium capitalize">
+                                        <span className="text-gray-600 dark:text-gray-400 font-light">Metal:</span>
+                                        <span className="text-[#2C2C2C] dark:text-gray-200 font-medium capitalize">
                                             {product.metal || product.metalType}
                                         </span>
                                     </div>
@@ -492,13 +493,13 @@ export default function ProductDetail({ productId }) {
                                 {product.goldWeight > 0 && (
                                     <>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-gray-600 font-light">Gold Weight:</span>
-                                            <span className="text-[#2C2C2C] font-medium">{product.goldWeight}g</span>
+                                            <span className="text-gray-600 dark:text-gray-400 font-light">Gold Weight:</span>
+                                            <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.goldWeight}g</span>
                                         </div>
                                         {product.goldPurity && (
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600 font-light">Gold Purity:</span>
-                                                <span className="text-[#2C2C2C] font-medium">{product.goldPurity}K</span>
+                                                <span className="text-gray-600 dark:text-gray-400 font-light">Gold Purity:</span>
+                                                <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.goldPurity}K</span>
                                             </div>
                                         )}
                                     </>
@@ -508,13 +509,13 @@ export default function ProductDetail({ productId }) {
                                 {product.silverWeight > 0 && (
                                     <>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-gray-600 font-light">Silver Weight:</span>
-                                            <span className="text-[#2C2C2C] font-medium">{product.silverWeight}g</span>
+                                            <span className="text-gray-600 dark:text-gray-400 font-light">Silver Weight:</span>
+                                            <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.silverWeight}g</span>
                                         </div>
                                         {product.silverPurity && (
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600 font-light">Silver Purity:</span>
-                                                <span className="text-[#2C2C2C] font-medium">{product.silverPurity}</span>
+                                                <span className="text-gray-600 dark:text-gray-400 font-light">Silver Purity:</span>
+                                                <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.silverPurity}</span>
                                             </div>
                                         )}
                                     </>
@@ -523,14 +524,14 @@ export default function ProductDetail({ productId }) {
                                 {/* Legacy purity and weight fields */}
                                 {product.purity && !product.goldPurity && !product.silverPurity && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Purity:</span>
-                                        <span className="text-[#2C2C2C] font-medium">{product.purity}</span>
+                                        <span className="text-gray-600 dark:text-gray-400 font-light">Purity:</span>
+                                        <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.purity}</span>
                                     </div>
                                 )}
                                 {product.weight && !product.goldWeight && !product.silverWeight && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Weight:</span>
-                                        <span className="text-[#2C2C2C] font-medium">{product.weight}g</span>
+                                        <span className="text-gray-600 dark:text-gray-400 font-light">Weight:</span>
+                                        <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">{product.weight}g</span>
                                     </div>
                                 )}
 
@@ -539,16 +540,16 @@ export default function ProductDetail({ productId }) {
                                 {/* Stone value */}
                                 {product.stoneValue > 0 && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Stone Value:</span>
-                                        <span className="text-[#2C2C2C] font-medium">₹{product.stoneValue.toLocaleString('en-IN')}</span>
+                                        <span className="text-gray-600 dark:text-gray-400 font-light">Stone Value:</span>
+                                        <span className="text-[#2C2C2C] dark:text-gray-200 font-medium">₹{product.stoneValue.toLocaleString('en-IN')}</span>
                                     </div>
                                 )}
 
                                 {/* Dynamic pricing indicator */}
                                 {product.isDynamicPricing && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-light">Pricing:</span>
-                                        <span className="font-medium text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                        <span className="text-gray-600 dark:text-gray-400 font-light">Pricing:</span>
+                                        <span className="font-medium text-xs bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
                                             Live Gold Rate
                                         </span>
                                     </div>
@@ -559,25 +560,25 @@ export default function ProductDetail({ productId }) {
                         {/* Quantity Selector */}
                         {!isOutOfStock && (
                             <div className="space-y-3">
-                                <label className="text-lg font-light text-[#2C2C2C]">Quantity</label>
+                                <label className="text-lg font-light text-[#2C2C2C] dark:text-gray-100">Quantity</label>
                                 <div className="flex items-center gap-4">
                                     <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-12 h-12 rounded-full bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] hover:border-[#D4AF76] text-[#2C2C2C] dark:text-gray-200 flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={quantity <= 1}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                                         </svg>
                                     </motion.button>
-                                    <span className="text-2xl font-light text-[#2C2C2C] min-w-[3rem] text-center">{quantity}</span>
+                                    <span className="text-2xl font-light text-[#2C2C2C] dark:text-gray-100 min-w-[3rem] text-center">{quantity}</span>
                                     <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setQuantity(Math.min(effectiveStock || 999, quantity + 1))}
-                                        className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-[#D4AF76] text-[#2C2C2C] flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-12 h-12 rounded-full bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] hover:border-[#D4AF76] text-[#2C2C2C] dark:text-gray-200 flex items-center justify-center transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={quantity >= (effectiveStock || 999)}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -620,7 +621,7 @@ export default function ProductDetail({ productId }) {
                                 )}
                             </motion.button>
                         ) : (
-                            <div className="w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 bg-gray-300 text-gray-600 cursor-not-allowed shadow-lg">
+                            <div className="w-full py-4 px-8 rounded-full font-light text-lg flex items-center justify-center gap-3 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed shadow-lg">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -637,8 +638,8 @@ export default function ProductDetail({ productId }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-[#2C2C2C]">Authentic</p>
-                                    <p className="text-xs text-gray-500 font-light">100% Genuine</p>
+                                    <p className="text-sm font-medium text-[#2C2C2C] dark:text-gray-200">Authentic</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-light">100% Genuine</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -648,8 +649,8 @@ export default function ProductDetail({ productId }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-[#2C2C2C]">Warranty</p>
-                                    <p className="text-xs text-gray-500 font-light">1 Year</p>
+                                    <p className="text-sm font-medium text-[#2C2C2C] dark:text-gray-200">Warranty</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-light">1 Year</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -659,8 +660,8 @@ export default function ProductDetail({ productId }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-[#2C2C2C]">Secure</p>
-                                    <p className="text-xs text-gray-500 font-light">Safe Payment</p>
+                                    <p className="text-sm font-medium text-[#2C2C2C] dark:text-gray-200">Secure</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-light">Safe Payment</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -670,8 +671,8 @@ export default function ProductDetail({ productId }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-[#2C2C2C]">Free Shipping</p>
-                                    <p className="text-xs text-gray-500 font-light">On All Orders</p>
+                                    <p className="text-sm font-medium text-[#2C2C2C] dark:text-gray-200">Free Shipping</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-light">On All Orders</p>
                                 </div>
                             </div>
                         </div>
@@ -689,10 +690,10 @@ export default function ProductDetail({ productId }) {
                     >
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h2 className="text-2xl md:text-3xl font-light text-[#2C2C2C] mb-2">
+                                <h2 className="text-2xl md:text-3xl font-light text-[#2C2C2C] dark:text-gray-100 mb-2">
                                     Similar Products
                                 </h2>
-                                <p className="text-sm md:text-base text-gray-600 font-light">
+                                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light">
                                     {product?.subcategory?.name || product?.category 
                                         ? `More from ${product?.subcategory?.name || product?.category}` 
                                         : 'You may also like these'
@@ -729,8 +730,8 @@ export default function ProductDetail({ productId }) {
                                         whileHover={{ y: -8 }}
                                         className="group cursor-pointer"
                                     >
-                                        <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100">
-                                            <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-2xl md:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 dark:border-white/[0.06]">
+                                            <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
                                                 <SafeImage
                                                     src={relatedProduct.images?.[0]?.url || relatedProduct.image}
                                                     alt={relatedProduct.name}
@@ -743,11 +744,11 @@ export default function ProductDetail({ productId }) {
                                                 </div>
                                             </div>
                                             <div className="p-3 md:p-4">
-                                                <h3 className="text-sm md:text-base font-light text-[#2C2C2C] mb-1 md:mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors leading-tight">
+                                                <h3 className="text-sm md:text-base font-light text-[#2C2C2C] dark:text-gray-200 mb-1 md:mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors leading-tight">
                                                     {relatedProduct.name}
                                                 </h3>
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-base md:text-lg font-medium text-[#2C2C2C]">
+                                                    <p className="text-base md:text-lg font-medium text-[#2C2C2C] dark:text-gray-100">
                                                         ₹{relatedProduct.sellingPrice?.toLocaleString('en-IN')}
                                                     </p>
                                                     {relatedProduct.mrp && relatedProduct.mrp > relatedProduct.sellingPrice && (

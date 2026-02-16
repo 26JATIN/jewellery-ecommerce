@@ -1,13 +1,13 @@
 export default function ShippingPolicy() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Shipping and Delivery Policy</h1>
-        <p className="text-sm text-gray-600 mb-8">Last Updated: October 14, 2025</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-[#0A0A0A] shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] rounded-lg p-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Shipping and Delivery Policy</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-8">Last Updated: October 14, 2025</p>
 
-        <div className="space-y-6 text-gray-700">
+        <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Shipping Coverage</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">1. Shipping Coverage</h2>
             <p>
               We currently ship across India. International shipping is not available at this time. 
               We use trusted courier partners including Shiprocket, Blue Dart, Delhivery, and India Post.
@@ -15,7 +15,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Processing Time</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">2. Processing Time</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Ready-to-Ship Items:</strong> Orders are processed within 1-2 business days</li>
               <li><strong>Custom/Made-to-Order Items:</strong> Processing may take 7-15 business days</li>
@@ -24,7 +24,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Delivery Time</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">3. Delivery Time</h2>
             <p className="mb-3">
               Delivery times vary based on your location and product availability:
             </p>
@@ -39,7 +39,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Shipping Charges</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">4. Shipping Charges</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Free Shipping:</strong> On orders above ₹2,000</li>
               <li><strong>Standard Shipping:</strong> ₹100 for orders below ₹2,000</li>
@@ -51,7 +51,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Order Tracking</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">5. Order Tracking</h2>
             <p>
               Once your order is shipped, you will receive a confirmation email with a tracking number. 
               You can track your shipment using:
@@ -64,7 +64,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Packaging</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">6. Packaging</h2>
             <p>
               All jewellery items are carefully packaged in:
             </p>
@@ -77,7 +77,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Delivery Requirements</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">7. Delivery Requirements</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>A signature is required upon delivery for security purposes</li>
               <li>Please ensure someone is available to receive the package</li>
@@ -87,7 +87,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Failed Delivery Attempts</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">8. Failed Delivery Attempts</h2>
             <p>
               If the courier is unable to deliver your package after multiple attempts:
             </p>
@@ -100,7 +100,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Address Changes</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">9. Address Changes</h2>
             <p>
               Once an order is placed, shipping addresses cannot be changed. Please ensure your 
               address is correct before completing your purchase. If you need to change the address, 
@@ -109,7 +109,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Lost or Damaged Shipments</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">10. Lost or Damaged Shipments</h2>
             <p>
               In the rare event that your package is lost or damaged during transit:
             </p>
@@ -122,7 +122,7 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Customs and Duties</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">11. Customs and Duties</h2>
             <p>
               For domestic shipments within India, there are no additional customs or import duties. 
               All applicable taxes are included in the product price.
@@ -130,13 +130,13 @@ export default function ShippingPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">12. Contact for Shipping Queries</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">12. Contact for Shipping Queries</h2>
             <p>
               For any shipping-related questions or issues, please contact:
             </p>
             <div className="mt-2">
-              <p>Email: <a href="mailto:shipping@nandikajewellers.in" className="text-blue-600 hover:underline">shipping@nandikajewellers.in</a></p>
-              <p className="mt-1">Email: <a href="mailto:support@nandikajewellers.in" className="text-blue-600 hover:underline">support@nandikajewellers.in</a></p>
+              <p>Email: <a href="mailto:shipping@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">shipping@nandikajewellers.in</a></p>
+              <p className="mt-1">Email: <a href="mailto:support@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">support@nandikajewellers.in</a></p>
             </div>
           </section>
         </div>

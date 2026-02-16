@@ -120,12 +120,12 @@ const ProductVariantSelector = ({
             {product.variantOptions.map((option, optionIndex) => (
                 <div key={optionIndex} className="space-y-2 sm:space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
-                        <h4 className="text-base sm:text-lg font-medium text-gray-900">
+                        <h4 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100">
                             {option.displayName}
                             {option.required && <span className="text-red-500 ml-1">*</span>}
                         </h4>
                         {selections[option.name] && (
-                            <span className="text-xs sm:text-sm text-gray-600">
+                            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                 Selected: {selections[option.name]}
                             </span>
                         )}
@@ -149,7 +149,7 @@ const ProductVariantSelector = ({
                                                 relative w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 transition-all
                                                 ${isSelected 
                                                     ? 'border-amber-500 shadow-lg scale-110' 
-                                                    : 'border-gray-300 hover:border-gray-400'
+                                                    : 'border-gray-300 dark:border-white/[0.1] hover:border-gray-400 dark:hover:border-white/[0.2]'
                                                 }
                                                 ${!isAvailable ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                                             `}
@@ -187,8 +187,8 @@ const ProductVariantSelector = ({
                                             className={`
                                                 relative px-2 py-2 sm:px-3 sm:py-2 text-center border rounded-md text-sm sm:text-base font-medium transition-all
                                                 ${isSelected 
-                                                    ? 'border-amber-500 bg-amber-50 text-amber-900' 
-                                                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-200' 
+                                                    : 'border-gray-300 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-white/[0.2]'
                                                 }
                                                 ${!isAvailable 
                                                     ? 'opacity-40 cursor-not-allowed line-through' 
@@ -200,7 +200,7 @@ const ProductVariantSelector = ({
                                         >
                                             {value.displayName}
                                             {value.priceAdjustment !== 0 && (
-                                                <span className="block text-xs text-gray-500">
+                                                <span className="block text-xs text-gray-500 dark:text-gray-400">
                                                     {value.priceAdjustment > 0 ? '+' : ''}₹{value.priceAdjustment}
                                                 </span>
                                             )}
@@ -223,8 +223,8 @@ const ProductVariantSelector = ({
                                             className={`
                                                 w-full text-left px-3 py-2.5 sm:px-4 sm:py-3 border rounded-lg transition-all text-sm sm:text-base
                                                 ${isSelected 
-                                                    ? 'border-amber-500 bg-amber-50 text-amber-900' 
-                                                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-200' 
+                                                    : 'border-gray-300 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-white/[0.2]'
                                                 }
                                                 ${!isAvailable 
                                                     ? 'opacity-40 cursor-not-allowed' 
@@ -238,7 +238,7 @@ const ProductVariantSelector = ({
                                                 <span className="font-medium">{value.displayName}</span>
                                                 <div className="flex items-center space-x-2">
                                                     {value.priceAdjustment !== 0 && (
-                                                        <span className="text-xs sm:text-sm text-gray-600">
+                                                        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                                             {value.priceAdjustment > 0 ? '+' : ''}₹{value.priceAdjustment}
                                                         </span>
                                                     )}
@@ -262,14 +262,14 @@ const ProductVariantSelector = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4"
+                        className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-3 sm:p-4"
                     >
                         <div className="flex items-center space-x-2">
                             <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
-                            <p className="text-red-700 font-medium text-sm sm:text-base">Selection Error</p>
+                            <p className="text-red-700 dark:text-red-400 font-medium text-sm sm:text-base">Selection Error</p>
                         </div>
                         {Object.values(errors).map((error, index) => (
-                            <p key={index} className="text-red-600 text-xs sm:text-sm mt-1">{error}</p>
+                            <p key={index} className="text-red-600 dark:text-red-400 text-xs sm:text-sm mt-1">{error}</p>
                         ))}
                     </motion.div>
                 )}
@@ -280,21 +280,21 @@ const ProductVariantSelector = ({
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4"
+                    className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-3 sm:p-4"
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                         <div>
-                            <h5 className="font-medium text-green-900 text-sm sm:text-base">Selected Configuration</h5>
-                            <p className="text-xs sm:text-sm text-green-700">
+                            <h5 className="font-medium text-green-900 dark:text-green-300 text-sm sm:text-base">Selected Configuration</h5>
+                            <p className="text-xs sm:text-sm text-green-700 dark:text-green-400">
                                 SKU: {currentVariant.sku} | Stock: {currentVariant.stock} available
                             </p>
                         </div>
                         <div className="text-left sm:text-right">
-                            <p className="text-lg sm:text-xl font-bold text-green-900">
+                            <p className="text-lg sm:text-xl font-bold text-green-900 dark:text-green-300">
                                 ₹{currentVariant.price?.sellingPrice?.toLocaleString() || product.sellingPrice?.toLocaleString()}
                             </p>
                             {currentVariant.price?.mrp && currentVariant.price.mrp !== currentVariant.price.sellingPrice && (
-                                <p className="text-xs sm:text-sm text-gray-500 line-through">
+                                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
                                     ₹{currentVariant.price.mrp.toLocaleString()}
                                 </p>
                             )}

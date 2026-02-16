@@ -1,9 +1,9 @@
 export default function ContactUs() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Contact Us</h1>
+        <div className="bg-white dark:bg-[#0A0A0A] shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] rounded-lg p-8 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Contact Us</h1>
           <p className="text-gray-700 mb-8">
             We&apos;d love to hear from you! Whether you have a question about our products, pricing, 
             or anything else, our team is ready to answer all your questions.
@@ -23,15 +23,15 @@ export default function ContactUs() {
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
                       <p className="text-gray-600">General Inquiries:</p>
-                      <a href="mailto:info@nandikajewellers.in" className="text-blue-600 hover:underline">
+                      <a href="mailto:info@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">
                         info@nandikajewellers.in
                       </a>
                       <p className="text-gray-600 mt-2">Customer Support:</p>
-                      <a href="mailto:support@nandikajewellers.in" className="text-blue-600 hover:underline">
+                      <a href="mailto:support@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">
                         support@nandikajewellers.in
                       </a>
                       <p className="text-gray-600 mt-2">Orders & Shipping:</p>
-                      <a href="mailto:orders@nandikajewellers.in" className="text-blue-600 hover:underline">
+                      <a href="mailto:orders@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">
                         orders@nandikajewellers.in
                       </a>
                     </div>
@@ -44,7 +44,7 @@ export default function ContactUs() {
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
                       <p className="text-gray-600">Customer Care:</p>
-                      <a href="tel:+911234567890" className="text-blue-600 hover:underline">
+                      <a href="tel:+911234567890" className="text-blue-600 dark:text-blue-400 hover:underline">
                         +91 123-456-7890
                       </a>
                       <p className="text-gray-600 text-sm mt-1">
@@ -73,7 +73,7 @@ export default function ContactUs() {
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Hours</h2>
-                <div className="space-y-2 text-gray-700">
+                <div className="space-y-2 text-gray-700 dark:text-gray-300">
                   <p><span className="font-semibold">Monday - Friday:</span> 10:00 AM - 7:00 PM</p>
                   <p><span className="font-semibold">Saturday:</span> 10:00 AM - 6:00 PM</p>
                   <p><span className="font-semibold">Sunday:</span> Closed</p>
@@ -171,7 +171,7 @@ export default function ContactUs() {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white shadow-lg rounded-lg p-8">
+        <div className="bg-white dark:bg-[#0A0A0A] shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] rounded-lg p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h2>
           <div className="space-y-4">
             <div>
@@ -183,13 +183,13 @@ export default function ContactUs() {
             <div>
               <h3 className="font-semibold text-gray-900">What is your return policy?</h3>
               <p className="text-gray-600 mt-1">
-                We accept returns within 7 days of delivery. Please see our <a href="/policies/refund" className="text-blue-600 hover:underline">Refund Policy</a> for details.
+                We accept returns within 7 days of delivery. Please see our <a href="/policies/refund" className="text-blue-600 dark:text-blue-400 hover:underline">Refund Policy</a> for details.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">Do you offer custom jewellery design?</h3>
               <p className="text-gray-600 mt-1">
-                Yes! Contact us at <a href="mailto:custom@nandikajewellers.in" className="text-blue-600 hover:underline">custom@nandikajewellers.in</a> to discuss your custom design requirements.
+                Yes! Contact us at <a href="mailto:custom@nandikajewellers.in" className="text-blue-600 dark:text-blue-400 hover:underline">custom@nandikajewellers.in</a> to discuss your custom design requirements.
               </p>
             </div>
           </div>

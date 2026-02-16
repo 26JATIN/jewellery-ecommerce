@@ -37,17 +37,21 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                 // Admin user trying to access admin area, redirect to original admin page
                 console.log('Login - Redirecting to admin page:', redirectPath);
                 router.push(redirectPath);
-            } else if (userData.user.isAdmin) {
-                // Admin user, redirect to admin dashboard
+            } else if (userData.user.isAdmin && !redirectPath) {
+                // Admin user with no redirect, go to admin dashboard
                 console.log('Login - Redirecting to admin dashboard');
                 router.push('/admin');
-            } else if (redirectPath && redirectPath.startsWith('/admin')) {
+            } else if (redirectPath && redirectPath.startsWith('/admin') && !userData.user.isAdmin) {
                 // Non-admin user tried to access admin, stay on home page
                 console.log('Login - Non-admin user, redirecting to home');
                 router.push('/');
+            } else if (redirectPath) {
+                // User has a redirect path (checkout, orders, returns, etc.) — go there
+                console.log('Login - Redirecting to:', redirectPath);
+                router.push(redirectPath);
             } else {
-                // Regular user, redirect to home
-                console.log('Login - Regular user, redirecting to home');
+                // No redirect path, go home
+                console.log('Login - No redirect, going home');
                 router.push('/');
             }
         } catch (err) {
@@ -86,18 +90,18 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                                 className="w-full max-w-md"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-8 md:p-10 relative border border-gray-100">
+                                <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-8 md:p-10 relative border border-gray-100 dark:border-white/[0.06]">
                                     {/* Premium accent line */}
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent rounded-full" />
                                     
                                     <div className="flex justify-between items-center mb-8">
                                         <div>
-                                            <h2 className="text-3xl font-light text-[#2C2C2C] tracking-tight">Welcome Back</h2>
-                                            <p className="text-sm text-gray-500 font-light mt-1">Sign in to your account</p>
+                                            <h2 className="text-3xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight">Welcome Back</h2>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 font-light mt-1">Sign in to your account</p>
                                         </div>
                                         <button 
                                             onClick={onClose}
-                                            className="text-gray-400 hover:text-[#2C2C2C] transition-colors p-2 rounded-full hover:bg-gray-100"
+                                            className="text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-100 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -107,13 +111,13 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {error && (
-                                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-light">
+                                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-2xl text-sm font-light">
                                         {error}
                                     </div>
                                 )}
                                 
                                 <div>
-                                    <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                    <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                         Phone Number
                                     </label>
                                     <input
@@ -125,12 +129,12 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                                         placeholder="10-digit mobile number"
                                         pattern="[0-9]{10}"
                                         maxLength="10"
-                                        className="w-full px-6 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                        className="w-full px-6 py-4 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                    <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                         Password
                                     </label>
                                     <input
@@ -140,7 +144,7 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                                         value={formData.password}
                                         onChange={handleChange}
                                         placeholder="••••••••"
-                                        className="w-full px-6 py-4 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                        className="w-full px-6 py-4 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                     />
                                 </div>
 

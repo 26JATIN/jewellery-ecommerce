@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import AdminLayout from '../../components/AdminLayout';
 import { CldImage, CldVideoPlayer } from 'next-cloudinary';
 import 'next-cloudinary/dist/cld-video-player.css';
@@ -61,11 +62,11 @@ function AdminGalleryPage() {
                 await fetchGalleryItems();
                 resetForm();
             } else {
-                alert('Failed to save gallery item');
+                toast.error('Failed to save gallery item');
             }
         } catch (error) {
             console.error('Error saving gallery item:', error);
-            alert('Failed to save gallery item');
+            toast.error('Failed to save gallery item');
         }
     };
 
@@ -96,11 +97,11 @@ function AdminGalleryPage() {
             if (res.ok) {
                 await fetchGalleryItems();
             } else {
-                alert('Failed to delete gallery item');
+                toast.error('Failed to delete gallery item');
             }
         } catch (error) {
             console.error('Error deleting gallery item:', error);
-            alert('Failed to delete gallery item');
+            toast.error('Failed to delete gallery item');
         }
     };
 
@@ -163,10 +164,10 @@ function AdminGalleryPage() {
                     alt: prev.alt || file.name.replace(/\.[^/.]+$/, '') // Filename without extension
                 }));
 
-                alert('✅ Upload successful!');
+                toast.success('Upload successful!');
             } catch (error) {
                 console.error('Upload error:', error);
-                alert('❌ Upload failed: ' + error.message);
+                toast.error('Upload failed: ' + error.message);
             } finally {
                 setUploadingMedia(false);
             }

@@ -45,7 +45,7 @@ export default function CollectionCategories() {
 
     if (loading) {
         return (
-            <section className="py-12 md:py-20 px-4 bg-white">
+            <section className="py-12 md:py-20 px-4 bg-white dark:bg-black">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8 md:mb-12">
                         <div className="h-6 md:h-8 bg-gray-200 rounded-lg w-48 mx-auto mb-4 animate-pulse"></div>
@@ -66,7 +66,7 @@ export default function CollectionCategories() {
     }
 
     return (
-        <section className="py-12 md:py-20 px-4 bg-white">
+        <section className="py-12 md:py-20 px-4 bg-white dark:bg-black">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8 md:mb-12">
@@ -93,7 +93,7 @@ export default function CollectionCategories() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         viewport={{ once: true }}
-                        className="text-sm md:text-base text-gray-600 font-light max-w-2xl mx-auto px-4"
+                        className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto px-4"
                     >
                         Discover our curated jewelry collections, each crafted with precision and passion
                     </motion.p>
@@ -111,7 +111,7 @@ export default function CollectionCategories() {
                             className="group cursor-pointer"
                             onClick={() => handleCategoryClick(category.slug)}
                         >
-                            <div className="relative overflow-hidden bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 group-hover:-translate-y-2">
+                            <div className="relative overflow-hidden bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none dark:border dark:border-white/[0.06] transition-all duration-500 group-hover:-translate-y-2">
                                 {/* Category Image */}
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
                                     <CldImage

@@ -69,7 +69,7 @@ export const InfiniteMovingCards = ({
         )}>
         {items.map((item, idx) => (
           <li
-            className="relative w-[280px] sm:w-[320px] md:w-[380px] lg:w-[420px] max-w-full shrink-0 rounded-3xl border border-gray-100 bg-white px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 group hover:border-[#D4AF76]/30 transition-all duration-500 shadow-lg hover:shadow-2xl"
+            className="relative w-[280px] sm:w-[320px] md:w-[380px] lg:w-[420px] max-w-full shrink-0 rounded-3xl border border-gray-100 dark:border-white/[0.06] bg-white dark:bg-[#0A0A0A] px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 group hover:border-[#D4AF76]/30 transition-all duration-500 shadow-lg hover:shadow-2xl"
             key={`${item.name}-${idx}`}>
             <div className="relative">
               {/* Quote Icon */}
@@ -83,7 +83,7 @@ export const InfiniteMovingCards = ({
 
               <blockquote>
                 {/* Quote Text */}
-                <p className="relative z-20 text-gray-700 font-light leading-relaxed text-sm sm:text-base md:text-lg mb-3 sm:mb-4 md:mb-6">
+                <p className="relative z-20 text-gray-700 dark:text-gray-300 font-light leading-relaxed text-sm sm:text-base md:text-lg mb-3 sm:mb-4 md:mb-6">
                   "{item.quote}"
                 </p>
 
@@ -104,10 +104,10 @@ export const InfiniteMovingCards = ({
                     {item.image}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="block font-light text-[#2C2C2C] text-sm sm:text-base md:text-lg group-hover:text-[#D4AF76] transition-colors truncate">
+                    <span className="block font-light text-[#2C2C2C] dark:text-gray-100 text-sm sm:text-base md:text-lg group-hover:text-[#D4AF76] transition-colors truncate">
                       {item.name}
                     </span>
-                    <span className="block text-xs sm:text-xs md:text-sm text-gray-600 font-light mb-0.5 sm:mb-1 truncate">
+                    <span className="block text-xs sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 font-light mb-0.5 sm:mb-1 truncate">
                       {item.title}
                     </span>
                     {item.purchase && (

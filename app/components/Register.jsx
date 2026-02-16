@@ -92,18 +92,18 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                 className="w-full max-w-md"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-8 md:p-10 relative border border-gray-100">
+                                <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-8 md:p-10 relative border border-gray-100 dark:border-white/[0.06]">
                                     {/* Premium accent line */}
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent rounded-full" />
                                     
                                     <div className="flex justify-between items-center mb-8">
                                         <div>
-                                            <h2 className="text-3xl font-light text-[#2C2C2C] tracking-tight">Create Account</h2>
-                                            <p className="text-sm text-gray-500 font-light mt-1">Join our exclusive collection</p>
+                                            <h2 className="text-3xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight">Create Account</h2>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 font-light mt-1">Join our exclusive collection</p>
                                         </div>
                                         <button 
                                             onClick={onClose}
-                                            className="text-gray-400 hover:text-[#2C2C2C] transition-colors p-2 rounded-full hover:bg-gray-100"
+                                            className="text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-100 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -117,24 +117,24 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="text-center py-12"
                                 >
-                                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
-                                    <p className="text-green-600 font-light text-lg">Registration successful!</p>
-                                    <p className="text-gray-500 text-sm mt-2 font-light">Redirecting...</p>
+                                    <p className="text-green-600 dark:text-green-400 font-light text-lg">Registration successful!</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 font-light">Redirecting...</p>
                                 </motion.div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-5">
                                     {error && (
-                                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-light">
+                                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-2xl text-sm font-light">
                                             {error}
                                         </div>
                                     )}
                                     
                                     <div>
-                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                        <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                             Full Name
                                         </label>
                                         <input
@@ -144,12 +144,12 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             value={formData.name}
                                             onChange={handleChange}
                                             placeholder="John Doe"
-                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                        <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                             Phone Number
                                         </label>
                                         <input
@@ -161,12 +161,12 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             placeholder="10-digit mobile number"
                                             pattern="[0-9]{10}"
                                             maxLength="10"
-                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                        <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                             Email Address (Optional)
                                         </label>
                                         <input
@@ -175,12 +175,12 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             value={formData.email}
                                             onChange={handleChange}
                                             placeholder="you@example.com (for order updates)"
-                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                        <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                             Password
                                         </label>
                                         <input
@@ -190,12 +190,12 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             value={formData.password}
                                             onChange={handleChange}
                                             placeholder="••••••••"
-                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-[#2C2C2C] text-sm font-light mb-2">
+                                        <label className="block text-[#2C2C2C] dark:text-gray-200 text-sm font-light mb-2">
                                             Confirm Password
                                         </label>
                                         <input
@@ -205,7 +205,7 @@ export default function Register({ isOpen, onClose, onLoginClick }) {
                                             value={formData.confirmPassword}
                                             onChange={handleChange}
                                             placeholder="••••••••"
-                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white outline-none transition-all font-light placeholder-gray-400"
+                                            className="w-full px-6 py-3.5 bg-[#FAFAFA] dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#D4AF76] focus:border-[#D4AF76] focus:bg-white dark:focus:bg-white/[0.1] outline-none transition-all font-light placeholder-gray-400 dark:placeholder-gray-500 dark:text-gray-100"
                                         />
                                     </div>
 

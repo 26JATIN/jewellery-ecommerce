@@ -153,7 +153,7 @@ export default function Collections() {
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] mb-4 tracking-tight">
                             {searchTerm ? 'Product Search' : 'Our Collections'}
                         </h1>
-                        <p className="text-gray-600 font-light max-w-2xl mx-auto">
+                        <p className="text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
                             {searchTerm 
                                 ? `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`
                                 : 'Discover our curated selection of jewelry collections, each crafted with precision and passion'
@@ -165,9 +165,9 @@ export default function Collections() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.3, delay: 0.2 }}
-                                className="mt-6 inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-sm"
+                                className="mt-6 inline-flex items-center gap-3 bg-white dark:bg-[#0A0A0A] dark:border dark:border-white/[0.06] px-6 py-3 rounded-full shadow-sm"
                             >
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
                                     Searching for "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
                                 </span>
                                 <button 
@@ -190,7 +190,7 @@ export default function Collections() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
-                        className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                        className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0A0A0A] rounded-2xl p-4 shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06]"
                     >
                         {/* Results Count */}
                         <div className="flex items-center gap-2">
@@ -222,14 +222,14 @@ export default function Collections() {
                             </div>
 
                             {/* View Toggle - Mobile and Desktop */}
-                            <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1">
+                            <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/[0.06] rounded-xl p-1">
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all ${
                                         viewMode === 'list' 
-                                            ? 'bg-white shadow-sm text-[#D4AF76]' 
-                                            : 'text-gray-400 hover:text-[#2C2C2C]'
+                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]' 
+                                            : 'text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-200'
                                     }`}
                                     title="List View"
                                 >
@@ -242,8 +242,8 @@ export default function Collections() {
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all ${
                                         viewMode === 'grid' 
-                                            ? 'bg-white shadow-sm text-[#D4AF76]' 
-                                            : 'text-gray-400 hover:text-[#2C2C2C]'
+                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]' 
+                                            : 'text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-200'
                                     }`}
                                     title="Grid View"
                                 >
@@ -267,7 +267,7 @@ export default function Collections() {
                             <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#D4AF76]/20"></div>
                             <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-[#D4AF76] absolute top-0 left-0"></div>
                         </div>
-                        <p className="mt-6 text-gray-600 font-light">
+                        <p className="mt-6 text-gray-600 dark:text-gray-400 font-light">
                             {searchTerm ? 'Searching products...' : 'Loading collections...'}
                         </p>
                     </motion.div>
@@ -287,8 +287,8 @@ export default function Collections() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-2xl font-light text-gray-900 mb-3">Something went wrong</h3>
-                            <p className="text-gray-600 font-light mb-6">{error}</p>
+                            <h3 className="text-2xl font-light text-gray-900 dark:text-gray-100 mb-3">Something went wrong</h3>
+                            <p className="text-gray-600 dark:text-gray-400 font-light mb-6">{error}</p>
                             <motion.button 
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -320,8 +320,8 @@ export default function Collections() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                                 </svg>
                                             </div>
-                                            <h3 className="text-2xl font-light text-gray-900 mb-3">No products found</h3>
-                                            <p className="text-gray-600 font-light mb-6">
+                                            <h3 className="text-2xl font-light text-gray-900 dark:text-gray-100 mb-3">No products found</h3>
+                                            <p className="text-gray-600 dark:text-gray-400 font-light mb-6">
                                                 We couldn't find any products matching "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
                                             </p>
                                             <button 
@@ -345,7 +345,7 @@ export default function Collections() {
                                                     transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
                                                 >
                                                     <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
                                                             <div className="flex gap-3 md:gap-4 p-3 md:p-4">
                                                                 {/* Product Image */}
                                                                 <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
@@ -415,7 +415,7 @@ export default function Collections() {
                                                     transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
                                                 >
                                                     <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
                                                             {/* Product Image */}
                                                             <div className="aspect-square overflow-hidden relative">
                                                                 <SafeImage
@@ -480,7 +480,7 @@ export default function Collections() {
                                                     transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
                                                 >
                                                     <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1">
+                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1">
                                                             <div className="flex gap-6 p-6">
                                                                 {/* Product Image */}
                                                                 <div className="w-64 flex-shrink-0">
@@ -519,13 +519,13 @@ export default function Collections() {
                                                                             </div>
                                                                         </div>
                                                                         
-                                                                        <p className="text-gray-600 text-sm font-light leading-relaxed mb-4 line-clamp-2">
+                                                                        <p className="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mb-4 line-clamp-2">
                                                                             {product.description}
                                                                         </p>
                                                                         
                                                                         {/* Specifications if available */}
                                                                         {(product.metal || product.purity || product.weight) && (
-                                                                            <div className="flex gap-4 mb-4 text-xs text-gray-500">
+                                                                            <div className="flex gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
                                                                                 {product.metal && (
                                                                                     <span className="flex items-center gap-1">
                                                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -588,7 +588,7 @@ export default function Collections() {
                                                         transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
                                                     >
                                                         <Link href={`/products/${product._id}`} className="block group">
-                                                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
+                                                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
                                                                 {/* Product Image */}
                                                                 <div className="aspect-square overflow-hidden relative">
                                                                     <SafeImage
@@ -650,11 +650,11 @@ export default function Collections() {
                                             transition={{ duration: 0.5, delay: 0.3 }}
                                             className="text-center mt-12"
                                         >
-                                            <div className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-sm">
+                                            <div className="inline-flex items-center gap-2 bg-white dark:bg-[#0A0A0A] dark:border dark:border-white/[0.06] px-6 py-3 rounded-full shadow-sm">
                                                 <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
-                                                <p className="text-sm text-gray-700 font-light">
+                                                <p className="text-sm text-gray-700 dark:text-gray-300 font-light">
                                                     Showing <span className="font-medium text-[#D4AF76]">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'product' : 'products'}
                                                 </p>
                                             </div>
@@ -678,8 +678,8 @@ export default function Collections() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                 </svg>
                                             </div>
-                                            <h3 className="text-2xl font-light text-gray-900 mb-3">No collections yet</h3>
-                                            <p className="text-gray-600 font-light">
+                                            <h3 className="text-2xl font-light text-gray-900 dark:text-gray-100 mb-3">No collections yet</h3>
+                                            <p className="text-gray-600 dark:text-gray-400 font-light">
                                                 Our beautiful jewelry collections will appear here soon
                                             </p>
                                         </div>
@@ -751,11 +751,11 @@ export default function Collections() {
                                             transition={{ duration: 0.5, delay: 0.3 }}
                                             className="text-center mt-12"
                                         >
-                                            <div className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-sm">
+                                            <div className="inline-flex items-center gap-2 bg-white dark:bg-[#0A0A0A] dark:border dark:border-white/[0.06] px-6 py-3 rounded-full shadow-sm">
                                                 <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
-                                                <p className="text-sm text-gray-700 font-light">
+                                                <p className="text-sm text-gray-700 dark:text-gray-300 font-light">
                                                     Showing <span className="font-medium text-[#D4AF76]">{categories.length}</span> {categories.length === 1 ? 'collection' : 'collections'}
                                                 </p>
                                             </div>

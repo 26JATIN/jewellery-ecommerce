@@ -67,7 +67,7 @@ export default function ImageCarousel({
     if (imageArray.length === 0) {
         return (
             <div className={`w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-inner ${className}`}>
-                <div className="text-center text-gray-500">
+                <div className="text-center text-gray-500 dark:text-gray-400">
                     <svg className="mx-auto h-16 w-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -143,7 +143,7 @@ export default function ImageCarousel({
                                 e.stopPropagation();
                                 goToPrevious();
                             }}
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white/95 hover:bg-[#D4AF76] hover:text-white text-[#2C2C2C] rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm z-10"
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white/95 dark:bg-[#0A0A0A]/95 hover:bg-[#D4AF76] hover:text-white text-[#2C2C2C] dark:text-gray-100 rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm z-10"
                             aria-label="Previous image"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +158,7 @@ export default function ImageCarousel({
                                 e.stopPropagation();
                                 goToNext();
                             }}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white/95 hover:bg-[#D4AF76] hover:text-white text-[#2C2C2C] rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm z-10"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white/95 dark:bg-[#0A0A0A]/95 hover:bg-[#D4AF76] hover:text-white text-[#2C2C2C] dark:text-gray-100 rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm z-10"
                             aria-label="Next image"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

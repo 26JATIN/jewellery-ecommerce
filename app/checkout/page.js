@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/app/context/CartContext';
+import { useRequireAuth } from '@/app/hooks/useRequireAuth';
 import CouponCode from '@/app/components/CouponCode';
 import { 
     MapPin, 
@@ -36,6 +37,7 @@ const loadRazorpayScript = () => {
 export default function CheckoutPage() {
     const router = useRouter();
     const { cartItems, clearCart } = useCart();
+    const { isAuthed, isChecking } = useRequireAuth({ message: 'Please sign in to proceed to checkout' });
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressForm, setShowAddressForm] = useState(false);
@@ -357,16 +359,20 @@ export default function CheckoutPage() {
         return data.order;
     };
 
-    if (loading) {
+    if (isChecking || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#D4AF76]" />
             </div>
         );
     }
 
+    if (!isAuthed) {
+        return null; // Will redirect via hook
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] py-12 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-12">
+        <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] py-12 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-12">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -375,7 +381,7 @@ export default function CheckoutPage() {
                     className="mb-8"
                 >
                     <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#8B6B4C] to-[#D4AF76] bg-clip-text text-transparent mb-2">Checkout</h1>
-                    <p className="text-gray-600">Complete your order</p>
+                    <p className="text-gray-600 dark:text-gray-400">Complete your order</p>
                 </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
@@ -385,10 +391,10 @@ export default function CheckoutPage() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-2xl shadow-lg p-6"
+                            className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] p-6"
                         >
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                     <MapPin className="w-6 h-6 text-[#D4AF76]" />
                                     Delivery Address
                                 </h2>
@@ -409,7 +415,7 @@ export default function CheckoutPage() {
                                         animate={{ opacity: 1, height: 'auto' }}
                                         exit={{ opacity: 0, height: 0 }}
                                         onSubmit={handleAddAddress}
-                                        className="mb-6 space-y-4 p-4 bg-[#F5E6D3] rounded-lg"
+                                        className="mb-6 space-y-4 p-4 bg-[#F5E6D3] dark:bg-[#D4AF76]/10 rounded-lg"
                                     >
                                         <div className="grid sm:grid-cols-2 gap-4">
                                             <input
@@ -419,7 +425,7 @@ export default function CheckoutPage() {
                                                 value={formData.fullName}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                             <input
                                                 type="tel"
@@ -429,7 +435,7 @@ export default function CheckoutPage() {
                                                 onChange={handleInputChange}
                                                 required
                                                 pattern="[0-9]{10}"
-                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                         </div>
                                         <input
@@ -438,7 +444,7 @@ export default function CheckoutPage() {
                                             placeholder="Email Address (for order updates)"
                                             value={formData.email}
                                             onChange={handleInputChange}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                         />
                                         <input
                                             type="text"
@@ -447,7 +453,7 @@ export default function CheckoutPage() {
                                             value={formData.addressLine1}
                                             onChange={handleInputChange}
                                             required
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                         />
                                         <input
                                             type="text"
@@ -455,7 +461,7 @@ export default function CheckoutPage() {
                                             placeholder="Address Line 2 (Optional)"
                                             value={formData.addressLine2}
                                             onChange={handleInputChange}
-                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                         />
                                         <div className="grid sm:grid-cols-3 gap-4">
                                             <input
@@ -465,7 +471,7 @@ export default function CheckoutPage() {
                                                 value={formData.city}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                             <input
                                                 type="text"
@@ -474,7 +480,7 @@ export default function CheckoutPage() {
                                                 value={formData.state}
                                                 onChange={handleInputChange}
                                                 required
-                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                             <input
                                                 type="text"
@@ -484,7 +490,7 @@ export default function CheckoutPage() {
                                                 onChange={handleInputChange}
                                                 required
                                                 pattern="[0-9]{6}"
-                                                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
+                                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:ring-2 focus:ring-[#D4AF76] focus:border-transparent"
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 cursor-pointer">
@@ -495,7 +501,7 @@ export default function CheckoutPage() {
                                                 onChange={handleInputChange}
                                                 className="w-4 h-4 text-[#D4AF76] rounded focus:ring-[#D4AF76]"
                                             />
-                                            <span className="text-sm text-gray-700">Set as default address</span>
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">Set as default address</span>
                                         </label>
                                         <div className="flex gap-3">
                                             <button
@@ -507,7 +513,7 @@ export default function CheckoutPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowAddressForm(false)}
-                                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                                className="px-6 py-2 bg-gray-200 dark:bg-white/[0.1] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-white/[0.15] transition"
                                             >
                                                 Cancel
                                             </button>
@@ -519,7 +525,7 @@ export default function CheckoutPage() {
                             {/* Saved Addresses */}
                             <div className="space-y-3">
                                 {addresses.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
+                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                         <Home className="w-12 h-12 mx-auto mb-3 opacity-50" />
                                         <p>No saved addresses. Add one to continue.</p>
                                     </div>
@@ -531,8 +537,8 @@ export default function CheckoutPage() {
                                             onClick={() => setSelectedAddress(address._id)}
                                             className={`p-4 rounded-lg border-2 cursor-pointer transition ${
                                                 selectedAddress === address._id
-                                                    ? 'border-[#D4AF76] bg-[#F5E6D3]'
-                                                    : 'border-gray-200 hover:border-[#E5C89F]'
+                                                    ? 'border-[#D4AF76] bg-[#F5E6D3] dark:bg-[#D4AF76]/10'
+                                                    : 'border-gray-200 dark:border-white/[0.06] hover:border-[#E5C89F]'
                                             }`}
                                         >
                                             <div className="flex items-start justify-between">
@@ -540,7 +546,7 @@ export default function CheckoutPage() {
                                                     <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                                                         selectedAddress === address._id
                                                             ? 'border-[#D4AF76] bg-[#D4AF76]'
-                                                            : 'border-gray-300'
+                                                            : 'border-gray-300 dark:border-white/[0.1]'
                                                     }`}>
                                                         {selectedAddress === address._id && (
                                                             <Check className="w-3 h-3 text-white" />
@@ -548,22 +554,22 @@ export default function CheckoutPage() {
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <h3 className="font-semibold text-gray-900">{address.fullName}</h3>
+                                                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{address.fullName}</h3>
                                                             {address.isDefault && (
-                                                                <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">
+                                                                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs rounded-full">
                                                                     Default
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <p className="text-sm text-gray-600">{address.phone}</p>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">{address.phone}</p>
                                                         {address.email && (
-                                                            <p className="text-sm text-gray-600">{address.email}</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">{address.email}</p>
                                                         )}
-                                                        <p className="text-sm text-gray-700 mt-2">
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
                                                             {address.addressLine1}
                                                             {address.addressLine2 && `, ${address.addressLine2}`}
                                                         </p>
-                                                        <p className="text-sm text-gray-700">
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300">
                                                             {address.city}, {address.state} - {address.pincode}
                                                         </p>
                                                     </div>
@@ -573,7 +579,7 @@ export default function CheckoutPage() {
                                                         e.stopPropagation();
                                                         handleDeleteAddress(address._id);
                                                     }}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -589,9 +595,9 @@ export default function CheckoutPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="bg-white rounded-2xl shadow-lg p-6"
+                            className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] p-6"
                         >
-                            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                                 <CreditCard className="w-5 h-5 text-[#D4AF76]" />
                                 Payment Method
                             </h2>
@@ -602,23 +608,23 @@ export default function CheckoutPage() {
                                     onClick={() => setPaymentMethod('cod')}
                                     className={`p-4 rounded-lg border-2 cursor-pointer transition ${
                                         paymentMethod === 'cod'
-                                            ? 'border-[#D4AF76] bg-[#F5E6D3]'
-                                            : 'border-gray-200 hover:border-[#E5C89F]'
+                                            ? 'border-[#D4AF76] bg-[#F5E6D3] dark:bg-[#D4AF76]/10'
+                                            : 'border-gray-200 dark:border-white/[0.06] hover:border-[#E5C89F]'
                                     }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                                             paymentMethod === 'cod'
                                                 ? 'border-[#D4AF76] bg-[#D4AF76]'
-                                                : 'border-gray-300'
+                                                : 'border-gray-300 dark:border-white/[0.1]'
                                         }`}>
                                             {paymentMethod === 'cod' && (
                                                 <Check className="w-3 h-3 text-white" />
                                             )}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-gray-900">Cash on Delivery</h3>
-                                            <p className="text-sm text-gray-600">Pay when you receive your order</p>
+                                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Cash on Delivery</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">Pay when you receive your order</p>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -629,28 +635,28 @@ export default function CheckoutPage() {
                                     onClick={() => setPaymentMethod('online')}
                                     className={`p-4 rounded-lg border-2 cursor-pointer transition ${
                                         paymentMethod === 'online'
-                                            ? 'border-[#D4AF76] bg-[#F5E6D3]'
-                                            : 'border-gray-200 hover:border-[#E5C89F]'
+                                            ? 'border-[#D4AF76] bg-[#F5E6D3] dark:bg-[#D4AF76]/10'
+                                            : 'border-gray-200 dark:border-white/[0.06] hover:border-[#E5C89F]'
                                     }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                                             paymentMethod === 'online'
                                                 ? 'border-[#D4AF76] bg-[#D4AF76]'
-                                                : 'border-gray-300'
+                                                : 'border-gray-300 dark:border-white/[0.1]'
                                         }`}>
                                             {paymentMethod === 'online' && (
                                                 <Check className="w-3 h-3 text-white" />
                                             )}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                 Online Payment
-                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                                                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
                                                     Secure
                                                 </span>
                                             </h3>
-                                            <p className="text-sm text-gray-600">Pay securely using UPI, Card, or Net Banking</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">Pay securely using UPI, Card, or Net Banking</p>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -662,9 +668,9 @@ export default function CheckoutPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 }}
-                            className="bg-white rounded-2xl shadow-lg p-6"
+                            className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] p-6"
                         >
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">Order Notes (Optional)</h2>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Order Notes (Optional)</h2>
                             <textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
@@ -681,9 +687,9 @@ export default function CheckoutPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="bg-white rounded-2xl shadow-lg p-6 sticky top-6"
+                            className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] p-6 sticky top-6"
                         >
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                                 <ShoppingBag className="w-6 h-6 text-[#D4AF76]" />
                                 Order Summary
                             </h2>
@@ -691,22 +697,22 @@ export default function CheckoutPage() {
                             {/* Cart Items */}
                             <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                                 {cartItems && cartItems.map((item) => (
-                                    <div key={item._id} className="flex gap-3 pb-4 border-b border-gray-200">
+                                    <div key={item._id} className="flex gap-3 pb-4 border-b border-gray-200 dark:border-white/[0.06]">
                                         <img
                                             src={item.selectedVariant?.images?.[0]?.url || item.image || item.product?.images?.[0] || '/placeholder.png'}
                                             alt={item.product?.name || item.name || 'Product'}
                                             className="w-16 h-16 object-cover rounded-lg"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-medium text-gray-900 text-sm truncate">
+                                            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
                                                 {item.product?.name || item.name || 'Product'}
                                             </h3>
                                             {item.selectedVariant && (
-                                                <p className="text-xs text-gray-600">
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                                     {item.selectedVariant.sku && `SKU: ${item.selectedVariant.sku}`}
                                                 </p>
                                             )}
-                                            <p className="text-sm text-gray-700 mt-1">
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                                                 ₹{(item.selectedVariant?.price?.sellingPrice || item.price || item.product?.price || 0).toLocaleString()} × {item.quantity}
                                             </p>
                                         </div>
@@ -715,8 +721,8 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* Total */}
-                            <div className="space-y-3 mb-6 pt-4 border-t-2 border-gray-200">
-                                <div className="flex justify-between text-gray-700">
+                            <div className="space-y-3 mb-6 pt-4 border-t-2 border-gray-200 dark:border-white/[0.06]">
+                                <div className="flex justify-between text-gray-700 dark:text-gray-300">
                                     <span>Subtotal</span>
                                     <span>₹{calculateSubtotal().toLocaleString()}</span>
                                 </div>
@@ -729,11 +735,11 @@ export default function CheckoutPage() {
                                         <span>-₹{appliedCoupon.discountAmount.toLocaleString()}</span>
                                     </div>
                                 )}
-                                <div className="flex justify-between text-gray-700">
+                                <div className="flex justify-between text-gray-700 dark:text-gray-300">
                                     <span>Shipping</span>
                                     <span className="text-green-600">FREE</span>
                                 </div>
-                                <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
+                                <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-gray-100 pt-3 border-t border-gray-200 dark:border-white/[0.06]">
                                     <span>Total</span>
                                     <span className="text-[#D4AF76]">₹{calculateTotal().toLocaleString()}</span>
                                 </div>
@@ -780,7 +786,7 @@ export default function CheckoutPage() {
                                 )}
                             </button>
 
-                            <p className="text-xs text-gray-500 text-center mt-4">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
                                 By placing your order, you agree to our terms and conditions
                             </p>
                         </motion.div>

@@ -35,11 +35,11 @@ export default function PoliciesIndex() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Policies & Information</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Policies & Information</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Everything you need to know about shopping with Nandika Jewellers, 
             from privacy to shipping and returns.
           </p>
@@ -50,13 +50,13 @@ export default function PoliciesIndex() {
             <Link
               key={policy.href}
               href={policy.href}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 group"
+              className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-md hover:shadow-lg dark:shadow-none transition-shadow duration-200 p-6 dark:border dark:border-white/[0.06] group"
             >
               <div className="text-4xl mb-4">{policy.icon}</div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-600 transition-colors">
                 {policy.title}
               </h2>
-              <p className="text-gray-600">{policy.description}</p>
+              <p className="text-gray-600 dark:text-gray-400">{policy.description}</p>
               <div className="mt-4 text-blue-600 font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
                 Read More
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,12 +68,12 @@ export default function PoliciesIndex() {
         </div>
 
         {/* Quick Links Section */}
-        <div className="mt-16 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Quick Links</h2>
+        <div className="mt-16 bg-white dark:bg-[#0A0A0A] rounded-lg shadow-md dark:shadow-none p-8 dark:border dark:border-white/[0.06]">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Quick Links</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Customer Service</h3>
-              <ul className="space-y-2 text-gray-600">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Customer Service</h3>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                 <li>
                   <a href="mailto:support@nandikajewellers.in" className="hover:text-blue-600">
                     Email: support@nandikajewellers.in
@@ -84,13 +84,13 @@ export default function PoliciesIndex() {
                     Phone: +91 123-456-7890
                   </a>
                 </li>
-                <li className="text-sm text-gray-500">
+                <li className="text-sm text-gray-500 dark:text-gray-400">
                   Monday - Saturday: 10:00 AM - 7:00 PM IST
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Important Information</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Important Information</h3>
               <ul className="space-y-2">
                 <li>
                   <Link href="/policies/refund" className="text-gray-600 hover:text-blue-600">

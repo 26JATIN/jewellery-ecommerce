@@ -1,6 +1,5 @@
 "use client";
 import { Suspense } from 'react';
-import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Benefits from './components/Benefits';
 import Testimonials from './components/Testimonials';
@@ -24,9 +23,8 @@ export default function Home() {
   return (
     <main className="min-h-screen relative overflow-x-hidden">
       {/* Gradient Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-white via-[#FEFEFE] to-[#F8F6F3] -z-10" />
+      <div className="fixed inset-0 bg-gradient-to-br from-white via-[#FEFEFE] to-[#F8F6F3] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] -z-10" />
 
-      <Navbar />
       <Suspense fallback={null}>
         <LoginModalHandler />
       </Suspense>

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import AdminLayout from '../../components/AdminLayout';
-
+import { toast } from 'sonner';
 // Dynamically import components to prevent hydration issues
 const ProductForm = dynamic(() => import('../../components/admin/ProductForm'), {
     ssr: false,
@@ -189,11 +189,11 @@ function AdminProductsPage() {
             if (res.ok) {
                 setProducts(products.filter(p => p._id !== productId));
             } else {
-                alert('Failed to delete product');
+                toast.error('Failed to delete product');
             }
         } catch (error) {
             console.error('Delete error:', error);
-            alert('Failed to delete product');
+            toast.error('Failed to delete product');
         }
     };
 
@@ -245,11 +245,11 @@ function AdminProductsPage() {
             } else {
                 const error = await res.json();
                 console.error('API Error:', error);
-                alert(error.error || 'Failed to save product');
+                toast.error(error.error || 'Failed to save product');
             }
         } catch (error) {
             console.error('Save error:', error);
-            alert('Failed to save product');
+            toast.error('Failed to save product');
         }
     };
 

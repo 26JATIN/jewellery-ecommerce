@@ -162,7 +162,7 @@ function CollectionContent({ params }) {
     const currentSubcategories = selectedCategory ? getSubcategoriesForCategory(selectedCategory) : [];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white">
+        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]">
             {/* Mobile Filter Button */}
             <motion.button
                 initial={{ opacity: 0, x: -20 }}
@@ -195,7 +195,7 @@ function CollectionContent({ params }) {
                                 animate={{ x: 0 }}
                                 exit={{ x: -300 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="fixed lg:sticky top-0 left-0 h-screen w-80 bg-white border-r border-gray-100 overflow-y-auto z-50 lg:z-0 shadow-2xl lg:shadow-none"
+                                className="fixed lg:sticky top-0 left-0 h-screen w-80 bg-white dark:bg-[#0A0A0A] border-r border-gray-100 dark:border-white/[0.06] overflow-y-auto z-50 lg:z-0 shadow-2xl lg:shadow-none"
                             >
                                 {/* Close Button (Mobile) */}
                                 <button
@@ -221,7 +221,7 @@ function CollectionContent({ params }) {
 
                                     {/* Categories */}
                                     <div className="mb-8">
-                                        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+                                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
                                             Categories
                                         </h3>
                                         <div className="space-y-1">
@@ -231,7 +231,7 @@ function CollectionContent({ params }) {
                                                 className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 ${
                                                     selectedCategory === 'All' || !selectedCategory
                                                         ? 'bg-gradient-to-r from-[#D4AF76] to-[#C19A6B] text-white shadow-md'
-                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
                                                 }`}
                                             >
                                                 <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ function CollectionContent({ params }) {
                                                     className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 ${
                                                         selectedCategory === category.name
                                                             ? 'bg-gradient-to-r from-[#D4AF76] to-[#C19A6B] text-white shadow-md'
-                                                            : 'text-gray-700 hover:bg-gray-50'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
                                                     }`}
                                                 >
                                                     <div className="flex items-center justify-between">
@@ -279,9 +279,9 @@ function CollectionContent({ params }) {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.3 }}
-                                            className="mb-8 p-4 bg-gradient-to-br from-[#FAFAFA] to-white rounded-xl border border-gray-100"
+                                            className="mb-8 p-4 bg-gradient-to-br from-[#FAFAFA] to-white dark:from-[#0A0A0A] dark:to-[#111] rounded-xl border border-gray-100 dark:border-white/[0.06]"
                                         >
-                                            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                                                 <span className="w-1 h-4 bg-[#D4AF76] rounded-full"></span>
                                                 {selectedCategory} Styles
                                             </h3>
@@ -293,7 +293,7 @@ function CollectionContent({ params }) {
                                                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-300 ${
                                                         selectedSubcategory === 'All' || !selectedSubcategory
                                                             ? 'bg-[#D4AF76] text-white shadow-sm'
-                                                            : 'text-gray-600 hover:bg-white hover:shadow-sm'
+                                                            : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-white/[0.06] hover:shadow-sm'
                                                     }`}
                                                 >
                                                     All {selectedCategory}
@@ -308,7 +308,7 @@ function CollectionContent({ params }) {
                                                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-300 ${
                                                             selectedSubcategory === sub._id
                                                                 ? 'bg-[#D4AF76] text-white shadow-sm'
-                                                                : 'text-gray-600 hover:bg-white hover:shadow-sm'
+                                                                : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-white/[0.06] hover:shadow-sm'
                                                         }`}
                                                     >
                                                         {sub.name}
@@ -320,7 +320,7 @@ function CollectionContent({ params }) {
 
                                     {/* Tags Filter */}
                                     <div className="mb-8">
-                                        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+                                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
                                             Target Audience
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
@@ -339,7 +339,7 @@ function CollectionContent({ params }) {
                                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                                                         selectedTags.includes(tag)
                                                             ? 'bg-[#2C2C2C] text-white shadow-md'
-                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                            : 'bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/[0.12]'
                                                     }`}
                                                 >
                                                     {tag}
@@ -361,7 +361,7 @@ function CollectionContent({ params }) {
                                                 setSelectedTags([]);
                                                 router.replace(window.location.pathname);
                                             }}
-                                            className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                                            className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.08] hover:bg-gray-200 dark:hover:bg-white/[0.12] text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
                                         >
                                             <X className="w-4 h-4" />
                                             Clear All Filters
@@ -378,7 +378,7 @@ function CollectionContent({ params }) {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                         {/* Breadcrumb & Header */}
                         <div className="mb-8">
-                            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                            <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                                 <Link href="/" className="hover:text-[#D4AF76] transition-colors">Home</Link>
                                 <ChevronRight className="w-4 h-4" />
                                 <Link href="/products" className="hover:text-[#D4AF76] transition-colors">Collections</Link>
@@ -396,7 +396,7 @@ function CollectionContent({ params }) {
                                         {selectedCategory && selectedCategory !== 'All' ? selectedCategory : 'All Collections'}
                                     </h1>
                                     {currentCategory?.description && (
-                                        <p className="text-gray-600 font-light max-w-2xl">
+                                        <p className="text-gray-600 dark:text-gray-400 font-light max-w-2xl">
                                             {currentCategory.description}
                                         </p>
                                     )}
@@ -407,7 +407,7 @@ function CollectionContent({ params }) {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm font-medium text-[#2C2C2C] hover:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 focus:border-[#D4AF76] transition-all cursor-pointer shadow-sm"
+                                        className="appearance-none bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] rounded-xl px-4 py-3 pr-10 text-sm font-medium text-[#2C2C2C] hover:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 focus:border-[#D4AF76] transition-all cursor-pointer shadow-sm"
                                     >
                                         <option value="featured">Featured</option>
                                         <option value="newest">Newest</option>
@@ -432,7 +432,7 @@ function CollectionContent({ params }) {
                                     </span>
                                 )}
                                 {selectedTags.map((tag) => (
-                                    <span key={tag} className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                                    <span key={tag} className="inline-flex items-center gap-2 bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full text-sm font-medium">
                                         {tag}
                                         <button
                                             onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
@@ -447,7 +447,7 @@ function CollectionContent({ params }) {
 
                         {/* Products Count */}
                         <div className="flex items-center gap-2 mb-6">
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
                                 {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
                             </span>
                         </div>
@@ -470,8 +470,8 @@ function CollectionContent({ params }) {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-light text-gray-600 mb-2">No products found</h3>
-                                <p className="text-gray-500 mb-6">Try adjusting your filters</p>
+                                <h3 className="text-xl font-light text-gray-600 dark:text-gray-400 mb-2">No products found</h3>
+                                <p className="text-gray-500 dark:text-gray-400 mb-6">Try adjusting your filters</p>
                                 <button
                                     onClick={() => {
                                         setSelectedCategory('All');
@@ -510,7 +510,7 @@ function ProductCard({ product, index }) {
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
+                <div className="bg-white dark:bg-[#0A0A0A] rounded-xl overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-none dark:border dark:border-white/[0.06] transition-all duration-500 group-hover:-translate-y-2">
                     <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-[#FAFAFA] to-[#F5F5F5]">
                         <SafeImage
                             src={product.image}

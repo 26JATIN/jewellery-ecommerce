@@ -176,7 +176,7 @@ export default function Testimonials() {
     return (
         <section className="py-20 lg:py-32 relative overflow-hidden">
             {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]" />
             
             {/* Decorative Elements */}
             <div className="absolute inset-0 opacity-5">
@@ -199,10 +199,10 @@ export default function Testimonials() {
                             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent" />
                         </div>
                     </div>
-                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
+                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-6">
                         What Our Customers Say
                     </h2>
-                    <p className="text-xl md:text-2xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto leading-relaxed">
                         Don't just take our word for it. Here's what our valued customers have to say about their experience with us.
                     </p>
                 </motion.div>
@@ -227,7 +227,7 @@ export default function Testimonials() {
                             <h3 className="text-3xl lg:text-4xl font-light text-[#D4AF76] mb-2 group-hover:scale-110 transition-transform duration-300">
                                 {stat.number}
                             </h3>
-                            <p className="text-gray-600 font-light">
+                            <p className="text-gray-600 dark:text-gray-400 font-light">
                                 {stat.label}
                             </p>
                         </motion.div>

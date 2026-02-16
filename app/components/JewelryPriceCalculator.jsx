@@ -173,47 +173,47 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-lg p-6"
+      className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg dark:shadow-none p-6 dark:border dark:border-white/[0.06]"
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Jewelry Price Calculator (₹ INR)</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Jewelry Price Calculator (₹ INR)</h2>
       
       {/* Current Metal Prices Display */}
       {currentPrices && (
         <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-gray-50 border border-yellow-200 rounded-lg">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Current Market Prices (Per Gram)</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Current Market Prices (Per Gram)</h3>
           
           {/* Gold Prices */}
           {currentPrices.gold && (
             <div className="mb-3">
-              <p className="text-xs text-gray-600 mb-2 font-medium">Gold:</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-medium">Gold:</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {currentPrices.gold['24k'] && (
-                  <div className="bg-white p-2 rounded border border-yellow-300">
-                    <div className="text-xs text-gray-600">24K</div>
+                  <div className="bg-white dark:bg-white/[0.06] p-2 rounded border border-yellow-300">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">24K</div>
                     <div className="text-sm font-bold text-yellow-700">
                       {formatPrice(currentPrices.gold['24k'])}
                     </div>
                   </div>
                 )}
                 {currentPrices.gold['22k'] && (
-                  <div className="bg-white p-2 rounded border border-amber-300">
-                    <div className="text-xs text-gray-600">22K</div>
+                  <div className="bg-white dark:bg-white/[0.06] p-2 rounded border border-amber-300">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">22K</div>
                     <div className="text-sm font-bold text-amber-700">
                       {formatPrice(currentPrices.gold['22k'])}
                     </div>
                   </div>
                 )}
                 {currentPrices.gold['20k'] && (
-                  <div className="bg-white p-2 rounded border border-orange-200">
-                    <div className="text-xs text-gray-600">20K</div>
+                  <div className="bg-white dark:bg-white/[0.06] p-2 rounded border border-orange-200">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">20K</div>
                     <div className="text-sm font-bold text-orange-700">
                       {formatPrice(currentPrices.gold['20k'])}
                     </div>
                   </div>
                 )}
                 {currentPrices.gold['18k'] && (
-                  <div className="bg-white p-2 rounded border border-orange-300">
-                    <div className="text-xs text-gray-600">18K</div>
+                  <div className="bg-white dark:bg-white/[0.06] p-2 rounded border border-orange-300">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">18K</div>
                     <div className="text-sm font-bold text-orange-700">
                       {formatPrice(currentPrices.gold['18k'])}
                     </div>
@@ -226,11 +226,11 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
           {/* Silver Price */}
           {currentPrices.silver?.['999'] && (
             <div>
-              <p className="text-xs text-gray-600 mb-2 font-medium">Silver:</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-medium">Silver:</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="bg-white p-2 rounded border border-gray-300">
-                  <div className="text-xs text-gray-600">999</div>
-                  <div className="text-sm font-bold text-gray-700">
+                <div className="bg-white dark:bg-white/[0.06] p-2 rounded border border-gray-300 dark:border-white/[0.1]">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">999</div>
+                  <div className="text-sm font-bold text-gray-700 dark:text-gray-300">
                     {formatPrice(currentPrices.silver['999'])}
                   </div>
                 </div>
@@ -242,7 +242,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
       
       {/* Metal Type Selector */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Metal Type *
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -262,7 +262,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
               className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                 metalType === type.value
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  : 'border-gray-300 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-white/[0.2]'
               }`}
             >
               <div className="text-2xl mb-1">{type.icon}</div>
@@ -277,11 +277,11 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
         {/* Gold Fields - Show for 'gold' and 'mixed' types */}
         {(metalType === 'gold' || metalType === 'mixed') && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">Gold Details</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Gold Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Gold Weight */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Weight (grams) *
                 </label>
                 <input
@@ -299,14 +299,14 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
 
               {/* Gold Purity */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Purity (Karat) *
                 </label>
                 <select
                   name="goldPurity"
                   value={formData.goldPurity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-white/[0.1] rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white dark:bg-white/[0.06] dark:text-gray-100"
                   required={metalType !== 'silver'}
                 >
                   {goldPurities.map((purity) => (
@@ -323,11 +323,11 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
         {/* Silver Fields - Show for 'silver' and 'mixed' types */}
         {(metalType === 'silver' || metalType === 'mixed') && (
           <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">Silver Details</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Silver Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Silver Weight */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Weight (grams) *
                 </label>
                 <input
@@ -345,14 +345,14 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
 
               {/* Silver Purity */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Purity *
                 </label>
                 <select
                   name="silverPurity"
                   value={formData.silverPurity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-white/[0.1] rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white dark:bg-white/[0.06] dark:text-gray-100"
                   required={metalType !== 'gold'}
                 >
                   {silverPurities.map((purity) => (
@@ -368,7 +368,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
 
         {/* Stone Value - Always visible */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Stone/Gem Value (₹)
           </label>
           <input
@@ -381,14 +381,14 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
             placeholder="e.g., 5000 (optional)"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <p className="mt-1 text-xs text-gray-500">Leave empty if no stones/gems</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave empty if no stones/gems</p>
         </div>
 
         {/* Making Charges & GST */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Making Charge */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Making Charge (%) *
             </label>
             <input
@@ -406,7 +406,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
 
           {/* GST */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               GST (%) *
             </label>
             <input
@@ -471,7 +471,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
           animate={{ opacity: 1, y: 0 }}
           className="mt-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-6 border border-gray-200"
         >
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
@@ -484,10 +484,10 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
             {calculation.breakdown.goldValue && calculation.breakdown.goldValue > 0 && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-gray-700">Gold Value</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Gold Value</span>
                   <span className="font-bold text-yellow-700">{formatPrice(calculation.breakdown.goldValue)}</span>
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
                   {formData.goldWeight}g × {formData.goldPurity}K @ {formatPrice(calculation.breakdown.goldPricePerGram || 0)}/g
                 </div>
               </div>
@@ -497,10 +497,10 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
             {calculation.breakdown.silverValue && calculation.breakdown.silverValue > 0 && (
               <div className="p-3 bg-gray-100 border border-gray-300 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-gray-700">Silver Value</span>
-                  <span className="font-bold text-gray-700">{formatPrice(calculation.breakdown.silverValue)}</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Silver Value</span>
+                  <span className="font-bold text-gray-700 dark:text-gray-300">{formatPrice(calculation.breakdown.silverValue)}</span>
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
                   {formData.silverWeight}g × {formData.silverPurity} @ {formatPrice(calculation.breakdown.silverPricePerGram || 0)}/g
                 </div>
               </div>
@@ -510,15 +510,15 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
             {calculation.breakdown.stoneValue && calculation.breakdown.stoneValue > 0 && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-700">Stone/Gem Value</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Stone/Gem Value</span>
                   <span className="font-bold text-blue-700">{formatPrice(calculation.breakdown.stoneValue)}</span>
                 </div>
               </div>
             )}
 
             {/* Base Metal Value */}
-            <div className="flex justify-between py-2 border-t border-gray-300">
-              <span className="text-gray-700 font-medium">Total Metal + Stone Value:</span>
+            <div className="flex justify-between py-2 border-t border-gray-300 dark:border-white/[0.1]">
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Total Metal + Stone Value:</span>
               <span className="font-semibold">{formatPrice(calculation.breakdown.baseMetalValue || calculation.breakdown.pureGoldValue || 0)}</span>
             </div>
           </div>
@@ -526,17 +526,17 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
           {/* Charges Section */}
           <div className="space-y-2 mb-4">
             <div className="flex justify-between py-2 border-b border-gray-200">
-              <span className="text-gray-600">Making Charges ({formData.makingChargePercent}%):</span>
+              <span className="text-gray-600 dark:text-gray-400">Making Charges ({formData.makingChargePercent}%):</span>
               <span className="font-medium">{formatPrice(calculation.breakdown.makingCharges)}</span>
             </div>
             
             <div className="flex justify-between py-2 border-b border-gray-200">
-              <span className="text-gray-600">Subtotal:</span>
+              <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
               <span className="font-medium">{formatPrice(calculation.breakdown.subtotal)}</span>
             </div>
             
             <div className="flex justify-between py-2 border-b border-gray-200">
-              <span className="text-gray-600">GST ({formData.gstPercent}%):</span>
+              <span className="text-gray-600 dark:text-gray-400">GST ({formData.gstPercent}%):</span>
               <span className="font-medium">{formatPrice(calculation.breakdown.gstAmount)}</span>
             </div>
           </div>
@@ -548,7 +548,7 @@ const JewelryPriceCalculator = ({ onPriceCalculated }) => {
           </div>
 
           {/* Timestamp */}
-          <div className="mt-4 text-xs text-gray-500 text-center">
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
             <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
             </svg>

@@ -60,7 +60,7 @@ export default function BlogsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]">
             {/* Hero Section */}
             <div className="relative bg-gradient-to-br from-[#2C2C2C] via-[#3A3A3A] to-[#2C2C2C] text-white py-24 overflow-hidden">
                 {/* Decorative Elements */}
@@ -88,7 +88,7 @@ export default function BlogsPage() {
                                 placeholder="Search for articles, trends, care tips..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-32 py-5 text-gray-900 bg-white/95 backdrop-blur-sm rounded-full shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#D4AF76] transition-all font-light"
+                                className="w-full pl-14 pr-32 py-5 text-gray-900 dark:text-gray-100 bg-white/95 dark:bg-white/10 backdrop-blur-sm rounded-full shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#D4AF76] transition-all font-light dark:placeholder-gray-500"
                             />
                             <button
                                 type="submit"
@@ -115,7 +115,7 @@ export default function BlogsPage() {
                                 className={`px-6 py-3 rounded-full font-light transition-all duration-300 ${
                                     category === cat.value
                                         ? 'bg-[#D4AF76] text-[#2C2C2C] shadow-lg scale-105'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md border border-gray-200'
+                                        : 'bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.15] hover:shadow-md border border-gray-200 dark:border-white/[0.06]'
                                 }`}
                             >
                                 {cat.label}
@@ -128,15 +128,15 @@ export default function BlogsPage() {
                 {loading ? (
                     <div className="text-center py-20">
                         <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#D4AF76]"></div>
-                        <p className="mt-4 text-gray-600 font-light">Loading articles...</p>
+                        <p className="mt-4 text-gray-600 dark:text-gray-400 font-light">Loading articles...</p>
                     </div>
                 ) : blogs.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm">
-                        <svg className="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center py-20 bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none dark:border dark:border-white/[0.06]">
+                        <svg className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="text-gray-500 text-lg font-light">No articles found</p>
-                        <p className="text-gray-400 text-sm mt-2 font-light">Try adjusting your search or filter</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg font-light">No articles found</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-sm mt-2 font-light">Try adjusting your search or filter</p>
                     </div>
                 ) : (
                     <>
@@ -145,7 +145,7 @@ export default function BlogsPage() {
                                 <Link
                                     key={blog._id}
                                     href={`/blogs/${blog.slug}`}
-                                    className="group bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+                                    className="group bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-md dark:shadow-none dark:border dark:border-white/[0.06] overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
                                 >
                                     {/* Featured Image */}
                                     {blog.featuredImage?.url ? (
@@ -178,17 +178,17 @@ export default function BlogsPage() {
                                         </div>
 
                                         {/* Title */}
-                                        <h3 className="text-xl font-normal mb-3 text-gray-900 group-hover:text-[#8B6B4C] transition-colors line-clamp-2 tracking-wide">
+                                        <h3 className="text-xl font-normal mb-3 text-gray-900 dark:text-gray-100 group-hover:text-[#8B6B4C] dark:group-hover:text-[#D4AF76] transition-colors line-clamp-2 tracking-wide">
                                             {blog.title}
                                         </h3>
 
                                         {/* Excerpt */}
-                                        <p className="text-gray-600 mb-4 line-clamp-3 font-light leading-relaxed text-sm">
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 font-light leading-relaxed text-sm">
                                             {blog.excerpt}
                                         </p>
 
                                         {/* Meta Info */}
-                                        <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-white/[0.06]">
                                             <div className="flex items-center gap-4 font-light">
                                                 <span className="flex items-center gap-1.5">
                                                     <Clock className="w-4 h-4 text-[#D4AF76]" />
@@ -214,7 +214,7 @@ export default function BlogsPage() {
                                                 {blog.tags.slice(0, 3).map((tag, index) => (
                                                     <span
                                                         key={index}
-                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-600 text-xs rounded-full font-light border border-gray-200"
+                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 dark:bg-white/[0.06] text-gray-600 dark:text-gray-400 text-xs rounded-full font-light border border-gray-200 dark:border-white/[0.06]"
                                                     >
                                                         <Tag className="w-3 h-3" />
                                                         {tag}
@@ -233,7 +233,7 @@ export default function BlogsPage() {
                                 <button
                                     onClick={() => setCurrentPage(currentPage - 1)}
                                     disabled={!pagination.hasPrev}
-                                    className="px-8 py-3 bg-white text-gray-700 rounded-full hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg font-light border border-gray-200"
+                                    className="px-8 py-3 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-50 dark:hover:bg-white/[0.15] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg font-light border border-gray-200 dark:border-white/[0.06]"
                                 >
                                     Previous
                                 </button>
@@ -243,7 +243,7 @@ export default function BlogsPage() {
                                 <button
                                     onClick={() => setCurrentPage(currentPage + 1)}
                                     disabled={!pagination.hasNext}
-                                    className="px-8 py-3 bg-white text-gray-700 rounded-full hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg font-light border border-gray-200"
+                                    className="px-8 py-3 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-50 dark:hover:bg-white/[0.15] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg font-light border border-gray-200 dark:border-white/[0.06]"
                                 >
                                     Next
                                 </button>

@@ -110,7 +110,7 @@ export default function FeaturedCollections() {
                     <h2 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
                         Signature Collections
                     </h2>
-                    <p className="text-lg md:text-xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto leading-relaxed">
                         Discover our carefully curated collections, each telling a unique story through exceptional design and craftsmanship
                     </p>
                 </motion.div>
@@ -139,7 +139,7 @@ export default function FeaturedCollections() {
                                 className={`relative group p-8 rounded-3xl border transition-all duration-500 cursor-pointer hover:scale-[1.02] hover:shadow-2xl text-left w-full ${
                                     activeCollection === index 
                                         ? `bg-gradient-to-br ${collection.color} border-[#D4AF76]/30 shadow-2xl` 
-                                        : 'bg-white/80 backdrop-blur-sm border-gray-200/50 hover:border-[#D4AF76]/20'
+                                        : 'bg-white/80 dark:bg-white/[0.06] backdrop-blur-sm border-gray-200/50 dark:border-white/[0.1] hover:border-[#D4AF76]/20'
                                 }`}
                             >
                                 <div className="flex items-start gap-6">
@@ -160,13 +160,13 @@ export default function FeaturedCollections() {
                                         <p className="text-sm text-[#D4AF76] font-light tracking-wide uppercase mb-3">
                                             {collection.subtitle}
                                         </p>
-                                        <p className="text-gray-600 font-light leading-relaxed">
+                                        <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
                                             {collection.description}
                                         </p>
                                         {collection.realData && (
                                             <div className="mt-4 flex items-center gap-2">
                                                 <div className="w-2 h-2 rounded-full bg-[#D4AF76]"></div>
-                                                <span className="text-xs text-gray-500 font-light">Live Collection</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-light">Live Collection</span>
                                             </div>
                                         )}
                                     </div>
@@ -238,7 +238,7 @@ export default function FeaturedCollections() {
                                 transition={{ duration: 0.6, delay: 0.3 }}
                                 className="absolute bottom-6 left-6 right-6"
                             >
-                                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl group-hover:shadow-2xl transition-all duration-300">
+                                <div className="bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl group-hover:shadow-2xl transition-all duration-300">
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <h4 className="text-lg font-light text-[#2C2C2C] mb-1">
@@ -248,7 +248,7 @@ export default function FeaturedCollections() {
                                                 {featuredCollections[activeCollection]?.subtitle}
                                             </p>
                                             <div className="flex items-center gap-2 mt-2">
-                                                <span className="text-xs text-gray-600">
+                                                <span className="text-xs text-gray-600 dark:text-gray-400">
                                                     {featuredCollections[activeCollection]?.products} Items
                                                 </span>
                                                 {featuredCollections[activeCollection]?.realData && (
@@ -275,7 +275,7 @@ export default function FeaturedCollections() {
 
                         {/* Click overlay indicator */}
                         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl flex items-center justify-center">
-                            <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full">
+                            <div className="bg-white/90 dark:bg-[#0A0A0A]/90 backdrop-blur-sm p-3 rounded-full">
                                 <svg className="w-6 h-6 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>

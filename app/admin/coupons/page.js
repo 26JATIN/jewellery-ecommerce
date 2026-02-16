@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/app/components/AdminLayout';
 import withAdminAuth from '@/app/components/withAdminAuth';
-
+import { toast } from 'sonner';
 const CouponManagement = () => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,13 +98,13 @@ const CouponManagement = () => {
         setShowModal(false);
         resetForm();
         fetchCoupons();
-        alert(result.message);
+        toast.success(result.message);
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error('Error saving coupon:', error);
-      alert('Failed to save coupon');
+      toast.error('Failed to save coupon');
     }
   };
 
@@ -140,13 +140,13 @@ const CouponManagement = () => {
       
       if (result.success) {
         fetchCoupons();
-        alert(result.message);
+        toast.success(result.message);
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error('Error deleting coupon:', error);
-      alert('Failed to delete coupon');
+      toast.error('Failed to delete coupon');
     }
   };
 

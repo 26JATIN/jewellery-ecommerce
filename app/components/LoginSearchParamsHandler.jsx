@@ -17,14 +17,17 @@ export default function LoginSearchParamsHandler({ onRedirect }) {
         if (userData.user.isAdmin && redirectPath && redirectPath.startsWith('/admin')) {
             // Admin user trying to access admin area, redirect to original admin page
             router.push(redirectPath);
-        } else if (userData.user.isAdmin) {
-            // Admin user, redirect to admin dashboard
+        } else if (userData.user.isAdmin && !redirectPath) {
+            // Admin user with no redirect, go to admin dashboard
             router.push('/admin');
-        } else if (redirectPath && redirectPath.startsWith('/admin')) {
+        } else if (redirectPath && redirectPath.startsWith('/admin') && !userData.user.isAdmin) {
             // Non-admin user tried to access admin, stay on home page
             router.push('/');
+        } else if (redirectPath) {
+            // User has a valid redirect path (checkout, orders, returns, etc.)
+            router.push(redirectPath);
         } else {
-            // Regular user, redirect to home
+            // No redirect path, go home
             router.push('/');
         }
     };

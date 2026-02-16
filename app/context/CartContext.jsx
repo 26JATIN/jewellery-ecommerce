@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { toast } from 'sonner';
 
 const CartContext = createContext();
 
@@ -112,7 +113,7 @@ export function CartProvider({ children }) {
         try {
             if (!user) {
                 // User not authenticated - show register modal with helpful message
-                alert('Please sign up or log in to add items to your cart!');
+                toast.warning('Please sign up or log in to add items to your cart!');
                 triggerRegisterModal();
                 return false; // Return false to indicate cart addition failed
             }
@@ -158,13 +159,13 @@ export function CartProvider({ children }) {
                 navigator.vibrate([50, 50, 50]);
             }
             
-            // Show success feedback (you can replace this with a toast notification)
-            console.log('Item added to cart successfully');
+            // Show success feedback
+            toast.success('Item added to cart!');
             return true; // Return true on success
         } catch (error) {
             console.error('Add to cart error:', error);
             // Show user-friendly error message
-            alert('Failed to add item to cart. Please try again.');
+            toast.error('Failed to add item to cart. Please try again.');
             return false; // Return false on error
         }
     };

@@ -283,7 +283,7 @@ export default function ProductsPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
+        <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-black pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div 
@@ -295,10 +295,10 @@ export default function ProductsPage() {
                     <p className="text-xs md:text-sm text-[#D4AF76] font-light tracking-widest uppercase mb-1 md:mb-2">
                         {searchTerm ? 'Search Results' : 'Shop by Category'}
                     </p>
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] tracking-tight mb-3 md:mb-4">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-3 md:mb-4">
                         {searchTerm ? 'Product Search' : 'Explore Collections'}
                     </h1>
-                    <p className="text-sm md:text-base text-gray-600 font-light max-w-2xl mx-auto">
+                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
                         {searchTerm 
                             ? `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`
                             : 'Discover our curated selection of jewelry collections, each crafted with precision and passion'
@@ -310,7 +310,7 @@ export default function ProductsPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.3, delay: 0.2 }}
-                            className="mt-6 inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-sm"
+                            className="mt-6 inline-flex items-center gap-3 bg-white dark:bg-white/10 px-6 py-3 rounded-full shadow-sm"
                         >
                             <span className="text-sm text-gray-600">
                                 Searching for "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
@@ -399,7 +399,7 @@ export default function ProductsPage() {
                                     text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center
                                     ${selectedCategory === category.name 
                                         ? 'text-[#D4AF76] font-medium' 
-                                        : 'text-[#2C2C2C] group-hover:text-[#D4AF76]'
+                                        : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
                                     {category.name}
@@ -422,10 +422,10 @@ export default function ProductsPage() {
                                 <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                                 </svg>
-                                <h3 className="text-base md:text-lg font-medium text-[#2C2C2C]">
+                                <h3 className="text-base md:text-lg font-medium text-[#2C2C2C] dark:text-gray-100">
                                     Explore Collections
                                     {selectedCategory !== 'All' && (
-                                        <span className="ml-2 text-sm font-normal text-gray-500">in {selectedCategory}</span>
+                                        <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">in {selectedCategory}</span>
                                     )}
                                 </h3>
                             </div>
@@ -490,7 +490,7 @@ export default function ProductsPage() {
                                     text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center line-clamp-2 leading-tight
                                     ${selectedSubcategory === 'All' 
                                         ? 'text-[#D4AF76] font-medium' 
-                                        : 'text-[#2C2C2C] group-hover:text-[#D4AF76]'
+                                        : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
                                     All Collections
@@ -553,7 +553,7 @@ export default function ProductsPage() {
                                         text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center line-clamp-2 leading-tight max-w-[70px] md:max-w-[80px] lg:max-w-[90px]
                                         ${selectedSubcategory === subcategory._id 
                                             ? 'text-[#D4AF76] font-medium' 
-                                            : 'text-[#2C2C2C] group-hover:text-[#D4AF76]'
+                                            : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                         }
                                     `}>
                                         {subcategory.name}
@@ -571,8 +571,8 @@ export default function ProductsPage() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="mb-6 md:mb-8"
                 >
-                    <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100">
-                        <label className="block text-sm font-medium text-[#2C2C2C] mb-3">
+                    <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 dark:border-white/[0.06]">
+                        <label className="block text-sm font-medium text-[#2C2C2C] dark:text-gray-200 mb-3">
                             Filter by Target Audience
                         </label>
                         <div className="flex flex-wrap gap-2 md:gap-3">
@@ -592,7 +592,7 @@ export default function ProductsPage() {
                                         px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                                         ${selectedTags.includes(tag)
                                             ? 'bg-[#D4AF76] text-white shadow-md'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
                                         }
                                     `}
                                 >
@@ -625,8 +625,8 @@ export default function ProductsPage() {
                     transition={{ duration: 0.5, delay: 0.35 }}
                     className="mb-6 md:mb-8"
                 >
-                    <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100">
-                        <label className="block text-sm font-medium text-[#2C2C2C] mb-3">
+                    <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 dark:border-white/[0.06]">
+                        <label className="block text-sm font-medium text-[#2C2C2C] dark:text-gray-200 mb-3">
                             Filter by Metal Type
                         </label>
                         <div className="flex flex-wrap gap-2 md:gap-3">
@@ -648,7 +648,7 @@ export default function ProductsPage() {
                                                 : type.value === 'silver'
                                                     ? 'bg-gradient-to-r from-gray-400 to-slate-500 text-white shadow-lg shadow-gray-300'
                                                     : 'bg-[#D4AF76] text-white shadow-md'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
                                         }
                                     `}
                                 >
@@ -670,14 +670,14 @@ export default function ProductsPage() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
-                        className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100"
+                        className="mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 dark:border-white/[0.06]"
                     >
                         {/* Results Count */}
                         <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 md:w-5 md:h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
-                            <span className="text-xs md:text-sm font-medium text-[#2C2C2C]">
+                            <span className="text-xs md:text-sm font-medium text-[#2C2C2C] dark:text-gray-200">
                                 {totalProductsCount} {totalProductsCount === 1 ? 'Product' : 'Products'}
                                 {selectedCategory !== 'All' && <span className="hidden sm:inline"> in {selectedCategory}</span>}
                                 {totalPages > 1 && (
@@ -695,7 +695,7 @@ export default function ProductsPage() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full sm:w-auto appearance-none bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl px-3 md:px-4 py-2 md:py-2.5 pr-8 md:pr-10 text-xs md:text-sm font-light text-[#2C2C2C] hover:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 focus:border-[#D4AF76] transition-all cursor-pointer"
+                                    className="w-full sm:w-auto appearance-none bg-gray-50 dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-lg md:rounded-xl px-3 md:px-4 py-2 md:py-2.5 pr-8 md:pr-10 text-xs md:text-sm font-light text-[#2C2C2C] dark:text-gray-200 hover:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 focus:border-[#D4AF76] transition-all cursor-pointer"
                                 >
                                     <option value="featured">Featured</option>
                                     <option value="newest">Newest</option>
@@ -708,7 +708,7 @@ export default function ProductsPage() {
                             </div>
 
                             {/* View Toggle */}
-                            <div className="flex items-center gap-0.5 md:gap-1 bg-gray-50 rounded-lg md:rounded-xl p-0.5 md:p-1">
+                            <div className="flex items-center gap-0.5 md:gap-1 bg-gray-50 dark:bg-white/[0.06] rounded-lg md:rounded-xl p-0.5 md:p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-1.5 md:p-2.5 rounded-md md:rounded-lg transition-all ${
@@ -754,13 +754,13 @@ export default function ProductsPage() {
                         <svg className="w-20 h-20 text-[#D4AF76] opacity-40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
-                        <p className="text-xl text-[#2C2C2C] font-light">
+                        <p className="text-xl text-[#2C2C2C] dark:text-gray-100 font-light">
                             {searchTerm || selectedCategory !== 'All' 
                                 ? 'No products found' 
                                 : 'No products available'
                             }
                         </p>
-                        <p className="text-gray-500 mt-2">
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">
                             {searchTerm 
                                 ? 'Try adjusting your search terms' 
                                 : selectedCategory !== 'All' 
@@ -800,10 +800,10 @@ export default function ProductsPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
-                        className="mt-8 md:mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100"
+                        className="mt-8 md:mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-white/[0.06]"
                     >
                         {/* Page Info */}
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                             Showing <span className="font-medium text-[#D4AF76]">{startIndex + 1}</span> to{' '}
                             <span className="font-medium text-[#D4AF76]">{Math.min(endIndex, totalProductsCount)}</span> of{' '}
                             <span className="font-medium text-[#D4AF76]">{totalProductsCount}</span> products
@@ -859,7 +859,7 @@ export default function ProductsPage() {
                                                 className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-medium text-sm transition-all ${
                                                     currentPage === page
                                                         ? 'bg-[#D4AF76] text-white shadow-md'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                        : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
                                                 }`}
                                             >
                                                 {page}
@@ -905,7 +905,7 @@ function ProductCard({ product, index }) {
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
-                <div className="bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 md:group-hover:-translate-y-2">
+                <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 md:group-hover:-translate-y-2">
                     <div className="relative aspect-[4/5] overflow-hidden">
                         <SafeImage
                             src={product.image}
@@ -926,10 +926,10 @@ function ProductCard({ product, index }) {
                         </div>
                     </div>
                     <div className="p-3 md:p-4 lg:p-6">
-                        <h3 className="text-[#2C2C2C] font-light text-sm md:text-base lg:text-lg mb-2 md:mb-3 group-hover:text-[#D4AF76] transition-colors line-clamp-2">
+                        <h3 className="text-[#2C2C2C] dark:text-gray-100 font-light text-sm md:text-base lg:text-lg mb-2 md:mb-3 group-hover:text-[#D4AF76] transition-colors line-clamp-2">
                             {product.name}
                         </h3>
-                        <p className="text-[#2C2C2C] font-medium text-sm md:text-base lg:text-xl">
+                        <p className="text-[#2C2C2C] dark:text-gray-200 font-medium text-sm md:text-base lg:text-xl">
                             ₹{(product.sellingPrice || product.price).toLocaleString('en-IN')}
                         </p>
                     </div>
@@ -949,7 +949,7 @@ function ProductListItem({ product, index }) {
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
-                <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-4 lg:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-[#D4AF76]/20 border border-transparent">
+                <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-3 md:p-4 lg:p-6 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-[#D4AF76]/20 border border-transparent dark:border-white/[0.06]">
                     <div className="flex gap-3 md:gap-4 lg:gap-6">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-48 xl:h-48 flex-shrink-0 relative">
                             <SafeImage
@@ -973,10 +973,10 @@ function ProductListItem({ product, index }) {
                                     </>
                                 )}
                             </div>
-                            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl text-[#2C2C2C] font-light mb-1 sm:mb-2 md:mb-3 group-hover:text-[#D4AF76] transition-colors line-clamp-2">
+                            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl text-[#2C2C2C] dark:text-gray-100 font-light mb-1 sm:mb-2 md:mb-3 group-hover:text-[#D4AF76] transition-colors line-clamp-2">
                                 {product.name}
                             </h3>
-                            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-[#2C2C2C] font-medium">
+                            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-[#2C2C2C] dark:text-gray-200 font-medium">
                                 ₹{product.sellingPrice.toLocaleString('en-IN')}
                             </p>
                         </div>

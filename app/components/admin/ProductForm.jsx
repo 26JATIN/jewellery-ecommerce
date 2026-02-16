@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import VariantManager from './VariantManager';
+import { toast } from 'sonner';
 
 export default function ProductForm({ product, onSubmit, onCancel }) {
     const [formData, setFormData] = useState({
@@ -271,7 +272,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             case 'gold':
                 const goldWeight = parseFloat(formData.goldWeight);
                 if (!formData.goldWeight || isNaN(goldWeight) || goldWeight <= 0) {
-                    alert('Gold weight is required for pricing calculation. Please enter a value like 10.5 grams.');
+                    toast.warning('Gold weight is required for pricing calculation. Please enter a value like 10.5 grams.');
                     return;
                 }
                 break;
@@ -279,18 +280,18 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             case 'silver':
                 const silverWeight = parseFloat(formData.silverWeight);
                 if (!formData.silverWeight || isNaN(silverWeight) || silverWeight <= 0) {
-                    alert('Silver weight is required for pricing calculation. Please enter a value like 15.0 grams.');
+                    toast.warning('Silver weight is required for pricing calculation. Please enter a value like 15.0 grams.');
                     return;
                 }
                 break;
                 
             default:
-                alert('Please select a valid metal type (Gold or Silver).');
+                toast.warning('Please select a valid metal type (Gold or Silver).');
                 return;
         }
 
         if (isMixed) {
-            alert('Mixed metal pricing calculation is not yet implemented. Please select a single metal type for dynamic pricing.');
+            toast.info('Mixed metal pricing calculation is not yet implemented. Please select a single metal type for dynamic pricing.');
             return;
         }
 
@@ -452,13 +453,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         if (file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
+                toast.warning('Please select an image file');
                 return;
             }
 
             // Validate file size (5MB max)
             if (file.size > 5 * 1024 * 1024) {
-                alert('Image size should be less than 5MB');
+                toast.warning('Image size should be less than 5MB');
                 return;
             }
 
@@ -481,11 +482,11 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         // Validate files
         const validFiles = files.filter(file => {
             if (!file.type.startsWith('image/')) {
-                alert(`${file.name} is not an image file`);
+                toast.warning(`${file.name} is not an image file`);
                 return false;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert(`${file.name} is too large (max 5MB)`);
+                toast.warning(`${file.name} is too large (max 5MB)`);
                 return false;
             }
             return true;
@@ -497,7 +498,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         const currentImages = imageFiles.length;
         const totalImages = currentImages + validFiles.length;
         if (totalImages > 10) {
-            alert(`Maximum 10 images allowed. You can add ${10 - currentImages} more images.`);
+            toast.warning(`Maximum 10 images allowed. You can add ${10 - currentImages} more images.`);
             return;
         }
 
@@ -571,7 +572,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             return result.imageUrl;
         } catch (error) {
             console.error('Image upload error:', error);
-            alert('Failed to upload image: ' + error.message);
+            toast.error('Failed to upload image: ' + error.message);
             return null;
         } finally {
             setUploadingImage(false);
@@ -592,7 +593,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             // Validation
             if (!formData.name || !formData.description || !formData.category || 
                 !formData.mrp || !formData.sellingPrice || !formData.sku) {
-                alert('Please fill in all required fields');
+                toast.warning('Please fill in all required fields');
                 setLoading(false);
                 return;
             }
@@ -605,7 +606,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                                    formData.image.match(/^https?:\/\/.+/);
                 
                 if (!isValidPath) {
-                    alert('Please enter a valid image URL (starting with http/https) or relative path (starting with /)');
+                    toast.warning('Please enter a valid image URL (starting with http/https) or relative path (starting with /)');
                     setLoading(false);
                     return;
                 }
@@ -616,7 +617,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             const sellingPrice = parseFloat(formData.sellingPrice);
 
             if (sellingPrice > mrp) {
-                alert('Selling price cannot be greater than MRP');
+                toast.warning('Selling price cannot be greater than MRP');
                 setLoading(false);
                 return;
             }
@@ -629,7 +630,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
                 }, 0);
 
                 if (variantStockSum !== totalStock) {
-                    alert(
+                    toast.warning(
                         `Stock mismatch: Total product stock is ${totalStock}, but sum of variant stocks is ${variantStockSum}. ` +
                         `Please ensure all variant stocks add up to the total stock.`
                     );

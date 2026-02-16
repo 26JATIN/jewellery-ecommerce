@@ -95,7 +95,7 @@ function AdminHeroVideosPage() {
         e.preventDefault();
         
         if (!formData.videoUrl) {
-            alert('Please upload a video first');
+            toast.warning('Please upload a video first');
             return;
         }
 
@@ -115,14 +115,14 @@ function AdminHeroVideosPage() {
             if (res.ok) {
                 await fetchVideos();
                 resetForm();
-                alert('✅ Video saved successfully!');
+                toast.success('Video saved successfully!');
             } else {
                 const error = await res.json();
-                alert('Failed to save video: ' + error.error);
+                toast.error('Failed to save video: ' + error.error);
             }
         } catch (error) {
             console.error('Error saving video:', error);
-            alert('Failed to save video');
+            toast.error('Failed to save video');
         }
     };
 
@@ -155,13 +155,13 @@ function AdminHeroVideosPage() {
 
             if (res.ok) {
                 await fetchVideos();
-                alert('✅ Video deleted successfully!');
+                toast.success('Video deleted successfully!');
             } else {
-                alert('Failed to delete video');
+                toast.error('Failed to delete video');
             }
         } catch (error) {
             console.error('Error deleting video:', error);
-            alert('Failed to delete video');
+            toast.error('Failed to delete video');
         }
     };
 
@@ -196,7 +196,7 @@ function AdminHeroVideosPage() {
             // Validate file size (max 50MB for portrait videos)
             const maxSize = 50 * 1024 * 1024; // 50MB
             if (file.size > maxSize) {
-                alert('Video file is too large. Please use a video under 50MB.');
+                toast.warning('Video file is too large. Please use a video under 50MB.');
                 return;
             }
 
@@ -238,10 +238,10 @@ function AdminHeroVideosPage() {
                     videoUrl: result.publicId
                 }));
 
-                alert('✅ Video uploaded successfully!');
+                toast.success('Video uploaded successfully!');
             } catch (error) {
                 console.error('Upload error:', error);
-                alert('❌ Upload failed: ' + error.message);
+                toast.error('Upload failed: ' + error.message);
             } finally {
                 setUploadingVideo(false);
             }

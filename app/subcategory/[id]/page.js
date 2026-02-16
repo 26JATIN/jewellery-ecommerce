@@ -51,14 +51,14 @@ export default function SubcategoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-white via-[#FEFEFE] to-[#F8F6F3]">
+        <div className="min-h-screen bg-gradient-to-br from-white via-[#FEFEFE] to-[#F8F6F3] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]">
             <Navbar />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
                 {/* Breadcrumb */}
                 {subcategory && (
                     <nav className="mb-8">
-                        <ol className="flex items-center space-x-2 text-sm text-gray-600">
+                        <ol className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                             <li>
                                 <Link href="/" className="hover:text-[#8B6B4C] transition-colors">
                                     Home
@@ -88,11 +88,11 @@ export default function SubcategoryPage() {
                 {/* Subcategory Header */}
                 {subcategory && (
                     <div className="mb-12">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                             {subcategory.name}
                         </h1>
                         {subcategory.description && (
-                            <p className="text-lg text-gray-600 max-w-3xl">
+                            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl">
                                 {subcategory.description}
                             </p>
                         )}
@@ -130,7 +130,7 @@ export default function SubcategoryPage() {
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-4 py-2 border border-gray-300 dark:border-white/[0.1] dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.06] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Previous
                                 </button>
@@ -151,7 +151,7 @@ export default function SubcategoryPage() {
                                                     className={`px-4 py-2 rounded-lg transition-colors ${
                                                         currentPage === page
                                                             ? 'bg-[#8B6B4C] text-white'
-                                                            : 'border border-gray-300 hover:bg-gray-50'
+                                                            : 'border border-gray-300 dark:border-white/[0.1] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
                                                     }`}
                                                 >
                                                     {page}
@@ -167,7 +167,7 @@ export default function SubcategoryPage() {
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === pagination.totalPages}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-4 py-2 border border-gray-300 dark:border-white/[0.1] dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.06] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Next
                                 </button>
@@ -184,10 +184,10 @@ export default function SubcategoryPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                             No products yet
                         </h3>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
                             Products in this subcategory are coming soon!
                         </p>
                         <Link

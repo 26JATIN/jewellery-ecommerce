@@ -90,7 +90,7 @@ export default function VideoShowcaseSection() {
 
     if (loading) {
         return (
-            <section className="py-20 bg-gradient-to-b from-[#F8F6F3] to-white">
+            <section className="py-20 bg-gradient-to-b from-[#F8F6F3] to-white dark:from-black dark:to-[#0A0A0A]">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
@@ -105,7 +105,7 @@ export default function VideoShowcaseSection() {
     }
 
     return (
-        <section className="py-20 bg-gradient-to-b from-[#F8F6F3] to-white overflow-hidden">
+        <section className="py-20 bg-gradient-to-b from-[#F8F6F3] to-white dark:from-black dark:to-[#0A0A0A] overflow-hidden">
             <div className="container mx-auto px-4">
                 {/* Section Header */}
                 <motion.div
@@ -115,10 +115,10 @@ export default function VideoShowcaseSection() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-4">
+                    <h2 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-gray-100 mb-4">
                         Jewelry in <span className="text-[#D4AF76]">Motion</span>
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Experience the elegance and craftsmanship of our collection through stunning videos
                     </p>
                 </motion.div>
@@ -227,7 +227,7 @@ export default function VideoShowcaseSection() {
 
                                 {/* Video Number Indicator */}
                                 <div className="text-center mt-4">
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
                                         {String(index + 1).padStart(2, '0')} / {String(videos.length).padStart(2, '0')}
                                     </span>
                                 </div>
@@ -241,7 +241,7 @@ export default function VideoShowcaseSection() {
                             <button
                                 onClick={() => scrollToVideo(Math.max(0, currentIndex - 1))}
                                 disabled={currentIndex === 0}
-                                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg items-center justify-center text-gray-900 hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed z-10"
+                                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white dark:bg-[#0A0A0A] shadow-lg dark:shadow-none items-center justify-center text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/[0.1] dark:border dark:border-white/[0.06] transition-all disabled:opacity-50 disabled:cursor-not-allowed z-10"
                                 aria-label="Previous video"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,7 +251,7 @@ export default function VideoShowcaseSection() {
                             <button
                                 onClick={() => scrollToVideo(Math.min(videos.length - 1, currentIndex + 1))}
                                 disabled={currentIndex === videos.length - 1}
-                                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg items-center justify-center text-gray-900 hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed z-10"
+                                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white dark:bg-[#0A0A0A] shadow-lg dark:shadow-none items-center justify-center text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/[0.1] dark:border dark:border-white/[0.06] transition-all disabled:opacity-50 disabled:cursor-not-allowed z-10"
                                 aria-label="Next video"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

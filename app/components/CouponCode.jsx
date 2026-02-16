@@ -77,8 +77,8 @@ const CouponCode = ({ cartItems, onCouponApplied, onCouponRemoved, appliedCoupon
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white dark:bg-[#0A0A0A] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
         🎫 Coupon Code
       </h3>
 
@@ -118,10 +118,10 @@ const CouponCode = ({ cartItems, onCouponApplied, onCouponRemoved, appliedCoupon
           </div>
 
           {/* Price breakdown */}
-          <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
+          <div className="bg-gray-50 dark:bg-white/[0.06] rounded-lg p-3 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Subtotal:</span>
-              <span className="text-gray-900">₹{appliedCoupon.originalTotal.toFixed(2)}</span>
+              <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+              <span className="text-gray-900 dark:text-gray-100">₹{appliedCoupon.originalTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-green-600">
               <span>Coupon Discount:</span>
@@ -207,10 +207,10 @@ const CouponCode = ({ cartItems, onCouponApplied, onCouponRemoved, appliedCoupon
                                 : `₹${coupon.discountValue} OFF`}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 mb-2">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                             {coupon.description}
                           </p>
-                          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                             {coupon.minOrderValue > 0 && (
                               <span>• Min order: ₹{coupon.minOrderValue}</span>
                             )}

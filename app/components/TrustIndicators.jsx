@@ -54,7 +54,7 @@ export default function TrustIndicators() {
     ];
 
     return (
-        <section className="py-16 bg-gradient-to-b from-white to-[#FAFAFA] relative overflow-hidden">
+        <section className="py-16 bg-gradient-to-b from-white to-[#FAFAFA] dark:from-black dark:to-[#050505] relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
                 <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -82,7 +82,7 @@ export default function TrustIndicators() {
                             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent" />
                         </div>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-light text-[#2C2C2C] tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight">
                         Certified Quality & Security
                     </h2>
                 </motion.div>
@@ -104,13 +104,13 @@ export default function TrustIndicators() {
                             viewport={{ once: true }}
                             className="text-center group"
                         >
-                            <div className="w-20 h-20 mx-auto mb-4 bg-white rounded-2xl shadow-lg flex items-center justify-center text-[#D4AF76] group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-lg flex items-center justify-center text-[#D4AF76] group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                                 {cert.icon}
                             </div>
-                            <h3 className="font-light text-[#2C2C2C] mb-1 group-hover:text-[#D4AF76] transition-colors">
+                            <h3 className="font-light text-[#2C2C2C] dark:text-gray-100 mb-1 group-hover:text-[#D4AF76] transition-colors">
                                 {cert.name}
                             </h3>
-                            <p className="text-sm text-gray-600 font-light">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-light">
                                 {cert.description}
                             </p>
                         </motion.div>
@@ -127,10 +127,10 @@ export default function TrustIndicators() {
                         viewport={{ once: true }}
                     >
                         <div className="mb-8">
-                            <h3 className="text-2xl md:text-3xl font-light text-[#2C2C2C] mb-4">
+                            <h3 className="text-2xl md:text-3xl font-light text-[#2C2C2C] dark:text-gray-100 mb-4">
                                 Awards & Recognition
                             </h3>
-                            <p className="text-gray-600 font-light leading-relaxed">
+                            <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
                                 Our commitment to excellence has been recognized by industry leaders and prestigious organizations worldwide.
                             </p>
                         </div>
@@ -149,10 +149,10 @@ export default function TrustIndicators() {
                                         {award.year}
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-light text-[#2C2C2C] mb-1 group-hover:text-[#D4AF76] transition-colors">
+                                        <h4 className="font-light text-[#2C2C2C] dark:text-gray-100 mb-1 group-hover:text-[#D4AF76] transition-colors">
                                             {award.title}
                                         </h4>
-                                        <p className="text-sm text-gray-600 font-light">
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-light">
                                             {award.organization}
                                         </p>
                                     </div>
@@ -167,7 +167,7 @@ export default function TrustIndicators() {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="bg-white rounded-3xl p-8 shadow-lg"
+                        className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 shadow-lg dark:border dark:border-white/[0.06]"
                     >
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] rounded-2xl flex items-center justify-center">
@@ -175,10 +175,10 @@ export default function TrustIndicators() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-light text-[#2C2C2C] mb-2">
+                            <h3 className="text-xl font-light text-[#2C2C2C] dark:text-gray-100 mb-2">
                                 Secure Shopping
                             </h3>
-                            <p className="text-gray-600 font-light">
+                            <p className="text-gray-600 dark:text-gray-400 font-light">
                                 Your privacy and security are our top priority
                             </p>
                         </div>
@@ -192,9 +192,9 @@ export default function TrustIndicators() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4, delay: index * 0.1 }}
                                     viewport={{ once: true }}
-                                    className="flex items-center justify-between py-3 px-4 bg-[#FAFAFA] rounded-xl hover:bg-[#D4AF76]/10 transition-colors"
+                                    className="flex items-center justify-between py-3 px-4 bg-[#FAFAFA] dark:bg-white/[0.04] rounded-xl hover:bg-[#D4AF76]/10 transition-colors"
                                 >
-                                    <span className="text-[#2C2C2C] font-light">{partner}</span>
+                                    <span className="text-[#2C2C2C] dark:text-gray-200 font-light">{partner}</span>
                                     <svg className="w-5 h-5 text-[#D4AF76]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
@@ -218,7 +218,7 @@ export default function TrustIndicators() {
                                         </svg>
                                     ))}
                                 </div>
-                                <span className="text-[#2C2C2C] font-light">99.8% Trust Score</span>
+                                <span className="text-[#2C2C2C] dark:text-gray-200 font-light">99.8% Trust Score</span>
                             </div>
                         </motion.div>
                     </motion.div>

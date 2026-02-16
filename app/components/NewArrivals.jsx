@@ -91,7 +91,7 @@ export default function NewArrivals() {
     };
 
     return (
-        <section id="new-arrivals" className="py-12 md:py-20 px-4 bg-gradient-to-b from-[#FAFAFA] via-white to-[#FAFAFA]">
+        <section id="new-arrivals" className="py-12 md:py-20 px-4 bg-gradient-to-b from-[#FAFAFA] via-white to-[#FAFAFA] dark:from-black dark:via-[#050505] dark:to-black">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div 
@@ -114,10 +114,10 @@ export default function NewArrivals() {
                         </span>
                     </motion.div>
                     
-                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] tracking-tight mb-4">
+                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-4">
                         New Creations, Just For You
                     </h2>
-                    <p className="text-sm md:text-base lg:text-lg text-gray-600 font-light max-w-2xl mx-auto">
+                    <p className="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
                         Explore exclusive designs that blend timeless artistry with a touch of modern elegance — curated to make every moment shine.
                     </p>
                 </motion.div>
@@ -127,10 +127,10 @@ export default function NewArrivals() {
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         {[...Array(8)].map((_, i) => (
                             <div key={i} className="animate-pulse">
-                                <div className="bg-gray-200 aspect-[3/4] rounded-3xl mb-4"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-2"></div>
-                                <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/3 mx-auto"></div>
+                                <div className="bg-gray-200 dark:bg-gray-800 aspect-[3/4] rounded-3xl mb-4"></div>
+                                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mx-auto mb-2"></div>
+                                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mx-auto mb-2"></div>
+                                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mx-auto"></div>
                             </div>
                         ))}
                     </div>
@@ -142,13 +142,13 @@ export default function NewArrivals() {
                             animate={{ opacity: 1, y: 0 }}
                             className="max-w-md mx-auto"
                         >
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-medium text-gray-800 mb-2">Unable to Load New Arrivals</h3>
-                            <p className="text-gray-600 mb-6 text-sm">We're having trouble loading our latest collection right now.</p>
+                            <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">Unable to Load New Arrivals</h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">We're having trouble loading our latest collection right now.</p>
                             <div className="flex gap-3 justify-center flex-wrap">
                                 <button 
                                     onClick={() => refetch()} 
@@ -158,7 +158,7 @@ export default function NewArrivals() {
                                 </button>
                                 <button 
                                     onClick={() => router.push('/products')} 
-                                    className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
+                                    className="px-6 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-colors font-medium text-sm"
                                 >
                                     View All Products
                                 </button>
@@ -167,7 +167,7 @@ export default function NewArrivals() {
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-gray-600 mb-4">No new arrivals at the moment. Check back soon!</p>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">No new arrivals at the moment. Check back soon!</p>
                         <button 
                             onClick={() => router.push('/products')} 
                             className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors"
@@ -195,7 +195,7 @@ export default function NewArrivals() {
                                 >
                                     <Link href={`/products/${product._id}`} className="block">
                                         {/* Product Card */}
-                                        <div className="relative overflow-hidden bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500">
+                                        <div className="relative overflow-hidden bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500">
                                             {/* Image Container */}
                                             <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
                                                 <SafeImage
@@ -266,10 +266,10 @@ export default function NewArrivals() {
                                             <p className="text-xs text-[#D4AF76] font-medium tracking-widest uppercase mb-2">
                                                 {product.category}
                                             </p>
-                                            <h3 className="text-[#2C2C2C] font-medium text-base lg:text-lg mb-2 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors">
+                                            <h3 className="text-[#2C2C2C] dark:text-gray-100 font-medium text-base lg:text-lg mb-2 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors">
                                                 {product.name}
                                             </h3>
-                                            <p className="text-[#2C2C2C] font-semibold text-lg">
+                                            <p className="text-[#2C2C2C] dark:text-gray-200 font-semibold text-lg">
                                                 ₹{product.sellingPrice.toLocaleString('en-IN')}
                                             </p>
                                         </div>

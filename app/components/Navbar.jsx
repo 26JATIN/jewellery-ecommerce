@@ -5,10 +5,12 @@ import Image from "next/image";
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavbar } from '../context/NavbarContext';
+import { useTheme } from '../context/ThemeContext';
 import Cart from './Cart';
 import Login from './Login';
 import Register from './Register';
 import SearchBar from './SearchBar';
+import ThemeToggle from './ThemeToggle';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from "../../lib/utils";
@@ -17,6 +19,7 @@ export default function Navbar() {
     const { setIsCartOpen, cartItems } = useCart();
     const { user, logout, showLoginModal, closeLoginModal, triggerLoginModal, showRegisterModal, closeRegisterModal, triggerRegisterModal } = useAuth();
     const { isNavbarHidden } = useNavbar();
+    const { isDark } = useTheme();
     const router = useRouter();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -90,14 +93,14 @@ export default function Navbar() {
                 <motion.div
                     animate={{
                         backgroundColor: visible 
-                            ? "rgba(255, 255, 255, 0.75)" 
-                            : "rgba(255, 255, 255, 0.65)",
+                            ? "var(--navbar-bg-scroll)" 
+                            : "var(--navbar-bg)",
                         borderBottomColor: visible 
-                            ? "rgba(0, 0, 0, 0.12)" 
-                            : "rgba(0, 0, 0, 0.08)",
+                            ? "var(--navbar-border-scroll)" 
+                            : "var(--navbar-border)",
                         boxShadow: visible
-                            ? "0 4px 30px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
-                            : "0 2px 20px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                            ? "var(--navbar-shadow-scroll)"
+                            : "var(--navbar-shadow)"
                     }}
                     transition={{
                         duration: 0.5,
@@ -134,8 +137,11 @@ export default function Navbar() {
                             </motion.div>
 
                             {/* Center Search Bar */}
-                            <div className="flex-1 max-w-xl mx-12">
-                                <SearchBar />
+                            <div className="flex-1 max-w-xl mx-12 flex items-center gap-2">
+                                <div className="flex-1">
+                                    <SearchBar />
+                                </div>
+                                <ThemeToggle />
                             </div>
 
                             {/* Right Actions */}
@@ -149,7 +155,7 @@ export default function Navbar() {
                                 >
                                     <Link 
                                         href="/products"
-                                        className="px-4 py-2 text-sm font-medium text-gray-800 hover:text-black hover:bg-black/[0.06] rounded-xl transition-all duration-300"
+                                        className="px-4 py-2 text-sm font-medium text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] rounded-xl transition-all duration-300"
                                     >
                                         Shop
                                     </Link>
@@ -162,7 +168,7 @@ export default function Navbar() {
                                 >
                                     <Link 
                                         href="/blogs"
-                                        className="px-4 py-2 text-sm font-medium text-gray-800 hover:text-black hover:bg-black/[0.06] rounded-xl transition-all duration-300"
+                                        className="px-4 py-2 text-sm font-medium text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] rounded-xl transition-all duration-300"
                                     >
                                         Blog
                                     </Link>
@@ -187,16 +193,17 @@ export default function Navbar() {
                                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                                     exit={{ opacity: 0, scale: 0.92, y: -10 }}
                                                     transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                                                    className="absolute right-0 top-full mt-7 w-64 bg-white/98 backdrop-blur-[40px] backdrop-saturate-[200%] rounded-2xl shadow-2xl border border-black/10 py-2 overflow-hidden"
+                                                    className="absolute right-0 top-full mt-7 w-64 backdrop-blur-[40px] backdrop-saturate-[200%] rounded-2xl shadow-2xl border border-[var(--navbar-border-scroll)] py-2 overflow-hidden"
                                                     style={{
+                                                        backgroundColor: "var(--dropdown-bg)",
                                                         WebkitBackdropFilter: "blur(40px) saturate(200%)",
                                                         backdropFilter: "blur(40px) saturate(200%)",
-                                                        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                                                        boxShadow: "var(--dropdown-shadow)"
                                                     }}
                                                 >
-                                                    <div className="px-4 py-3 bg-gradient-to-br from-black/[0.04] to-black/[0.02] border-b border-black/[0.06]">
-                                                        <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                                                        <p className="text-xs text-gray-600 truncate mt-0.5">{user.email}</p>
+                                                    <div className="px-4 py-3 bg-[var(--nav-hover-bg)] border-b border-[var(--navbar-border)]">
+                                                        <p className="text-sm font-semibold text-[var(--nav-text)] truncate">{user.name}</p>
+                                                        <p className="text-xs text-[var(--nav-text-muted)] truncate mt-0.5">{user.email}</p>
                                                     </div>
                                                     
                                                     <div className="py-1">
@@ -205,9 +212,9 @@ export default function Navbar() {
                                                                 setIsProfileOpen(false);
                                                                 router.push('/orders');
                                                             }}
-                                                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-800 hover:bg-black/[0.06] active:bg-black/[0.08] transition-all duration-200"
+                                                            className="flex items-center w-full px-4 py-2.5 text-sm text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-all duration-200"
                                                         >
-                                                            <svg className="mr-3 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                                             </svg>
                                                             My Orders
@@ -218,9 +225,9 @@ export default function Navbar() {
                                                                 setIsProfileOpen(false);
                                                                 router.push('/returns');
                                                             }}
-                                                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-800 hover:bg-black/[0.06] active:bg-black/[0.08] transition-all duration-200"
+                                                            className="flex items-center w-full px-4 py-2.5 text-sm text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-all duration-200"
                                                         >
-                                                            <svg className="mr-3 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
                                                             </svg>
                                                             My Returns
@@ -232,9 +239,9 @@ export default function Navbar() {
                                                                     setIsProfileOpen(false);
                                                                     router.push('/admin');
                                                                 }}
-                                                                className="flex items-center w-full px-4 py-2.5 text-sm text-gray-800 hover:bg-black/[0.06] active:bg-black/[0.08] transition-all duration-200"
+                                                                className="flex items-center w-full px-4 py-2.5 text-sm text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-all duration-200"
                                                             >
-                                                                <svg className="mr-3 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                 </svg>
@@ -243,7 +250,7 @@ export default function Navbar() {
                                                         )}
                                                     </div>
 
-                                                    <div className="border-t border-black/[0.06] mt-1">
+                                                    <div className="border-t border-[var(--navbar-border)] mt-1">
                                                         <button
                                                             onClick={handleLogout}
                                                             disabled={isLoggingOut}
@@ -262,7 +269,7 @@ export default function Navbar() {
                                 ) : (
                                     <motion.button
                                         onClick={() => triggerRegisterModal()}
-                                        className="px-5 py-2 text-sm font-medium text-gray-800 hover:text-black bg-black/[0.06] hover:bg-black/[0.10] rounded-xl transition-all duration-300 hover:shadow-sm"
+                                        className="px-5 py-2 text-sm font-medium text-[var(--nav-text)] bg-[var(--nav-hover-bg)] hover:opacity-80 rounded-xl transition-all duration-300 hover:shadow-sm"
                                         whileHover={{ scale: 1.03, y: -1 }}
                                         whileTap={{ scale: 0.98 }}
                                     >
@@ -279,11 +286,11 @@ export default function Navbar() {
                                             triggerRegisterModal();
                                         }
                                     }}
-                                    className="relative p-2.5 rounded-xl bg-black/[0.06] hover:bg-black/[0.10] transition-all duration-300 hover:shadow-sm"
+                                    className="relative p-2.5 rounded-xl bg-[var(--nav-hover-bg)] hover:opacity-80 transition-all duration-300 hover:shadow-sm"
                                     whileHover={{ scale: 1.08, y: -1 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    <svg className="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="h-5 w-5 text-[var(--nav-icon-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                     </svg>
                                     <AnimatePresence>
@@ -308,12 +315,12 @@ export default function Navbar() {
 
             {/* Mobile Top Search Bar - Enhanced Apple Liquid Glass Effect */}
             <motion.div 
-                className="lg:hidden fixed top-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-b border-black/10"
+                className="lg:hidden fixed top-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-b border-[var(--navbar-border)]"
                 style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.75)",
+                    backgroundColor: "var(--navbar-bg)",
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
-                    boxShadow: "0 2px 20px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                    boxShadow: "var(--navbar-shadow)"
                 }}
                 initial={{ y: -100 }}
                 animate={{ 
@@ -345,17 +352,19 @@ export default function Navbar() {
                     <div className="flex-1">
                         <SearchBar placeholder="Search jewelry, collections..." />
                     </div>
+                    {/* Theme Toggle */}
+                    <ThemeToggle />
                 </div>
             </motion.div>
 
             {/* Mobile Bottom Navigation - Enhanced Apple Liquid Glass Effect */}
             <motion.div 
-                className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-black/10"
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-[var(--navbar-border)]"
                 style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.75)",
+                    backgroundColor: "var(--navbar-bg)",
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
-                    boxShadow: "0 -2px 20px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                    boxShadow: "var(--navbar-shadow)"
                 }}
                 initial={{ y: 100 }}
                 animate={{ 
@@ -374,15 +383,15 @@ export default function Navbar() {
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}>
                         <Link href="/" className="flex flex-col items-center p-2 space-y-1.5">
                             <motion.div
-                                className="p-2.5 rounded-2xl bg-black/[0.06]"
+                                className="p-2.5 rounded-2xl bg-[var(--nav-hover-bg)]"
                                 whileHover={{ backgroundColor: "rgba(212, 175, 118, 0.15)", scale: 1.08 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[var(--nav-icon-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m0 0h1a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
                             </motion.div>
-                            <span className="text-xs text-gray-700 font-medium">Home</span>
+                            <span className="text-xs text-[var(--nav-text-muted)] font-medium">Home</span>
                         </Link>
                     </motion.div>
 
@@ -390,15 +399,15 @@ export default function Navbar() {
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}>
                         <Link href="/products" className="flex flex-col items-center p-2 space-y-1.5">
                             <motion.div
-                                className="p-2.5 rounded-2xl bg-black/[0.06]"
+                                className="p-2.5 rounded-2xl bg-[var(--nav-hover-bg)]"
                                 whileHover={{ backgroundColor: "rgba(212, 175, 118, 0.15)", scale: 1.08 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[var(--nav-icon-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                             </motion.div>
-                            <span className="text-xs text-gray-700 font-medium">Browse</span>
+                            <span className="text-xs text-[var(--nav-text-muted)] font-medium">Browse</span>
                         </Link>
                     </motion.div>
 
@@ -406,15 +415,15 @@ export default function Navbar() {
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}>
                         <Link href="/blogs" className="flex flex-col items-center p-2 space-y-1.5">
                             <motion.div
-                                className="p-2.5 rounded-2xl bg-black/[0.06]"
+                                className="p-2.5 rounded-2xl bg-[var(--nav-hover-bg)]"
                                 whileHover={{ backgroundColor: "rgba(212, 175, 118, 0.15)", scale: 1.08 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[var(--nav-icon-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </motion.div>
-                            <span className="text-xs text-gray-700 font-medium">Blog</span>
+                            <span className="text-xs text-[var(--nav-text-muted)] font-medium">Blog</span>
                         </Link>
                     </motion.div>
 
@@ -431,11 +440,11 @@ export default function Navbar() {
                             className="flex flex-col items-center p-2 space-y-1.5 relative"
                         >
                             <motion.div
-                                className="p-2.5 rounded-2xl bg-black/[0.06] relative"
+                                className="p-2.5 rounded-2xl bg-[var(--nav-hover-bg)] relative"
                                 whileHover={{ backgroundColor: "rgba(212, 175, 118, 0.15)", scale: 1.08 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[var(--nav-icon-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                 </svg>
                                 <AnimatePresence>
@@ -452,7 +461,7 @@ export default function Navbar() {
                                     )}
                                 </AnimatePresence>
                             </motion.div>
-                            <span className="text-xs text-gray-700 font-medium">Cart</span>
+                            <span className="text-xs text-[var(--nav-text-muted)] font-medium">Cart</span>
                         </button>
                     </motion.div>
 
@@ -471,7 +480,7 @@ export default function Navbar() {
                                     >
                                         {getInitials()}
                                     </motion.div>
-                                    <span className="text-xs text-gray-700 font-medium">Profile</span>
+                                    <span className="text-xs text-[var(--nav-text-muted)] font-medium">Profile</span>
                                 </button>
                                 
                                 <AnimatePresence>
@@ -481,11 +490,12 @@ export default function Navbar() {
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.92, y: 10 }}
                                             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                                            className="absolute bottom-full right-0 mb-4 w-52 bg-white/98 backdrop-blur-[40px] backdrop-saturate-[200%] rounded-2xl shadow-2xl border border-black/10 py-2 z-[110]"
+                                            className="absolute bottom-full right-0 mb-4 w-52 backdrop-blur-[40px] backdrop-saturate-[200%] rounded-2xl shadow-2xl border border-[var(--navbar-border-scroll)] py-2 z-[110]"
                                             style={{
+                                                backgroundColor: "var(--dropdown-bg)",
                                                 WebkitBackdropFilter: "blur(40px) saturate(200%)",
                                                 backdropFilter: "blur(40px) saturate(200%)",
-                                                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                                                boxShadow: "var(--dropdown-shadow)"
                                             }}
                                         >
                                             <button
@@ -495,9 +505,9 @@ export default function Navbar() {
                                                     setIsMobileMenuOpen(false);
                                                     router.push('/orders');
                                                 }}
-                                                className="flex items-center w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                                                className="flex items-center w-full px-4 py-3 text-left text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-colors"
                                             >
-                                                <svg className="mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                                 </svg>
                                                 My Orders
@@ -509,9 +519,9 @@ export default function Navbar() {
                                                     setIsMobileMenuOpen(false);
                                                     router.push('/returns');
                                                 }}
-                                                className="flex items-center w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                                                className="flex items-center w-full px-4 py-3 text-left text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-colors"
                                             >
-                                                <svg className="mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
                                                 </svg>
                                                 My Returns
@@ -524,16 +534,16 @@ export default function Navbar() {
                                                         setIsMobileMenuOpen(false);
                                                         router.push('/admin');
                                                     }}
-                                                    className="flex items-center w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                                                    className="flex items-center w-full px-4 py-3 text-left text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] active:bg-[var(--nav-hover-bg)] transition-colors"
                                                 >
-                                                    <svg className="mr-3 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg className="mr-3 h-4 w-4 text-[var(--nav-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
                                                     Admin
                                                 </button>
                                             )}
-                                            <div className="border-t border-gray-100 mt-2 pt-2">
+                                            <div className="border-t border-[var(--navbar-border)] mt-2 pt-2">
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
@@ -559,15 +569,15 @@ export default function Navbar() {
                                 className="flex flex-col items-center p-2 space-y-1"
                             >
                                 <motion.div
-                                    className="p-2 rounded-xl bg-gray-50"
+                                    className="p-2 rounded-xl bg-[var(--nav-hover-bg)]"
                                     whileHover={{ backgroundColor: "#D4AF76", scale: 1.1 }}
                                     transition={{ duration: 0.2 }}
                                 >
-                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[var(--nav-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </motion.div>
-                                <span className="text-xs text-gray-600 font-medium">Sign Up</span>
+                                <span className="text-xs text-[var(--nav-text-muted)] font-medium">Sign Up</span>
                             </button>
                         )}
                     </motion.div>

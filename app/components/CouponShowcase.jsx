@@ -93,15 +93,15 @@ export default function CouponShowcase() {
 
     if (loading) {
         return (
-            <section className="py-20 px-4 bg-gradient-to-br from-gray-50 via-white to-gray-50">
+            <section className="py-20 px-4 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-[#050505] dark:to-black">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
-                        <div className="h-8 bg-gray-200 rounded-lg w-64 mx-auto mb-4 animate-pulse"></div>
-                        <div className="h-4 bg-gray-200 rounded-lg w-96 mx-auto animate-pulse"></div>
+                        <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded-lg w-64 mx-auto mb-4 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-96 mx-auto animate-pulse"></div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-48 bg-gray-200 rounded-2xl animate-pulse"></div>
+                            <div key={i} className="h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
                         ))}
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export default function CouponShowcase() {
     }
 
     return (
-        <section className="py-20 px-4 bg-white">
+        <section className="py-20 px-4 bg-white dark:bg-black">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div 
@@ -127,10 +127,10 @@ export default function CouponShowcase() {
                     <p className="text-sm text-[#D4AF76] font-light tracking-widest uppercase mb-2">
                         Exclusive Offers
                     </p>
-                    <h2 className="text-4xl md:text-5xl font-light text-[#2C2C2C] tracking-tight mb-4">
+                    <h2 className="text-4xl md:text-5xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-4">
                         Special Savings
                     </h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto font-light">
+                    <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
                         Unlock exceptional value on our curated jewelry collection with these limited-time offers
                     </p>
                 </motion.div>
@@ -151,7 +151,7 @@ export default function CouponShowcase() {
                             className="group relative"
                         >
                             {/* Main Card */}
-                            <div className="relative bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-500">
+                            <div className="relative bg-white dark:bg-[#0A0A0A] rounded-3xl overflow-hidden shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] hover:shadow-lg transition-all duration-500">
                                 {/* Content */}
                                 <div className="p-8">
                                     {/* Discount Badge */}
@@ -175,16 +175,16 @@ export default function CouponShowcase() {
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => copyToClipboard(coupon.code)}
-                                            className="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 cursor-pointer group-hover:bg-[#D4AF76]/5 group-hover:border-[#D4AF76]/30 transition-all duration-300"
+                                            className="inline-block bg-gray-50 dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] rounded-2xl px-6 py-3 cursor-pointer group-hover:bg-[#D4AF76]/5 group-hover:border-[#D4AF76]/30 transition-all duration-300"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="text-center">
-                                                    <div className="text-xs text-gray-500 mb-1 font-light">Code</div>
-                                                    <div className="text-xl font-light text-[#2C2C2C] tracking-wider">
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-light">Code</div>
+                                                    <div className="text-xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-wider">
                                                         {coupon.code}
                                                     </div>
                                                 </div>
-                                                <div className="text-gray-400 group-hover:text-[#D4AF76] transition-colors">
+                                                <div className="text-gray-400 dark:text-gray-500 group-hover:text-[#D4AF76] transition-colors">
                                                     <AnimatePresence mode="wait">
                                                         {copiedCode === coupon.code ? (
                                                             <motion.div
@@ -214,7 +214,7 @@ export default function CouponShowcase() {
                                                     </AnimatePresence>
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-gray-400 mt-1 font-light">
+                                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-light">
                                                 Tap to copy
                                             </div>
                                         </motion.div>
@@ -222,7 +222,7 @@ export default function CouponShowcase() {
 
                                     {/* Description */}
                                     <div className="text-center mb-6">
-                                        <p className="text-gray-600 text-sm font-light leading-relaxed">
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed">
                                             {coupon.description}
                                         </p>
                                     </div>
@@ -231,13 +231,13 @@ export default function CouponShowcase() {
                                     <div className="space-y-3">
                                         {coupon.minimumOrderValue > 0 && (
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500 font-light">Minimum Order</span>
-                                                <span className="text-[#2C2C2C] font-light">₹{coupon.minimumOrderValue.toLocaleString()}</span>
+                                                <span className="text-gray-500 dark:text-gray-400 font-light">Minimum Order</span>
+                                                <span className="text-[#2C2C2C] dark:text-gray-200 font-light">₹{coupon.minimumOrderValue.toLocaleString()}</span>
                                             </div>
                                         )}
                                         
                                         <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500 font-light">Valid Until</span>
+                                            <span className="text-gray-500 dark:text-gray-400 font-light">Valid Until</span>
                                             <span className="text-[#2C2C2C] font-light">
                                                 {new Date(coupon.validUntil).toLocaleDateString('en-IN', { 
                                                     day: 'numeric', 
@@ -249,7 +249,7 @@ export default function CouponShowcase() {
 
                                         {coupon.usageLimit && (
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500 font-light">Remaining Uses</span>
+                                                <span className="text-gray-500 dark:text-gray-400 font-light">Remaining Uses</span>
                                                 <span className="text-[#D4AF76] font-light">
                                                     {coupon.usageLimit - (coupon.usedCount || 0)}
                                                 </span>

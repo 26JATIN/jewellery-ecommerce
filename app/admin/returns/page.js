@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { 
     RotateCcw, 
     Loader2, 
@@ -101,11 +102,11 @@ export default function AdminReturnsPage() {
             if (res.ok) {
                 fetchReturns(); // Refresh list
             } else {
-                alert(data.error || 'Failed to mark refund complete');
+                toast.error(data.error || 'Failed to mark refund complete');
             }
         } catch (err) {
             console.error('Error marking refund complete:', err);
-            alert('Something went wrong');
+            toast.error('Something went wrong');
         } finally {
             setProcessingRefund(null);
         }

@@ -44,7 +44,7 @@ export default function AboutPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white">
+        <main className="min-h-screen bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]">
             {/* Hero Section */}
             <section className="relative py-20 lg:py-32 overflow-hidden">
                 {/* Decorative Background */}
@@ -67,13 +67,13 @@ export default function AboutPage() {
                             </div>
                         </div>
                         
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-6">
                             A Bond of Trust & Quality
                             <br />
                             <span className="text-[#D4AF76]">Since the Beginning</span>
                         </h1>
                         
-                        <p className="text-xl md:text-2xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto leading-relaxed">
                             Where Craftsmanship Meets Elegance
                         </p>
                     </motion.div>
@@ -88,9 +88,9 @@ export default function AboutPage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="bg-white rounded-3xl p-8 lg:p-16 shadow-xl border border-gray-100"
+                        className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 lg:p-16 shadow-xl dark:shadow-none border border-gray-100 dark:border-white/[0.06]"
                     >
-                        <div className="space-y-6 text-gray-700 text-lg leading-relaxed font-light">
+                        <div className="space-y-6 text-gray-700 dark:text-gray-300 text-lg leading-relaxed font-light">
                             <p>
                                 At <span className="text-[#D4AF76] font-normal">Nandika Jewellers</span>, we believe jewelry is not just an ornament — it&apos;s a reflection of emotion, legacy, and artistry.
                             </p>
@@ -107,7 +107,7 @@ export default function AboutPage() {
                                 Trusted by thousands of customers across India, <span className="text-[#D4AF76] font-normal">Nandika Jewellers</span> stands for authenticity, hallmarked quality, and exceptional customer service.
                             </p>
                             
-                            <p className="text-xl text-[#2C2C2C] font-normal italic border-l-4 border-[#D4AF76] pl-6">
+                            <p className="text-xl text-[#2C2C2C] dark:text-gray-200 font-normal italic border-l-4 border-[#D4AF76] pl-6">
                                 We don&apos;t just sell jewelry — we create lifelong bonds built on trust, transparency, and timeless design.
                             </p>
                         </div>
@@ -125,7 +125,7 @@ export default function AboutPage() {
                         viewport={{ once: true }}
                         className="text-center mb-16"
                     >
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] tracking-tight mb-6">
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-6">
                             Our Core Values
                         </h2>
                         <div className="w-24 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent mx-auto" />
@@ -141,7 +141,7 @@ export default function AboutPage() {
                                 viewport={{ once: true }}
                                 className="group"
                             >
-                                <div className="bg-white rounded-3xl p-8 h-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group-hover:border-[#D4AF76]/30">
+                                <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 h-full shadow-lg hover:shadow-2xl dark:shadow-none transition-all duration-500 border border-gray-100 dark:border-white/[0.06] group-hover:border-[#D4AF76]/30">
                                     {/* Icon */}
                                     <div className="mb-6">
                                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
@@ -150,12 +150,12 @@ export default function AboutPage() {
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-2xl font-light text-[#2C2C2C] mb-4 group-hover:text-[#D4AF76] transition-colors">
+                                    <h3 className="text-2xl font-light text-[#2C2C2C] dark:text-gray-100 mb-4 group-hover:text-[#D4AF76] transition-colors">
                                         {value.title}
                                     </h3>
 
                                     {/* Description */}
-                                    <p className="text-gray-600 font-light leading-relaxed">
+                                    <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
                                         {value.description}
                                     </p>
 
@@ -222,7 +222,7 @@ export default function AboutPage() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-16 bg-white">
+            <section className="py-16 bg-white dark:bg-[#0A0A0A]">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
@@ -242,7 +242,7 @@ export default function AboutPage() {
                                 <h3 className="text-4xl lg:text-5xl font-light text-[#D4AF76] mb-2 group-hover:scale-110 transition-transform duration-300">
                                     {stat.number}
                                 </h3>
-                                <p className="text-gray-600 font-light">
+                                <p className="text-gray-600 dark:text-gray-400 font-light">
                                     {stat.label}
                                 </p>
                             </motion.div>

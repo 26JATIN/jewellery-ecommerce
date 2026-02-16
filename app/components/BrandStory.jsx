@@ -191,7 +191,7 @@ export default function BrandStory() {
                             viewport={{ once: true }}
                             className="absolute -bottom-8 -left-8 right-8 lg:right-auto lg:w-80"
                         >
-                            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
+                            <div className="bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
                                 <div className="text-[#D4AF76] mb-4">
                                     <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />

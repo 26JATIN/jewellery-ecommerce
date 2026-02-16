@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRequireAuth } from '@/app/hooks/useRequireAuth';
 import { 
     RotateCcw, 
     Loader2, 
@@ -30,6 +31,7 @@ const statusConfig = {
 
 export default function ReturnDetailPage({ params }) {
     const router = useRouter();
+    const { isAuthed, isChecking } = useRequireAuth({ message: 'Please sign in to view return details' });
     const [returnData, setReturnData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [resolvedParams, setResolvedParams] = useState(null);
@@ -79,7 +81,7 @@ export default function ReturnDetailPage({ params }) {
         });
     };
 
-    if (loading) {
+    if (isChecking || loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] flex items-center justify-center">
                 <div className="text-center">
@@ -90,15 +92,17 @@ export default function ReturnDetailPage({ params }) {
         );
     }
 
+    if (!isAuthed) return null;
+
     if (!returnData) return null;
 
     const StatusIcon = statusConfig[returnData.status]?.icon || Clock;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] pb-20 sm:pb-0">
+        <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pb-20 sm:pb-0">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white sticky top-0 z-40 shadow-lg">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white z-40 shadow-lg">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 sm:pt-6 sm:pb-6 lg:pt-24 lg:pb-6">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <Link
                             href="/returns"

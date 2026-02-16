@@ -316,7 +316,7 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                             setIsOpen(true);
                         }
                     }}
-                    className="w-full px-6 py-4 text-sm bg-white/60 backdrop-blur-lg border border-white/30 rounded-2xl focus:bg-white/90 focus:border-[#D4AF76]/50 focus:ring-4 focus:ring-[#D4AF76]/20 outline-none transition-all duration-300 shadow-sm pr-20 placeholder:text-gray-500 lg:px-6 lg:py-4 sm:px-4 sm:py-3"
+                    className="w-full px-6 py-4 text-sm bg-white/60 dark:bg-white/[0.06] backdrop-blur-lg border border-white/30 dark:border-white/10 rounded-2xl focus:bg-white/90 dark:focus:bg-white/[0.12] focus:border-[#D4AF76]/50 focus:ring-4 focus:ring-[#D4AF76]/20 outline-none transition-all duration-300 shadow-sm pr-20 placeholder:text-gray-500 dark:placeholder:text-gray-400 dark:text-gray-100 lg:px-6 lg:py-4 sm:px-4 sm:py-3"
                     whileFocus={{ scale: 1.01 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 />
@@ -383,11 +383,13 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -5, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                        className="absolute top-full left-0 right-0 mt-5 bg-white/98 backdrop-blur-[40px] backdrop-saturate-[200%] rounded-2xl shadow-2xl border border-black/10 overflow-hidden z-50"
+                        className="absolute top-full left-0 right-0 mt-5 rounded-2xl shadow-2xl border overflow-hidden z-50"
                         style={{
+                            backgroundColor: "var(--dropdown-bg)",
+                            borderColor: "var(--navbar-border-scroll)",
                             WebkitBackdropFilter: "blur(40px) saturate(200%)",
                             backdropFilter: "blur(40px) saturate(200%)",
-                            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5)"
+                            boxShadow: "var(--dropdown-shadow)"
                         }}
                     >
                         {isLoading ? (
@@ -395,10 +397,10 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                 {/* Loading skeleton */}
                                 {[1, 2, 3].map((i) => (
                                     <div key={i} className="flex items-center gap-4 px-4 py-3 animate-pulse">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
                                         <div className="flex-1">
-                                            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                                            <div className="h-3 bg-gray-100 rounded w-2/3"></div>
+                                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                            <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-2/3"></div>
                                         </div>
                                     </div>
                                 ))}
@@ -410,13 +412,13 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                 <motion.button
                                     key={suggestion.id}
                                     onClick={() => handleSuggestionClick(suggestion)}
-                                    className={`w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-gray-50 transition-all duration-200 ${
+                                    className={`w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-white/[0.06] transition-all duration-200 ${
                                         selectedIndex === index ? 'bg-[#D4AF76]/10 border-l-4 border-[#D4AF76]' : ''
                                     }`}
                                     whileHover={{ x: 4, backgroundColor: "rgba(212, 175, 118, 0.05)" }}
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                 >
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 border border-gray-200 relative flex items-center justify-center">
+                                    <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 relative flex items-center justify-center">
                                         {(suggestion.images?.[0]?.url || suggestion.image) && !imageErrors[suggestion.id] ? (
                                             <img
                                                 src={suggestion.images?.[0]?.url || suggestion.image}
@@ -434,7 +436,7 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                     
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between">
-                                            <p className="font-medium text-gray-900 truncate">
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                                                 {suggestion.text}
                                             </p>
                                             {suggestion.price && (
@@ -494,7 +496,7 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                         </div>
                         
                         {/* Search footer */}
-                        <div className="border-t border-gray-100 px-4 py-2 bg-gray-50/50">
+                        <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-2 bg-gray-50/50 dark:bg-white/[0.03]">
                             <button
                                 onClick={() => handleSearch()}
                                 className="flex items-center gap-2 text-sm text-[#D4AF76] hover:text-[#8B6B4C] transition-colors"

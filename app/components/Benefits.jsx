@@ -56,7 +56,7 @@ export default function Benefits() {
     return (
         <section className="py-20 lg:py-32 relative overflow-hidden">
             {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FAFAFA] to-[#F8F6F3]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FAFAFA] to-[#F8F6F3] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]" />
             
             {/* Decorative Elements */}
             <div className="absolute inset-0 opacity-5">
@@ -79,10 +79,10 @@ export default function Benefits() {
                             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF76] to-transparent" />
                         </div>
                     </div>
-                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
+                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-6">
                         Our Promise of Excellence
                     </h2>
-                    <p className="text-xl md:text-2xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto leading-relaxed">
                         Experience unmatched craftsmanship, trust, and luxury — every time you choose us.
                     </p>
                 </motion.div>
@@ -99,7 +99,7 @@ export default function Benefits() {
                             className="group relative"
                         >
                             {/* Card Container */}
-                            <div className="relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group-hover:border-[#D4AF76]/30 h-full">
+                            <div className="relative bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-white/[0.06] group-hover:border-[#D4AF76]/30 h-full">
                                 {/* Icon Container */}
                                 <div className="relative mb-6">
                                     <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${benefit.color} flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition-transform duration-300`}>
@@ -111,13 +111,13 @@ export default function Benefits() {
 
                                 {/* Content */}
                                 <div className="space-y-4">
-                                    <h3 className="text-xl lg:text-2xl font-light text-[#2C2C2C] group-hover:text-[#D4AF76] transition-colors duration-300">
+                                    <h3 className="text-xl lg:text-2xl font-light text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76] transition-colors duration-300">
                                         {benefit.title}
                                     </h3>
-                                    <p className="text-gray-600 font-light leading-relaxed">
+                                    <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
                                         {benefit.description}
                                     </p>
-                                    <p className="text-sm text-gray-500 font-light leading-relaxed">
+                                    <p className="text-sm text-gray-500 dark:text-gray-500 font-light leading-relaxed">
                                         {benefit.details}
                                     </p>
                                 </div>
@@ -152,18 +152,18 @@ export default function Benefits() {
                     viewport={{ once: true }}
                     className="text-center mt-16"
                 >
-                    <p className="text-lg text-gray-600 font-light mb-6">
+                    <p className="text-lg text-gray-600 dark:text-gray-400 font-light mb-6">
                         Join thousands of satisfied customers who trust our commitment to excellence
                     </p>
                     <div className="flex items-center justify-center gap-2">
                         <div className="flex -space-x-2">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] border-2 border-white flex items-center justify-center text-white text-xs font-light">
+                                <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] border-2 border-white dark:border-black flex items-center justify-center text-white text-xs font-light">
                                     {String.fromCharCode(65 + i)}
                                 </div>
                             ))}
                         </div>
-                        <span className="text-sm text-gray-600 font-light ml-3">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 font-light ml-3">
                             Trusted by 10,000+ customers
                         </span>
                     </div>

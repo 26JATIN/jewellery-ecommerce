@@ -8,7 +8,6 @@ import React, {
   useMemo,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import SafeImage from "./SafeImage";
 import { useRouter } from "next/navigation";
@@ -152,7 +151,7 @@ export const Card = React.memo(({
         borderRadius: '24px 24px 4px 24px'
       }}
     >
-      <div className="bg-white dark:bg-gray-800 h-full shadow-lg relative overflow-hidden" style={{ borderRadius: '16px 16px 2px 16px' }}>
+      <div className="bg-white dark:bg-[#0A0A0A] h-full shadow-lg relative overflow-hidden" style={{ borderRadius: '16px 16px 2px 16px' }}>
         <CategoryPreview
           category={card}
           className="w-full h-full"
@@ -425,10 +424,10 @@ export default function CategoryShowcase() {
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
       {[...Array(12)].map((_, index) => (
         <div key={index} className="animate-pulse">
-          <div className="bg-gray-200 dark:bg-gray-700 rounded-3xl aspect-[4/3] mb-4"></div>
+          <div className="bg-gray-200 dark:bg-gray-800 rounded-3xl aspect-[4/3] mb-4"></div>
           <div className="space-y-2">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
           </div>
         </div>
       ))}
@@ -525,7 +524,7 @@ export default function CategoryShowcase() {
                                                 className={`text-left px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-[1.02] flex items-center justify-between group ${
                                                     selectedCategory === filter
                                                         ? 'bg-gradient-to-r from-[#D4AF76] to-[#B8935F] text-white shadow-lg shadow-[#D4AF76]/20'
-                                                        : 'text-gray-900 dark:text-black hover:text-[#8B6B4C] dark:hover:text-[#D4AF76] hover:bg-[#D4AF76]/5 dark:hover:bg-[#D4AF76]/10 hover:shadow-md border border-transparent hover:border-[#D4AF76]/30'
+                                                        : 'text-gray-900 dark:text-gray-100 hover:text-[#8B6B4C] dark:hover:text-[#D4AF76] hover:bg-[#D4AF76]/5 dark:hover:bg-[#D4AF76]/10 hover:shadow-md border border-transparent hover:border-[#D4AF76]/30'
                                                 }`}
                                             >
                                                 <span className="truncate">{filter}</span>

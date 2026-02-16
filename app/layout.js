@@ -3,10 +3,12 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { NavbarProvider } from "./context/NavbarContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import ConditionalNavbar from "./components/ConditionalNavbar";
 import PWARegister from "./components/PWARegister";
 import InstallPrompt from "./components/InstallPrompt";
 import { Toaster } from "sonner";
+import ThemeToaster from "./components/ThemeToaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,28 +41,40 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#d4af37" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('theme');
+              if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+              }
+            } catch(e) {}
+          })();
+        `}} />
       </head>
-      <body className={inter.className}>
-        <Toaster position="top-right" richColors />
+      <body className={`${inter.className} bg-white dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
+        <ThemeToaster />
         <PWARegister />
         <InstallPrompt />
-        <AuthProvider>
-          <CartProvider>
-            <NavbarProvider>
-              <ConditionalNavbar />
-              <main>
-                {children}
-              </main>
-            </NavbarProvider>
-          </CartProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              <NavbarProvider>
+                <ConditionalNavbar />
+                <main>
+                  {children}
+                </main>
+              </NavbarProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

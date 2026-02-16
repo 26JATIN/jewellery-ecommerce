@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdminLayout from '@/app/components/AdminLayout';
+import { toast } from 'sonner';
 import { 
     Package, 
     Loader2, 
@@ -114,14 +115,14 @@ export default function AdminOrdersPage() {
                     if (docs.manifestError) errors.push(`Manifest: ${docs.manifestError}`);
                     if (docs.labelError) errors.push(`Label: ${docs.labelError}`);
                     if (docs.invoiceError) errors.push(`Invoice: ${docs.invoiceError}`);
-                    alert('Some documents could not be generated:\n' + errors.join('\n'));
+                    toast.warning('Some documents could not be generated:\n' + errors.join('\n'));
                 }
             } else {
-                alert(data.error || 'Failed to generate documents');
+                toast.error(data.error || 'Failed to generate documents');
             }
         } catch (err) {
             console.error('Error downloading documents:', err);
-            alert('Failed to download documents. Please try again.');
+            toast.error('Failed to download documents. Please try again.');
         } finally {
             setDownloadingDocs(prev => ({ ...prev, [`${orderId}-${docType}`]: false }));
         }

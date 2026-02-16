@@ -1,5 +1,6 @@
 "use client";
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
@@ -8,6 +9,7 @@ import { useEffect } from 'react';
 
 export default function Cart() {
     const router = useRouter();
+    const { user, triggerLoginModal } = useAuth();
     const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, loading } = useCart();
 
     // Handle browser back button to close cart
@@ -109,7 +111,7 @@ export default function Cart() {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-[101] flex flex-col"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-[#0A0A0A] shadow-2xl z-[101] flex flex-col"
                     >
                         {/* Header */}
                         <div className="relative bg-gradient-to-r from-[#8B6B4C] to-[#725939] text-white px-6 py-6">
@@ -147,7 +149,7 @@ export default function Cart() {
                                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                                     className="w-16 h-16 border-4 border-[#D4AF76] border-t-transparent rounded-full"
                                 />
-                                <p className="mt-4 text-gray-600 font-medium">Loading your cart...</p>
+                                <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">Loading your cart...</p>
                             </div>
                         ) : cartItems.length === 0 ? (
                             <div className="flex-1 flex flex-col items-center justify-center px-6">
@@ -159,8 +161,8 @@ export default function Cart() {
                                 >
                                     <ShoppingCart className="w-16 h-16 text-[#8B6B4C]" />
                                 </motion.div>
-                                <h3 className="text-xl font-semibold text-gray-800 mb-2">Your cart is empty</h3>
-                                <p className="text-gray-500 text-center mb-6">
+                                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Your cart is empty</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-center mb-6">
                                     Discover our exquisite collection of jewelry
                                 </p>
                                 <motion.button
@@ -178,7 +180,7 @@ export default function Cart() {
                         ) : (
                             <>
                                 {/* Cart Items */}
-                                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 bg-gray-50/50">
+                                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 bg-gray-50/50 dark:bg-black/50">
                                     <AnimatePresence mode="popLayout">
                                         {cartItems.map((item, index) => (
                                             <motion.div
@@ -189,7 +191,7 @@ export default function Cart() {
                                                 animate="visible"
                                                 exit="exit"
                                                 layout
-                                                className="group relative bg-white rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+                                                className="group relative bg-white dark:bg-[#111] rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-white/[0.06]"
                                             >
                                                 <div className="flex gap-4">
                                                     {/* Product Image */}
@@ -204,19 +206,19 @@ export default function Cart() {
 
                                                     {/* Product Info */}
                                                     <div className="flex-1 min-w-0">
-                                                        <h3 className="text-sm font-semibold text-gray-800 mb-1 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors pr-16">
+                                                        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors pr-16">
                                                             {item.name}
                                                         </h3>
                                                         <div className="flex items-center gap-2 mb-2">
                                                             <p className="text-base sm:text-lg font-bold text-[#8B6B4C]">
                                                                 {formatPrice(item.price)}
                                                             </p>
-                                                            <span className="text-xs text-gray-400">each</span>
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">each</span>
                                                         </div>
 
                                                         {/* Quantity Controls */}
                                                         <div className="flex items-center gap-2">
-                                                            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+                                                            <div className="flex items-center bg-gray-50 dark:bg-white/[0.06] border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden">
                                                                 <motion.button
                                                                     whileHover={{ backgroundColor: "#8B6B4C" }}
                                                                     whileTap={{ scale: 0.9 }}
@@ -263,22 +265,22 @@ export default function Cart() {
                                 </div>
 
                                 {/* Footer - Summary & Checkout */}
-                                <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-4 sm:py-5">
+                                <div className="border-t border-gray-200 dark:border-white/[0.06] bg-white dark:bg-[#0A0A0A] px-4 sm:px-6 py-4 sm:py-5">
                                     {/* Price Breakdown */}
                                     <div className="space-y-2 mb-4">
-                                        <div className="flex justify-between text-sm text-gray-600">
+                                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                             <span>Subtotal</span>
-                                            <span className="font-medium text-gray-900">{formatPrice(calculateSubtotal())}</span>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">{formatPrice(calculateSubtotal())}</span>
                                         </div>
-                                        <div className="flex justify-between text-sm text-gray-600">
+                                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                             <span>Shipping</span>
                                             <span className="font-medium text-[#8B6B4C]">FREE</span>
                                         </div>
                                     </div>
 
                                     {/* Total */}
-                                    <div className="flex justify-between items-center mb-6 pt-3 border-t border-gray-200">
-                                        <span className="text-lg font-bold text-gray-800">Total</span>
+                                    <div className="flex justify-between items-center mb-6 pt-3 border-t border-gray-200 dark:border-white/[0.06]">
+                                        <span className="text-lg font-bold text-gray-800 dark:text-gray-100">Total</span>
                                         <motion.span 
                                             key={calculateTotal()}
                                             initial={{ scale: 1.2 }}
@@ -292,6 +294,12 @@ export default function Cart() {
                                     {/* Checkout Button */}
                                     <button
                                         onClick={() => {
+                                            if (!user) {
+                                                // Not logged in — close cart and show login modal
+                                                setIsCartOpen(false);
+                                                triggerLoginModal();
+                                                return;
+                                            }
                                             setIsCartOpen(false);
                                             router.push('/checkout');
                                         }}

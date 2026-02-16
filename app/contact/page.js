@@ -99,7 +99,7 @@ export default function ContactPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white">
+        <main className="min-h-screen bg-gradient-to-br from-[#FAFAFA] via-[#F8F6F3] to-white dark:from-black dark:via-[#050505] dark:to-[#0A0A0A]">
             {/* Hero Section */}
             <section className="relative py-20 lg:py-32 overflow-hidden">
                 {/* Decorative Background */}
@@ -122,13 +122,13 @@ export default function ContactPage() {
                             </div>
                         </div>
                         
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] tracking-tight mb-6">
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-6">
                             We&apos;re Here to Help
                             <br />
                             <span className="text-[#D4AF76]">You Shine</span>
                         </h1>
                         
-                        <p className="text-xl md:text-2xl text-gray-600 font-light max-w-4xl mx-auto leading-relaxed">
+                        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-light max-w-4xl mx-auto leading-relaxed">
                             Get in touch with us for product inquiries, custom designs, or after-sales support.
                         </p>
                     </motion.div>
@@ -145,7 +145,7 @@ export default function ContactPage() {
                         viewport={{ once: true }}
                         className="text-center"
                     >
-                        <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
+                        <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 font-light leading-relaxed">
                             Whether you&apos;re looking for the perfect engagement ring, need assistance with a recent order, or wish to design your own masterpiece — our dedicated team is here for you.
                         </p>
                     </motion.div>
@@ -168,7 +168,7 @@ export default function ContactPage() {
                                 viewport={{ once: true }}
                                 className="group cursor-pointer"
                             >
-                                <div className="bg-white rounded-3xl p-6 lg:p-8 h-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 group-hover:border-[#D4AF76]/30">
+                                <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-6 lg:p-8 h-full shadow-lg hover:shadow-2xl dark:shadow-none transition-all duration-500 border border-gray-100 dark:border-white/[0.06] group-hover:border-[#D4AF76]/30">
                                     {/* Icon */}
                                     <div className="mb-6">
                                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
@@ -177,14 +177,14 @@ export default function ContactPage() {
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-xl font-light text-[#2C2C2C] mb-4 group-hover:text-[#D4AF76] transition-colors">
+                                    <h3 className="text-xl font-light text-[#2C2C2C] dark:text-gray-100 mb-4 group-hover:text-[#D4AF76] transition-colors">
                                         {info.title}
                                     </h3>
 
                                     {/* Details */}
                                     <div className="space-y-2">
                                         {info.details.map((detail, idx) => (
-                                            <p key={idx} className="text-gray-600 font-light text-sm leading-relaxed">
+                                            <p key={idx} className="text-gray-600 dark:text-gray-400 font-light text-sm leading-relaxed">
                                                 {detail}
                                             </p>
                                         ))}
@@ -207,17 +207,17 @@ export default function ContactPage() {
                             transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
                         >
-                            <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-xl border border-gray-100">
-                                <h2 className="text-3xl md:text-4xl font-light text-[#2C2C2C] mb-6">
+                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 lg:p-12 shadow-xl dark:shadow-none border border-gray-100 dark:border-white/[0.06]">
+                                <h2 className="text-3xl md:text-4xl font-light text-[#2C2C2C] dark:text-gray-100 mb-6">
                                     Send us a Message
                                 </h2>
-                                <p className="text-gray-600 font-light mb-8">
+                                <p className="text-gray-600 dark:text-gray-400 font-light mb-8">
                                     Fill out the form below and we&apos;ll get back to you within 24 hours.
                                 </p>
 
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-light text-gray-700 mb-2">
+                                        <label className="block text-sm font-light text-gray-700 dark:text-gray-300 mb-2">
                                             Your Name *
                                         </label>
                                         <input
@@ -226,14 +226,14 @@ export default function ContactPage() {
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
                                             placeholder="Enter your full name"
                                         />
                                     </div>
 
                                     <div className="grid sm:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-light text-gray-700 mb-2">
+                                            <label className="block text-sm font-light text-gray-700 dark:text-gray-300 mb-2">
                                                 Email Address *
                                             </label>
                                             <input
@@ -242,13 +242,13 @@ export default function ContactPage() {
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
                                                 placeholder="your@email.com"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-light text-gray-700 mb-2">
+                                            <label className="block text-sm font-light text-gray-700 dark:text-gray-300 mb-2">
                                                 Phone Number
                                             </label>
                                             <input
@@ -256,14 +256,14 @@ export default function ContactPage() {
                                                 name="phone"
                                                 value={formData.phone}
                                                 onChange={handleChange}
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
                                                 placeholder="+91 XXXXX XXXXX"
                                             />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-light text-gray-700 mb-2">
+                                        <label className="block text-sm font-light text-gray-700 dark:text-gray-300 mb-2">
                                             Subject *
                                         </label>
                                         <input
@@ -272,13 +272,13 @@ export default function ContactPage() {
                                             value={formData.subject}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300"
                                             placeholder="What is this about?"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-light text-gray-700 mb-2">
+                                        <label className="block text-sm font-light text-gray-700 dark:text-gray-300 mb-2">
                                             Message *
                                         </label>
                                         <textarea
@@ -287,7 +287,7 @@ export default function ContactPage() {
                                             onChange={handleChange}
                                             required
                                             rows="5"
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300 resize-none"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-100 focus:border-[#D4AF76] focus:outline-none focus:ring-2 focus:ring-[#D4AF76]/20 transition-all duration-300 resize-none"
                                             placeholder="Tell us how we can help you..."
                                         />
                                     </div>
@@ -379,7 +379,7 @@ export default function ContactPage() {
                             </div>
 
                             {/* Quick Links */}
-                            <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl p-8 shadow-lg dark:shadow-none border border-gray-100 dark:border-white/[0.06]">
                                 <h3 className="text-xl font-light text-[#2C2C2C] mb-4">
                                     Quick Links
                                 </h3>
@@ -393,7 +393,7 @@ export default function ContactPage() {
                                         <a
                                             key={index}
                                             href={link.href}
-                                            className="block text-gray-600 hover:text-[#D4AF76] font-light transition-colors group"
+                                            className="block text-gray-600 dark:text-gray-400 hover:text-[#D4AF76] font-light transition-colors group"
                                         >
                                             <span className="inline-flex items-center gap-2">
                                                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

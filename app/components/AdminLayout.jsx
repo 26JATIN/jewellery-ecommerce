@@ -2,7 +2,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({ children }) {
@@ -12,9 +12,22 @@ export default function AdminLayout({ children }) {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const wasDarkRef = useRef(false);
 
     useEffect(() => {
         setMounted(true);
+        // Force light mode for admin pages
+        const html = document.documentElement;
+        wasDarkRef.current = html.classList.contains('dark');
+        if (wasDarkRef.current) {
+            html.classList.remove('dark');
+        }
+        return () => {
+            // Restore dark mode when leaving admin
+            if (wasDarkRef.current) {
+                html.classList.add('dark');
+            }
+        };
     }, []);
 
     // Admin access protection
@@ -166,7 +179,7 @@ export default function AdminLayout({ children }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 text-gray-900">
             {/* Admin Header */}
             <header className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40">
                 <div className="px-4 lg:px-6 py-4">

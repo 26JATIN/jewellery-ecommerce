@@ -92,10 +92,10 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-[101] animate-slide-up">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-6 relative">
+      <div className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-2xl dark:shadow-none border border-gray-200 dark:border-white/[0.06] p-6 relative">
         <button
           onClick={handleDismiss}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           aria-label="Dismiss"
         >
           <X size={20} />
@@ -121,10 +121,10 @@ export default function InstallPrompt() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
               Install Nandika Jewellers
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Install our app for a faster experience with offline access and exclusive features!
             </p>
 
@@ -137,7 +137,7 @@ export default function InstallPrompt() {
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors text-sm font-medium"
               >
                 Not Now
               </button>

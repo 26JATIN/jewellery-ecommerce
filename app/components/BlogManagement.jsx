@@ -248,9 +248,9 @@ export default function BlogManagement() {
 
     if (showForm) {
         return (
-            <div className="max-w-5xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-3xl font-light tracking-wide text-gray-900">
+            <div className="max-w-5xl mx-auto px-2 sm:px-0">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-light tracking-wide text-gray-900">
                         {editingBlog ? 'Edit Article' : 'Create New Article'}
                     </h2>
                     <Button
@@ -266,7 +266,7 @@ export default function BlogManagement() {
                     </Button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                <form onSubmit={handleSubmit} className="space-y-6 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100">
                     <div>
                         <label className="block text-sm font-light mb-3 text-gray-700">Title *</label>
                         <Input
@@ -313,7 +313,7 @@ export default function BlogManagement() {
                         
                         <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-[#D4AF76] focus-within:border-transparent transition-all shadow-sm hover:shadow-md bg-white">
                             {/* Rich Text Toolbar */}
-                            <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 border-b border-gray-200">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-1 p-2 sm:p-2 bg-gray-50 border-b border-gray-200">
                                 {/* Font Family */}
                                 <select
                                     onChange={(e) => {
@@ -326,10 +326,10 @@ export default function BlogManagement() {
                                             }));
                                         }
                                     }}
-                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors mr-2"
+                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors"
                                     defaultValue=""
                                 >
-                                    <option value="" disabled>Font Family</option>
+                                    <option value="" disabled>Font</option>
                                     <option value="'Playfair Display', serif">Playfair Display</option>
                                     <option value="'Georgia', serif">Georgia</option>
                                     <option value="'Times New Roman', serif">Times New Roman</option>
@@ -351,7 +351,7 @@ export default function BlogManagement() {
                                             }));
                                         }
                                     }}
-                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors mr-2"
+                                    className="h-8 px-2 text-xs border border-gray-200 rounded bg-white focus:border-[#D4AF76] focus:outline-none font-light text-gray-600 cursor-pointer hover:border-gray-300 transition-colors"
                                     defaultValue=""
                                 >
                                     <option value="" disabled>Size</option>
@@ -362,7 +362,7 @@ export default function BlogManagement() {
                                     <option value="2rem">Heading</option>
                                 </select>
 
-                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+                                <div className="hidden sm:block w-px h-5 bg-gray-300 mx-1"></div>
 
                                 {/* Heading Tags */}
                                 <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
@@ -392,7 +392,7 @@ export default function BlogManagement() {
                                     </button>
                                 </div>
 
-                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+                                <div className="hidden sm:block w-px h-5 bg-gray-300 mx-1"></div>
 
                                 {/* Text Formatting */}
                                 <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
@@ -422,7 +422,7 @@ export default function BlogManagement() {
                                     </button>
                                 </div>
 
-                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+                                <div className="hidden sm:block w-px h-5 bg-gray-300 mx-1"></div>
 
                                 {/* Lists */}
                                 <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
@@ -444,7 +444,7 @@ export default function BlogManagement() {
                                     </button>
                                 </div>
 
-                                <div className="w-px h-5 bg-gray-300 mx-2"></div>
+                                <div className="hidden sm:block w-px h-5 bg-gray-300 mx-1"></div>
 
                                 {/* Blockquote & Link */}
                                 <div className="flex items-center gap-0.5 bg-white rounded-lg border border-gray-200 p-0.5">
@@ -474,7 +474,7 @@ export default function BlogManagement() {
                                 rows={20}
                                 required
                                 placeholder="Start writing your beautiful story..."
-                                className="border-0 rounded-none focus:ring-0 resize-y min-h-[400px] font-light font-mono text-sm leading-relaxed p-6 bg-white outline-none active:outline-none focus:outline-none focus-visible:ring-0"
+                                className="border-0 rounded-none focus:ring-0 resize-y min-h-[250px] sm:min-h-[400px] font-light font-mono text-sm leading-relaxed p-3 sm:p-6 bg-white outline-none active:outline-none focus:outline-none focus-visible:ring-0"
                             />
                         </div>
                         <p className="text-xs text-gray-400 mt-2 font-light flex items-center gap-1.5 pl-1">
@@ -485,7 +485,7 @@ export default function BlogManagement() {
 
 
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
                             <label className="block text-sm font-light mb-3 text-gray-700">Category</label>
                             <select
@@ -577,7 +577,7 @@ export default function BlogManagement() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <Input
                                     value={formData.featuredImage.url}
@@ -589,7 +589,7 @@ export default function BlogManagement() {
                                         });
                                         setImagePreview(url);
                                     }}
-                                    placeholder="https://..."
+                                    placeholder="Image URL (https://...)"
                                     className="rounded-2xl border-gray-200 focus:border-[#D4AF76] focus:ring-[#D4AF76] font-light"
                                 />
                             </div>
@@ -608,8 +608,8 @@ export default function BlogManagement() {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-8">
-                        <h3 className="text-lg font-light tracking-wide mb-6 text-gray-900">SEO Settings</h3>
+                    <div className="border-t border-gray-200 pt-6 sm:pt-8">
+                        <h3 className="text-base sm:text-lg font-light tracking-wide mb-4 sm:mb-6 text-gray-900">SEO Settings</h3>
                         
                         <div className="space-y-6">
                             <div>
@@ -688,18 +688,18 @@ export default function BlogManagement() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h2 className="text-4xl font-light tracking-wide text-gray-900 mb-2">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-wide text-gray-900 mb-1 sm:mb-2">
                         Article Management
                     </h2>
-                    <p className="text-gray-600 font-light">
+                    <p className="text-sm sm:text-base text-gray-600 font-light">
                         Create and manage your blog articles
                     </p>
                 </div>
                 <Button 
                     onClick={() => setShowForm(true)}
-                    className="bg-gradient-to-r from-[#D4AF76] to-[#B8956A] hover:from-[#B8956A] hover:to-[#D4AF76] text-[#2C2C2C] rounded-full px-8 py-6 font-light shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+                    className="w-full sm:w-auto bg-gradient-to-r from-[#D4AF76] to-[#B8956A] hover:from-[#B8956A] hover:to-[#D4AF76] text-[#2C2C2C] rounded-full px-6 sm:px-8 py-5 sm:py-6 font-light shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
                     <Plus className="w-5 h-5" />
                     Create Article
@@ -707,8 +707,8 @@ export default function BlogManagement() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-6 rounded-3xl shadow-lg mb-8 border border-gray-100">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg mb-6 sm:mb-8 border border-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
@@ -766,28 +766,28 @@ export default function BlogManagement() {
                     <p className="text-gray-500 font-light text-lg">No articles found</p>
                 </div>
             ) : (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                     {blogs.map((blog) => (
                         <div 
                             key={blog._id} 
-                            className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
+                            className="bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
                         >
-                            <div className="p-8">
-                                <div className="flex items-start gap-6">
+                            <div className="p-4 sm:p-6 lg:p-8">
+                                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                                     {blog.featuredImage?.url && (
                                         <img
                                             src={blog.featuredImage.url}
                                             alt={blog.featuredImage.alt || blog.title}
-                                            className="w-48 h-32 object-cover rounded-2xl flex-shrink-0"
+                                            className="w-full sm:w-40 lg:w-48 h-40 sm:h-28 lg:h-32 object-cover rounded-xl sm:rounded-2xl flex-shrink-0"
                                         />
                                     )}
                                     
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between gap-4 mb-3">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <h3 className="text-2xl font-light tracking-wide text-gray-900">{blog.title}</h3>
-                                                    <span className={`px-4 py-1.5 text-xs font-light rounded-full ${
+                                    <div className="flex-1 min-w-0 w-full">
+                                        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                                    <h3 className="text-lg sm:text-xl lg:text-2xl font-light tracking-wide text-gray-900">{blog.title}</h3>
+                                                    <span className={`px-3 sm:px-4 py-1 sm:py-1.5 text-xs font-light rounded-full whitespace-nowrap ${
                                                         blog.isPublished 
                                                             ? 'bg-gradient-to-r from-green-100 to-green-50 text-green-700 border border-green-200' 
                                                             : 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 border border-gray-200'
@@ -796,9 +796,9 @@ export default function BlogManagement() {
                                                     </span>
                                                 </div>
                                                 
-                                                <p className="text-gray-600 font-light mb-4 line-clamp-2">{blog.excerpt}</p>
+                                                <p className="text-sm sm:text-base text-gray-600 font-light mb-3 sm:mb-4 line-clamp-2">{blog.excerpt}</p>
                                                 
-                                                <div className="flex items-center gap-4 text-sm text-gray-500 font-light">
+                                                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 font-light">
                                                     <span className="flex items-center gap-1.5">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF76]"></span>
                                                         {blog.category.replace(/-/g, ' ')}
@@ -807,9 +807,9 @@ export default function BlogManagement() {
                                                         <Eye size={14} />
                                                         {blog.views || 0} views
                                                     </span>
-                                                    <span>By: {blog.author?.name || 'Admin'}</span>
+                                                    <span className="hidden sm:inline">By: {blog.author?.name || 'Admin'}</span>
                                                     {blog.publishedAt && (
-                                                        <span>
+                                                        <span className="hidden sm:inline">
                                                             {new Date(blog.publishedAt).toLocaleDateString('en-US', { 
                                                                 year: 'numeric', 
                                                                 month: 'short', 
@@ -826,26 +826,26 @@ export default function BlogManagement() {
                                                         variant="outline"
                                                         size="icon"
                                                         onClick={() => window.open(`/blogs/${blog.slug}`, '_blank')}
-                                                        className="rounded-full h-10 w-10 border-blue-300 hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200"
+                                                        className="rounded-full h-9 w-9 sm:h-10 sm:w-10 border-blue-300 hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200"
                                                     >
-                                                        <Eye size={16} className="text-blue-500" />
+                                                        <Eye size={15} className="text-blue-500" />
                                                     </Button>
                                                 )}
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
                                                     onClick={() => handleEdit(blog)}
-                                                    className="rounded-full h-10 w-10 border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 transition-colors duration-200"
+                                                    className="rounded-full h-9 w-9 sm:h-10 sm:w-10 border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 transition-colors duration-200"
                                                 >
-                                                    <Edit size={16} className="text-[#8B6B4C]" />
+                                                    <Edit size={15} className="text-[#8B6B4C]" />
                                                 </Button>
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
                                                     onClick={() => handleDelete(blog._id)}
-                                                    className="rounded-full h-10 w-10 border-red-300 hover:border-red-400 hover:bg-red-50 transition-colors duration-200"
+                                                    className="rounded-full h-9 w-9 sm:h-10 sm:w-10 border-red-300 hover:border-red-400 hover:bg-red-50 transition-colors duration-200"
                                                 >
-                                                    <Trash2 size={16} className="text-red-500" />
+                                                    <Trash2 size={15} className="text-red-500" />
                                                 </Button>
                                             </div>
                                         </div>
@@ -859,23 +859,23 @@ export default function BlogManagement() {
 
             {/* Pagination */}
             {pagination.pages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-8">
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-6 sm:mt-8">
                     <Button
                         variant="outline"
                         onClick={() => fetchBlogs(pagination.page - 1)}
                         disabled={!pagination.hasPrev}
-                        className="rounded-full px-6 font-light border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto rounded-full px-6 font-light border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Previous
                     </Button>
-                    <span className="px-6 py-2 bg-gradient-to-r from-[#D4AF76]/20 to-[#B8956A]/10 rounded-full font-light text-[#8B6B4C] border border-[#D4AF76]/30">
+                    <span className="px-6 py-2 bg-gradient-to-r from-[#D4AF76]/20 to-[#B8956A]/10 rounded-full font-light text-[#8B6B4C] border border-[#D4AF76]/30 text-sm sm:text-base">
                         Page {pagination.page} of {pagination.pages}
                     </span>
                     <Button
                         variant="outline"
                         onClick={() => fetchBlogs(pagination.page + 1)}
                         disabled={!pagination.hasNext}
-                        className="rounded-full px-6 font-light border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto rounded-full px-6 font-light border-gray-300 hover:border-[#D4AF76] hover:bg-[#D4AF76]/5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Next
                     </Button>
