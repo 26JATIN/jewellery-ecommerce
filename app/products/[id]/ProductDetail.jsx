@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import SafeImage from '../../components/SafeImage';
 import ProductVariantSelector from '../../components/ProductVariantSelector';
@@ -9,6 +9,181 @@ import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import { isProductOutOfStock, getEffectiveStock, hasLowStock } from '@/lib/productUtils';
 import { toast } from 'sonner';
+
+// Mobile swipeable image gallery — touch-controlled, strictly 1 image per swipe
+function MobileImageGallery({ images, productName, isOutOfStock, effectiveStock, discount }) {
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [loadedImages, setLoadedImages] = useState(new Set([0]));
+    const [dragOffset, setDragOffset] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+    const containerRef = useRef(null);
+    const isHorizontalSwipeRef = useRef(null);
+
+    // Preload adjacent images
+    useEffect(() => {
+        setLoadedImages(prev => {
+            const next = new Set(prev);
+            next.add(activeIndex);
+            if (activeIndex > 0) next.add(activeIndex - 1);
+            if (activeIndex < images.length - 1) next.add(activeIndex + 1);
+            return next;
+        });
+    }, [activeIndex, images.length]);
+
+    const handleTouchStart = useCallback((e) => {
+        const touch = e.touches[0];
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+        isHorizontalSwipeRef.current = null;
+        setIsDragging(true);
+    }, []);
+
+    const handleTouchMove = useCallback((e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const diffX = touch.clientX - touchStartRef.current.x;
+        const diffY = touch.clientY - touchStartRef.current.y;
+
+        // Determine swipe direction on first significant move
+        if (isHorizontalSwipeRef.current === null && (Math.abs(diffX) > 5 || Math.abs(diffY) > 5)) {
+            isHorizontalSwipeRef.current = Math.abs(diffX) > Math.abs(diffY);
+        }
+
+        // Only handle horizontal swipes
+        if (isHorizontalSwipeRef.current) {
+            e.preventDefault();
+            // Clamp drag at edges with rubber-band effect
+            let offset = diffX;
+            if ((activeIndex === 0 && diffX > 0) || (activeIndex === images.length - 1 && diffX < 0)) {
+                offset = diffX * 0.3; // Rubber band
+            }
+            setDragOffset(offset);
+        }
+    }, [isDragging, activeIndex, images.length]);
+
+    const handleTouchEnd = useCallback(() => {
+        if (!isDragging) return;
+        setIsDragging(false);
+        const threshold = containerRef.current ? containerRef.current.offsetWidth * 0.2 : 80;
+        const timeDiff = Date.now() - touchStartRef.current.time;
+        const velocity = Math.abs(dragOffset) / timeDiff;
+
+        // Swipe if dragged past threshold OR fast flick
+        if (dragOffset < -threshold || (dragOffset < -30 && velocity > 0.3)) {
+            // Swipe left → next
+            if (activeIndex < images.length - 1) {
+                setActiveIndex(prev => prev + 1);
+            }
+        } else if (dragOffset > threshold || (dragOffset > 30 && velocity > 0.3)) {
+            // Swipe right → prev
+            if (activeIndex > 0) {
+                setActiveIndex(prev => prev - 1);
+            }
+        }
+        setDragOffset(0);
+        isHorizontalSwipeRef.current = null;
+    }, [isDragging, dragOffset, activeIndex, images.length]);
+
+    const goToIndex = useCallback((index) => {
+        setActiveIndex(index);
+    }, []);
+
+    return (
+        <div className="relative">
+            {/* Gallery container */}
+            <div 
+                ref={containerRef}
+                className="overflow-hidden rounded-3xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06]"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
+                <div 
+                    className="flex"
+                    style={{ 
+                        transform: `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
+                        transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                        willChange: 'transform',
+                    }}
+                >
+                    {images.map((img, index) => (
+                        <div 
+                            key={index} 
+                            className="w-full flex-shrink-0"
+                        >
+                            <div className="aspect-square relative bg-white dark:bg-[#0A0A0A]">
+                                {loadedImages.has(index) ? (
+                                    <SafeImage
+                                        src={img}
+                                        alt={`${productName} ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        priority={index === 0}
+                                        loading={index === 0 ? "eager" : "lazy"}
+                                        quality={80}
+                                        draggable={false}
+                                    />
+                                ) : (
+                                    <SafeImage
+                                        src={img}
+                                        alt={`${productName} ${index + 1}`}
+                                        fill
+                                        className="object-cover blur-sm scale-105"
+                                        quality={1}
+                                        loading="lazy"
+                                        draggable={false}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Badges */}
+            {!isOutOfStock && effectiveStock > 0 && effectiveStock <= 5 && (
+                <div className="absolute top-4 right-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-4 py-2 shadow-lg z-20">
+                    <span className="text-sm font-medium">Only {effectiveStock} left!</span>
+                </div>
+            )}
+            {isOutOfStock && (
+                <div className="absolute top-4 right-5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-4 py-2 shadow-lg z-20">
+                    <span className="text-sm font-medium">Out of Stock</span>
+                </div>
+            )}
+            {discount > 0 && (
+                <div className="absolute top-4 left-5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-4 py-2 shadow-lg z-20">
+                    <span className="text-sm font-medium">{discount}% OFF</span>
+                </div>
+            )}
+
+            {/* Dot indicators */}
+            {images.length > 1 && (
+                <div className="flex justify-center gap-2 mt-3">
+                    {images.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => goToIndex(index)}
+                            className={`rounded-full transition-all duration-300 ${
+                                activeIndex === index 
+                                    ? 'w-6 h-2 bg-[#D4AF76]' 
+                                    : 'w-2 h-2 bg-gray-300 dark:bg-gray-600'
+                            }`}
+                            aria-label={`View image ${index + 1}`}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Image counter */}
+            {images.length > 1 && (
+                <div className="absolute bottom-4 right-5 bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full z-20">
+                    {activeIndex + 1} / {images.length}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function ProductDetail({ productId }) {
     const router = useRouter();
@@ -196,6 +371,45 @@ export default function ProductDetail({ productId }) {
         }
     };
 
+    const handleShare = async () => {
+        const url = window.location.href;
+        const title = product?.name || 'Check out this product';
+        const price = selectedVariant?.price?.sellingPrice || product?.sellingPrice;
+        const text = `✨ ${product?.name} - Nandika Jewellers${price ? `\n💰 ₹${price.toLocaleString('en-IN')}` : ''}\n🔗 ${url}`;
+
+        // Always try navigator.share first — works on mobile Chrome, PWA, Safari
+        if (navigator.share) {
+            try {
+                await navigator.share({ 
+                    title, 
+                    text,
+                    url 
+                });
+                return;
+            } catch (err) {
+                // User cancelled or share failed
+                if (err.name === 'AbortError') return;
+            }
+        }
+        
+        // Fallback: copy link to clipboard
+        try {
+            await navigator.clipboard.writeText(url);
+            toast.success('Link copied to clipboard!');
+        } catch {
+            // Final fallback: manual copy
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            toast.success('Link copied to clipboard!');
+        }
+    };
+
     // Use variant images if available, otherwise use product images
     const displayImages = variantImages.length > 0 ? variantImages : (product?.images || (product?.image ? [{url: product.image, alt: product.name}] : []));
     const currentImage = displayImages[selectedImage] || displayImages[0];
@@ -322,8 +536,19 @@ export default function ProductDetail({ productId }) {
                         transition={{ duration: 0.6 }}
                         className="space-y-4"
                     >
-                        {/* Main Image */}
-                        <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] overflow-hidden">
+                        {/* Mobile Swipeable Gallery */}
+                        <div className="lg:hidden">
+                            <MobileImageGallery 
+                                images={displayImages} 
+                                productName={product.name}
+                                isOutOfStock={isOutOfStock}
+                                effectiveStock={effectiveStock}
+                                discount={discount}
+                            />
+                        </div>
+
+                        {/* Desktop Main Image */}
+                        <div className="hidden lg:block bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-lg dark:shadow-none dark:border dark:border-white/[0.06] overflow-hidden">
                             <div className="aspect-square relative">
                                 <AnimatePresence mode="wait">
                                     <motion.div
@@ -365,9 +590,9 @@ export default function ProductDetail({ productId }) {
                             </div>
                         </div>
 
-                        {/* Thumbnail Images */}
+                        {/* Desktop Thumbnail Images */}
                         {displayImages.length > 1 && (
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="hidden lg:grid grid-cols-4 gap-4">
                                 {displayImages.map((img, index) => (
                                     <motion.button
                                         key={index}
@@ -400,12 +625,23 @@ export default function ProductDetail({ productId }) {
                         transition={{ duration: 0.6 }}
                         className="space-y-6"
                     >
-                        {/* Category */}
-                        <div className="inline-flex items-center gap-2 bg-[#D4AF76]/10 text-[#8B6B4C] px-4 py-2 rounded-full">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                            <span className="text-sm font-light tracking-wide">{product.category}</span>
+                        {/* Category & Share */}
+                        <div className="flex items-center justify-between">
+                            <div className="inline-flex items-center gap-2 bg-[#D4AF76]/10 text-[#8B6B4C] px-4 py-2 rounded-full">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                <span className="text-sm font-light tracking-wide">{product.category}</span>
+                            </div>
+                            <button
+                                onClick={handleShare}
+                                className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/[0.08] hover:bg-[#D4AF76]/15 dark:hover:bg-[#D4AF76]/15 text-gray-600 dark:text-gray-400 hover:text-[#D4AF76] dark:hover:text-[#D4AF76] transition-all duration-200"
+                                aria-label="Share product"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                            </button>
                         </div>
 
                         {/* Product Name */}
