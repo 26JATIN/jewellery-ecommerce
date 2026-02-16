@@ -1,10 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
-import { useProducts } from '../hooks/useProducts';
 import SafeImage from './SafeImage';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 
@@ -12,51 +11,40 @@ export default function NewArrivals() {
     const router = useRouter();
     const { addToCart, setIsCartOpen } = useCart();
     const [hoveredProduct, setHoveredProduct] = useState(null);
-    const [mounted, setMounted] = useState(false);
-    
-    const { products: allProducts, loading, error, refetch } = useProducts();
-    
-    // Handle client-side mounting
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-    
-    // Debug logging
-    useEffect(() => {
-        console.log('NewArrivals Debug:', {
-            allProducts: allProducts?.length,
-            loading,
-            error,
-            mounted
-        });
-    }, [allProducts, loading, error, mounted]);
-    
-    // Show first 8 products sorted by creation date (newest first)
-    const products = React.useMemo(() => {
-        if (!allProducts || !Array.isArray(allProducts) || allProducts.length === 0) {
-            console.log('NewArrivals: No products available');
-            return [];
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch only 8 newest products directly — not all 2000
+    const fetchNewArrivals = useCallback(async () => {
+        try {
+            setLoading(true);
+            const res = await fetch(`/api/products?limit=8&page=1&sortBy=createdAt&sortOrder=desc&_=${Date.now()}`, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' },
+            });
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const data = await res.json();
+            if (data.success && Array.isArray(data.data)) {
+                setProducts(data.data);
+            } else if (Array.isArray(data)) {
+                setProducts(data);
+            } else {
+                throw new Error('Unexpected response format');
+            }
+            setError(null);
+        } catch (err) {
+            console.error('NewArrivals fetch failed:', err.message);
+            setError(err.message);
+            setProducts([]);
+        } finally {
+            setLoading(false);
         }
-        
-        // Filter out invalid products only (don't filter by stock for new arrivals)
-        const validProducts = allProducts.filter(p => {
-            return p && p._id;
-        });
-        
-        console.log('NewArrivals: Valid products:', validProducts.length);
-        
-        // Sort by createdAt if available, otherwise use array order
-        const sorted = validProducts
-            .sort((a, b) => {
-                const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
-                const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
-                return dateB - dateA;
-            })
-            .slice(0, 8);
-            
-        console.log('NewArrivals: Final products to display:', sorted.length);
-        return sorted;
-    }, [allProducts]);
+    }, []);
+
+    useEffect(() => {
+        fetchNewArrivals();
+    }, [fetchNewArrivals]);
 
     const handleAddToCart = async (e, product) => {
         e.preventDefault();
@@ -122,8 +110,8 @@ export default function NewArrivals() {
                     </p>
                 </motion.div>
 
-                {/* Always show loading state initially or when not mounted */}
-                {!mounted || loading ? (
+                {/* Always show loading state initially */}
+                {loading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         {[...Array(8)].map((_, i) => (
                             <div key={i} className="animate-pulse">
@@ -151,7 +139,7 @@ export default function NewArrivals() {
                             <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">We're having trouble loading our latest collection right now.</p>
                             <div className="flex gap-3 justify-center flex-wrap">
                                 <button 
-                                    onClick={() => refetch()} 
+                                    onClick={() => fetchNewArrivals()} 
                                     className="px-6 py-2.5 bg-[#D4AF76] text-white rounded-lg hover:bg-[#C19A65] transition-colors font-medium text-sm"
                                 >
                                     Try Again
@@ -208,26 +196,17 @@ export default function NewArrivals() {
                                                 {/* Gradient Overlay */}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                                 
-                                                {/* NEW Badge */}
-                                                <motion.div 
-                                                    initial={{ scale: 0, rotate: -45 }}
-                                                    animate={{ scale: 1, rotate: 0 }}
-                                                    transition={{ delay: index * 0.1 }}
-                                                    className="absolute top-4 left-4 bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-full px-3 py-1.5 shadow-lg z-10"
-                                                >
-                                                    <span className="text-xs font-semibold tracking-wider">NEW</span>
-                                                </motion.div>
-
-                                                {/* Low Stock Badge - only show if stock is defined and low */}
-                                                {product.stock > 0 && product.stock <= 5 && (
-                                                    <motion.div
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                        className="absolute top-4 right-4 bg-orange-500 text-white rounded-full px-3 py-1.5 shadow-lg z-10"
-                                                    >
-                                                        <span className="text-xs font-semibold tracking-wider">ONLY {product.stock} LEFT</span>
-                                                    </motion.div>
-                                                )}
+                                                {/* Badges - stacked top-left */}
+                                                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+                                                    <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-full px-2.5 py-1 shadow-lg w-fit">
+                                                        <span className="text-[10px] font-semibold tracking-wider">NEW</span>
+                                                    </div>
+                                                    {product.stock > 0 && product.stock <= 5 && (
+                                                        <div className="bg-orange-500 text-white rounded-full px-2.5 py-1 shadow-lg w-fit">
+                                                            <span className="text-[10px] font-semibold tracking-wider">ONLY {product.stock} LEFT</span>
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 {/* Quick View Badge */}
                                                 <AnimatePresence>
@@ -289,7 +268,7 @@ export default function NewArrivals() {
                             <motion.button
                                 whileHover={{ scale: 1.05, x: 5 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={() => router.push('/products')}
+                                onClick={() => router.push('/products?sort=newest')}
                                 className="inline-flex items-center gap-3 bg-gradient-to-r from-[#2C2C2C] to-[#1A1A1A] text-white px-8 py-4 rounded-full font-medium shadow-xl hover:shadow-2xl transition-all duration-300 group"
                             >
                                 <span>View Latest Collection</span>

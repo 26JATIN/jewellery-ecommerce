@@ -82,6 +82,7 @@ export default function ProductsPage() {
         const categoryFromUrl = searchParams.get('category');
         const subcategoryFromUrl = searchParams.get('subcategory');
         const tagFromUrl = searchParams.get('tag');
+        const sortFromUrl = searchParams.get('sort');
         
         if (searchFromUrl) {
             setSearchTerm(searchFromUrl);
@@ -94,6 +95,9 @@ export default function ProductsPage() {
         }
         if (tagFromUrl) {
             setSelectedTags([tagFromUrl]);
+        }
+        if (sortFromUrl) {
+            setSortBy(sortFromUrl);
         }
         setUrlParamsProcessed(true);
     }, [searchParams]);
@@ -352,6 +356,9 @@ export default function ProductsPage() {
         if (selectedTags.length > 0) {
             params.set('tag', selectedTags[0]);
         }
+        if (sortBy && sortBy !== 'featured') {
+            params.set('sort', sortBy);
+        }
 
         const newUrl = params.toString() ? `/products?${params.toString()}` : '/products';
         const currentUrl = `${window.location.pathname}${window.location.search}`;
@@ -360,7 +367,7 @@ export default function ProductsPage() {
             isInternalUrlUpdate.current = true;
             router.replace(newUrl, { scroll: false });
         }
-    }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, urlParamsProcessed, dataReady, router]);
+    }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, sortBy, urlParamsProcessed, dataReady, router]);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-black pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
@@ -420,9 +427,6 @@ export default function ProductsPage() {
                             <motion.button
                                 key={category.name}
                                 data-category-selected={selectedCategory === category.name ? "true" : undefined}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.2 }}
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleCategoryClick(category.name)}
@@ -529,7 +533,7 @@ export default function ProductsPage() {
                             <motion.button
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.2 }}
+                                transition={{ duration: 0.3 }}
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleSubcategoryClick('All')}
@@ -584,9 +588,6 @@ export default function ProductsPage() {
                                 <motion.button
                                     key={subcategory._id}
                                     data-subcategory-selected={selectedSubcategory === subcategory._id ? "true" : undefined}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.2 }}
                                     whileHover={{ scale: 1.05, y: -2 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleSubcategoryClick(subcategory._id)}
@@ -982,9 +983,9 @@ export default function ProductsPage() {
 function ProductCard({ product, index }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
@@ -1026,9 +1027,9 @@ function ProductCard({ product, index }) {
 function ProductListItem({ product, index }) {
     return (
         <motion.div
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
+            transition={{ duration: 0.4, delay: index * 0.05 }}
             className="group"
         >
             <Link href={`/products/${product._id}`} className="block">
