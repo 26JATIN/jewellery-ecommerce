@@ -71,6 +71,7 @@
   --nav-text-muted: #4b5563;
   --nav-hover-bg: rgba(0, 0, 0, 0.06);
   --nav-icon-color: #374151;
+  --pwa-bottom-bg: #ffffff;
 }
 
 /* Pitch Black Dark Theme */
@@ -115,6 +116,7 @@
   --nav-text-muted: #9ca3af;
   --nav-hover-bg: rgba(255, 255, 255, 0.08);
   --nav-icon-color: #d1d5db;
+  --pwa-bottom-bg: #000000;
 
   color-scheme: dark;
 }
@@ -172,6 +174,16 @@ html {
   overflow-x: hidden;
   overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
+  /* Edge-to-edge PWA: extend page behind gesture pill / nav bar */
+  height: 100%;
+}
+
+/* PWA: fill the gesture-bar / safe-area gap with the page background */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    /* let body background fill behind the gesture pill */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 body {
@@ -452,6 +464,21 @@ img,
   .pt-mobile-navbar {
     padding: 0;
   }
+}
+
+/* PWA: Solid fill behind the gesture-pill / navigation-bar safe-area
+   so that translucent glass nav doesn't bleed page colours through. */
+.pwa-bottom-fill::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--pwa-bottom-bg, #ffffff);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Checkout Page Enhancements */

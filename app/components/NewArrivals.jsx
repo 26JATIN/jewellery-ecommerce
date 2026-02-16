@@ -3,18 +3,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCart } from '../context/CartContext';
 import SafeImage from './SafeImage';
-import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function NewArrivals() {
     const router = useRouter();
-    const { addToCart, setIsCartOpen } = useCart();
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     // Fetch only 8 newest products directly — not all 2000
     const fetchNewArrivals = useCallback(async () => {
         try {
@@ -46,15 +43,7 @@ export default function NewArrivals() {
         fetchNewArrivals();
     }, [fetchNewArrivals]);
 
-    const handleAddToCart = async (e, product) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const result = await addToCart(product);
-        if (result !== false) {
-            setIsCartOpen(true);
-        }
-    };
+
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -225,18 +214,7 @@ export default function NewArrivals() {
                                                     )}
                                                 </AnimatePresence>
                                                 
-                                                {/* Add to Cart Button */}
-                                                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                                                    <motion.button 
-                                                        whileHover={{ scale: 1.05 }}
-                                                        whileTap={{ scale: 0.95 }}
-                                                        onClick={(e) => handleAddToCart(e, product)}
-                                                        className="w-full px-4 py-3 rounded-full transition-all duration-300 text-sm font-medium shadow-xl flex items-center justify-center gap-2 bg-white/95 backdrop-blur-sm text-[#2C2C2C] hover:bg-[#D4AF76] hover:text-white"
-                                                    >
-                                                        <ShoppingBag className="w-4 h-4" />
-                                                        Add to Cart
-                                                    </motion.button>
-                                                </div>
+
                                             </div>
                                         </div>
 

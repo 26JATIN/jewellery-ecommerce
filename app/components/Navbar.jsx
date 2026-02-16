@@ -359,7 +359,7 @@ export default function Navbar() {
 
             {/* Mobile Bottom Navigation - Enhanced Apple Liquid Glass Effect */}
             <motion.div 
-                className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-[var(--navbar-border)]"
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-[var(--navbar-border)] pwa-bottom-fill"
                 style={{
                     backgroundColor: "var(--navbar-bg)",
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
