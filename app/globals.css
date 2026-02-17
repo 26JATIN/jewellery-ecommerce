@@ -184,9 +184,14 @@ html {
 
 body {
   overscroll-behavior-x: none;
-  /* NOTE: Do NOT use user-select:none or -webkit-touch-callout:none on body.
-     These block single-finger scrolling on mobile Chrome/Safari.
-     Apply them only to specific elements (e.g., buttons, images) that need it. */
+}
+
+/* Mobile Bottom Nav Spacing */
+@media (max-width: 1024px) {
+  body {
+    /* 85px nav height + safe area */
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Prevent text selection and long-press only on interactive/visual elements */
