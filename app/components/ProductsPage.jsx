@@ -149,7 +149,17 @@ export default function ProductsPage() {
                 }
             });
             const data = await response.json();
-            setCategories([{ name: 'All', slug: 'all' }, ...data]);
+            
+            // Deduplicate categories based on name to prevent key collisions and layoutId crashes
+            const uniqueData = Array.isArray(data) ? data.filter((cat, index, self) => 
+                index === self.findIndex((t) => t.name === cat.name)
+            ) : [];
+            
+            // Ensure we don't add "All" if it already exists in the data (case insensitive)
+            const hasAll = uniqueData.some(cat => cat.name.toLowerCase() === 'all');
+            const initialCategories = hasAll ? [] : [{ name: 'All', slug: 'all' }];
+            
+            setCategories([...initialCategories, ...uniqueData]);
         } catch (error) {
             console.error('Error fetching categories:', error);
             setCategories([{ name: 'All', slug: 'all' }]);
@@ -168,8 +178,12 @@ export default function ProductsPage() {
             });
             const data = await response.json();
             if (data.success && Array.isArray(data.subcategories)) {
-                setAllSubcategories(data.subcategories);
-                setSubcategories(data.subcategories);
+                // Deduplicate subcategories based on _id
+                const uniqueSubcategories = data.subcategories.filter((sub, index, self) => 
+                    index === self.findIndex((t) => t._id === sub._id)
+                );
+                setAllSubcategories(uniqueSubcategories);
+                setSubcategories(uniqueSubcategories);
             } else {
                 setAllSubcategories([]);
                 setSubcategories([]);

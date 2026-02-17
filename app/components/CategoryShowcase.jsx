@@ -324,8 +324,24 @@ export default function CategoryShowcase() {
         const categoriesData = await categoriesRes.json();
         const subcategoriesData = await subcategoriesRes.json();
 
-        setCategories(Array.isArray(categoriesData) ? categoriesData.filter(cat => cat.isActive) : []);
-        setSubcategories(subcategoriesData.success && Array.isArray(subcategoriesData.subcategories) ? subcategoriesData.subcategories : []);
+        // Filter active categories AND deduplicate by name to prevent layoutId collisions
+        const uniqueCategories = Array.isArray(categoriesData) 
+          ? categoriesData
+              .filter(cat => cat.isActive)
+              .filter((cat, index, self) => 
+                index === self.findIndex((t) => t.name === cat.name)
+              ) 
+          : [];
+        setCategories(uniqueCategories);
+
+        // Deduplicate subcategories by ID
+        const uniqueSubcategories = (subcategoriesData.success && Array.isArray(subcategoriesData.subcategories))
+          ? subcategoriesData.subcategories
+              .filter((sub, index, self) => 
+                index === self.findIndex((t) => t._id === sub._id)
+              )
+          : [];
+        setSubcategories(uniqueSubcategories);
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error('Error fetching categories:', error);
