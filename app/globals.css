@@ -7,7 +7,8 @@
 .theme-transitioning {
   transition: background-color 0.3s ease, color 0.3s ease !important;
 }
-.theme-transitioning > *,
+
+.theme-transitioning>*,
 .theme-transitioning main,
 .theme-transitioning nav,
 .theme-transitioning header,
@@ -51,7 +52,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
+
   /* Enhanced Color Palette */
   --gold-primary: #D4AF76;
   --gold-secondary: #8B6B4C;
@@ -140,7 +141,8 @@ body {
 /* Viewport adjustments */
 @media (min-width: 1024px) {
   body {
-    padding-top: 72px; /* Fixed desktop navbar height */
+    padding-top: 72px;
+    /* Fixed desktop navbar height */
   }
 }
 
@@ -149,7 +151,7 @@ body {
     padding-top: var(--mobile-top-navbar-height);
     padding-bottom: var(--mobile-navbar-height);
   }
-  
+
   main {
     min-height: calc(100vh - var(--mobile-top-navbar-height) - var(--mobile-navbar-height));
   }
@@ -190,7 +192,7 @@ body {
 @media (max-width: 1024px) {
   body {
     /* Precise alignment: ~66px content height + safe area (fallback 20px) */
-    padding-bottom: calc(66px + env(safe-area-inset-bottom, 20px));
+    padding-bottom: calc(66px + env(safe-area-inset-bottom, 18px));
   }
 }
 
@@ -270,27 +272,49 @@ img,
 
 /* Premium Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(212, 175, 118, 0.3);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 40px rgba(212, 175, 118, 0.6);
   }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .float-animation {
@@ -313,12 +337,10 @@ img,
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -374,12 +396,10 @@ img,
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   transition: left 0.5s ease;
 }
 
@@ -400,8 +420,13 @@ img,
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Premium Focus States */
@@ -461,6 +486,7 @@ img,
 }
 
 @media (min-width: 1024px) {
+
   .pb-mobile-navbar,
   .pt-mobile-navbar {
     padding: 0;
@@ -493,7 +519,9 @@ img,
 }
 
 /* Smooth transitions for form elements */
-input, select, textarea {
+input,
+select,
+textarea {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -525,7 +553,7 @@ textarea:focus-visible {
   .text-gray-600 {
     color: #000 !important;
   }
-  
+
   .border-gray-200 {
     border-color: #000 !important;
   }
@@ -569,10 +597,13 @@ textarea:focus-visible {
 
 /* Cart Badge Animation */
 @keyframes badge-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.8;
@@ -601,9 +632,12 @@ textarea:focus-visible {
 
 /* Gradient Text Animation */
 @keyframes gradient-flow {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -619,6 +653,7 @@ textarea:focus-visible {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(calc(-50% - 0.75rem));
   }
@@ -627,12 +662,14 @@ textarea:focus-visible {
 .animate-scroll {
   animation: scroll var(--animation-duration, 40s) linear infinite var(--animation-direction, forwards);
 }
+
 /* Slide up animation for mobile modals */
 @keyframes slide-up {
   from {
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -648,6 +685,7 @@ textarea:focus-visible {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -663,6 +701,7 @@ textarea:focus-visible {
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -774,4 +813,3 @@ textarea:focus-visible {
 .blog-content a:hover {
   color: #8B6B4C;
 }
-
