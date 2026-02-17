@@ -192,7 +192,7 @@ body {
 @media (max-width: 1024px) {
   body {
     /* Precise alignment: ~66px content height + safe area (fallback 20px) */
-    padding-bottom: calc(66px + env(safe-area-inset-bottom, 18px));
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 20px));
   }
 }
 
