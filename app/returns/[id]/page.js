@@ -102,7 +102,7 @@ export default function ReturnDetailPage({ params }) {
         <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pb-20 sm:pb-0">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white z-40 shadow-lg">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 sm:pt-6 sm:pb-6 lg:pt-24 lg:pb-6">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-3 sm:pt-22 sm:pb-4 lg:pt-24 lg:pb-5">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <Link
                             href="/returns"
@@ -111,7 +111,7 @@ export default function ReturnDetailPage({ params }) {
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div className="flex-1 min-w-0">
-                            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">
+                            <h1 className="text-base sm:text-lg lg:text-xl font-bold truncate">
                                 Return Details
                             </h1>
                             <p className="text-xs sm:text-sm text-[#F5E6D3] mt-1">{returnData.returnNumber}</p>
