@@ -364,10 +364,11 @@ export default function ProductsPage() {
         const currentUrl = `${window.location.pathname}${window.location.search}`;
 
         if (newUrl !== currentUrl) {
-            isInternalUrlUpdate.current = true;
-            router.replace(newUrl, { scroll: false });
+            // Use history.replaceState instead of router.replace to avoid
+            // triggering Next.js searchParams re-render cycle
+            window.history.replaceState(window.history.state, '', newUrl);
         }
-    }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, sortBy, urlParamsProcessed, dataReady, router]);
+    }, [selectedCategory, selectedSubcategory, searchTerm, selectedTags, sortBy, urlParamsProcessed, dataReady]);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-black pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">

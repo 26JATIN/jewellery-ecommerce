@@ -584,12 +584,6 @@ export default function Navbar() {
                     </motion.div>
                 </div>
 
-                {/* Solid opaque fill behind gesture pill — prevents page content bleed-through */}
-                <div
-                    className="absolute bottom-0 left-0 right-0 bg-white dark:bg-black"
-                    style={{ height: 'env(safe-area-inset-bottom, 0px)' }}
-                    aria-hidden="true"
-                />
             </motion.div>
 
             {/* Modals and Cart */}

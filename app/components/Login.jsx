@@ -114,10 +114,7 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                             className="w-full max-w-md"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.25)] p-8 md:p-10 relative border border-gray-100 dark:border-white/[0.06] overflow-hidden">
-                                {/* Decorative top gradient */}
-                                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#D4AF76] via-[#E8C891] to-[#D4AF76]" />
-                                
+                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.25)] p-8 md:p-10 relative border border-gray-100 dark:border-white/[0.06] overflow-hidden">                                
                                 <div className="flex justify-between items-start mb-8">
                                     <div>
                                         <h2 className="text-2xl font-semibold text-[#2C2C2C] dark:text-gray-100 tracking-tight">Welcome Back</h2>
@@ -212,10 +209,7 @@ export default function Login({ isOpen, onClose, onRegisterClick }) {
                     >
                         <div className="bg-white dark:bg-[#0A0A0A] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] relative overflow-hidden max-h-[92vh] flex flex-col"
                              style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
-                        >
-                            {/* Decorative top gradient + drag handle */}
-                            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#D4AF76] via-[#E8C891] to-[#D4AF76]" />
-                            <div className="flex justify-center pt-3 pb-1">
+                        >                            <div className="flex justify-center pt-3 pb-1">
                                 <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
                             </div>
 
