@@ -36,10 +36,11 @@ export default function CategoryStoryBadges() {
     }, []);
 
     const handleCategoryClick = (category) => {
-        if (category.name === 'All') {
+        const categoryName = typeof category.name === 'object' ? category.name?.name : category.name;
+        if (categoryName === 'All') {
             router.push('/products');
         } else {
-            router.push(`/products?category=${encodeURIComponent(category.name)}`);
+            router.push(`/products?category=${encodeURIComponent(categoryName)}`);
         }
     };
 

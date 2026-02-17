@@ -448,13 +448,13 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                         <p className="text-xs text-gray-500">
                                             {suggestion.type === 'product' && suggestion.category ? (
                                                 <>
-                                                    {getTypeLabel(suggestion.type)} • {suggestion.category}
+                                                    {getTypeLabel(suggestion.type)} • {typeof suggestion.category === 'object' ? suggestion.category?.name : suggestion.category}
                                                     {suggestion.subcategory && (
-                                                        <> • <span className="text-[#8B6B4C]">{suggestion.subcategory}</span></>
+                                                        <> • <span className="text-[#8B6B4C]">{typeof suggestion.subcategory === 'object' ? suggestion.subcategory?.name : suggestion.subcategory}</span></>
                                                     )}
                                                 </>
                                             ) : suggestion.category ? (
-                                                `${getTypeLabel(suggestion.type)} • ${suggestion.category}`
+                                                `${getTypeLabel(suggestion.type)} • ${typeof suggestion.category === 'object' ? suggestion.category?.name : suggestion.category}`
                                             ) : (
                                                 getTypeLabel(suggestion.type)
                                             )}

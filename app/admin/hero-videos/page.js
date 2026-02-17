@@ -467,10 +467,10 @@ function AdminHeroVideosPage() {
                                                                         ₹{product.price.toLocaleString()}
                                                                     </p>
                                                                 )}
-                                                                {product.category && (
+                                                                {(product.category || product.subcategory) && (
                                                                     <p className="text-xs text-gray-500 mt-1">
-                                                                        {product.category}
-                                                                        {product.subcategory && ` / ${product.subcategory}`}
+                                                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                                        {product.subcategory && ` / ${typeof product.subcategory === 'object' ? product.subcategory?.name : product.subcategory}`}
                                                                     </p>
                                                                 )}
                                                             </div>

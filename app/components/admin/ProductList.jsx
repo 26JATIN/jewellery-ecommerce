@@ -107,7 +107,7 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                                         )}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        {product.category}
+                                                        {typeof product.category === 'object' ? product.category?.name : product.category}
                                                         {product.hasVariants && (
                                                             <span className="ml-2 text-xs text-purple-600">
                                                                 • {product.variants?.length || 0} options

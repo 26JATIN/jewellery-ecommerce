@@ -520,7 +520,7 @@ function ProductCard({ product, index }) {
                         />
                         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                             <span className="bg-white/90 backdrop-blur-sm text-[#D4AF76] text-xs px-2 py-1 rounded-full font-medium shadow-sm">
-                                {product.category}
+                                {typeof product.category === 'object' ? product.category?.name : product.category}
                             </span>
                             {product.subcategory?.name && (
                                 <span className="bg-[#D4AF76]/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full font-medium shadow-sm">

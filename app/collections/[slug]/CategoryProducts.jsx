@@ -35,7 +35,7 @@ function ProductCard({ product, index }) {
                         )}
                     </div>
                     <div className="p-3 md:p-6">
-                        <p className="text-xs text-[#D4AF76] font-light mb-1 md:mb-2 uppercase tracking-wide">{product.category}</p>
+                        <p className="text-xs text-[#D4AF76] font-light mb-1 md:mb-2 uppercase tracking-wide">{typeof product.category === 'object' ? product.category?.name : product.category}</p>
                         <h3 className="text-sm md:text-lg font-light text-[#2C2C2C] mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors">
                             {product.name}
                         </h3>
@@ -102,7 +102,7 @@ function ProductListItem({ product, index }) {
                         {/* Product Info - Responsive Layout */}
                         <div className="flex-1 flex flex-col justify-between py-0.5 md:py-1 lg:py-2 min-w-0">
                             <div>
-                                <p className="text-[9px] sm:text-[10px] md:text-xs text-[#D4AF76] font-light mb-0.5 md:mb-1 lg:mb-2 uppercase tracking-wider">{product.category}</p>
+                                <p className="text-[9px] sm:text-[10px] md:text-xs text-[#D4AF76] font-light mb-0.5 md:mb-1 lg:mb-2 uppercase tracking-wider">{typeof product.category === 'object' ? product.category?.name : product.category}</p>
                                 <h3 className="text-xs sm:text-sm md:text-lg lg:text-xl xl:text-2xl font-light text-[#2C2C2C] mb-1 md:mb-2 lg:mb-3 line-clamp-2 leading-snug group-hover:text-[#D4AF76] transition-colors">
                                     {product.name}
                                 </h3>

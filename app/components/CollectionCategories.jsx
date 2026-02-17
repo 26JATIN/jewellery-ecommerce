@@ -42,7 +42,8 @@ export default function CollectionCategories() {
     };
 
     const handleCategoryClick = (category) => {
-        router.push(`/products?category=${encodeURIComponent(category.name)}`);
+        const categoryName = typeof category.name === 'object' ? category.name?.name : category.name;
+        router.push(`/products?category=${encodeURIComponent(categoryName)}`);
     };
 
     const handleViewAll = () => {

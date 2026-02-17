@@ -373,7 +373,9 @@ export default function Collections() {
                                                                     {/* Product Info */}
                                                                     <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
                                                                         <div>
-                                                                            <p className="text-[9px] sm:text-[10px] text-[#D4AF76] font-light mb-0.5 sm:mb-1 uppercase tracking-wider">{product.category}</p>
+                                                                            <p className="text-[9px] sm:text-[10px] text-[#D4AF76] font-light mb-0.5 sm:mb-1 uppercase tracking-wider">
+                                                                                {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                                            </p>
                                                                             <h3 className="text-xs sm:text-sm font-light text-[#2C2C2C] mb-1 sm:mb-1.5 line-clamp-2 leading-snug group-hover:text-[#D4AF76] transition-colors">
                                                                                 {product.name}
                                                                             </h3>
@@ -438,7 +440,9 @@ export default function Collections() {
 
                                                                 {/* Product Info */}
                                                                 <div className="p-3">
-                                                                    <p className="text-xs text-[#D4AF76] font-light mb-1 uppercase tracking-wide">{product.category}</p>
+                                                                    <p className="text-xs text-[#D4AF76] font-light mb-1 uppercase tracking-wide">
+                                                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                                    </p>
                                                                     <h3 className="text-sm font-light text-[#2C2C2C] mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors">
                                                                         {product.name}
                                                                     </h3>
@@ -510,7 +514,9 @@ export default function Collections() {
                                                                         <div>
                                                                             <div className="flex items-start justify-between mb-3">
                                                                                 <div>
-                                                                                    <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">{product.category}</p>
+                                                                                    <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">
+                                                                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                                                    </p>
                                                                                     <h3 className="text-2xl font-light text-[#2C2C2C] mb-3 group-hover:text-[#D4AF76] transition-colors">
                                                                                         {product.name}
                                                                                     </h3>

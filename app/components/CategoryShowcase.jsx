@@ -395,7 +395,11 @@ export default function CategoryShowcase() {
       console.log('Category info found:', categoryInfo);
 
       if (categoryInfo && subcategory._id) {
-        const categoryName = encodeURIComponent(categoryInfo.name || '');
+        let safeCategoryName = categoryInfo.name || '';
+        if (typeof safeCategoryName === 'object') {
+            safeCategoryName = safeCategoryName.name || '';
+        }
+        const categoryName = encodeURIComponent(safeCategoryName);
         const subcategoryId = encodeURIComponent(subcategory._id || '');
         const url = `/products?category=${categoryName}&subcategory=${subcategoryId}`;
         console.log('Navigating to:', url);
