@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function CategoryStoryBadges() {
     const router = useRouter();
     const [categories, setCategories] = useState([]);
-    
+
     // Fetch categories
     useEffect(() => {
         const fetchCategories = async () => {
@@ -19,7 +19,14 @@ export default function CategoryStoryBadges() {
                     }
                 });
                 const data = await response.json();
-                setCategories(data);
+                if (Array.isArray(data)) {
+                    // Filter valid categories with images
+                    const validCategories = data.filter(cat => cat && cat._id && cat.name && cat.image && cat.isActive);
+                    setCategories(validCategories);
+                } else {
+                    console.error('Categories data is not an array:', data);
+                    setCategories([]);
+                }
             } catch (error) {
                 console.error('Error fetching categories:', error);
                 setCategories([]);
@@ -44,7 +51,7 @@ export default function CategoryStoryBadges() {
         <section className="py-8 md:py-12 px-4 bg-gradient-to-b from-white to-[#FAFAFA]">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -58,9 +65,9 @@ export default function CategoryStoryBadges() {
                         Explore Collections
                     </h2>
                 </motion.div>
-                
+
                 {/* Category Story Badges */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -84,8 +91,8 @@ export default function CategoryStoryBadges() {
                                     <div className="bg-white rounded-full p-[3px]">
                                         <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] to-[#F5F5F5] flex items-center justify-center shadow-sm">
                                             {category.image ? (
-                                                <img 
-                                                    src={category.image} 
+                                                <img
+                                                    src={category.image}
                                                     alt={category.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -97,7 +104,7 @@ export default function CategoryStoryBadges() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Category Name */}
                                 <span className="text-[10px] md:text-xs font-light tracking-wide text-[#2C2C2C] group-hover:text-[#D4AF76] transition-colors duration-300 text-center">
                                     {category.name}

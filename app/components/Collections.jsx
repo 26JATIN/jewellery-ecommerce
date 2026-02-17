@@ -28,7 +28,7 @@ export default function Collections() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('featured'); // featured, price-low, price-high, newest
     const [viewMode, setViewMode] = useState('list'); // list or grid for products
-    
+
     // Set initial search term from URL
     useEffect(() => {
         const searchFromUrl = searchParams.get('search');
@@ -140,7 +140,7 @@ export default function Collections() {
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white pt-20 md:pt-24 lg:pt-28 pb-8 md:pb-12 lg:pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -154,14 +154,14 @@ export default function Collections() {
                             {searchTerm ? 'Product Search' : 'Our Collections'}
                         </h1>
                         <p className="text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
-                            {searchTerm 
+                            {searchTerm
                                 ? `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`
                                 : 'Discover our curated selection of jewelry collections, each crafted with precision and passion'
                             }
                         </p>
-                        
+
                         {searchTerm && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.3, delay: 0.2 }}
@@ -170,7 +170,7 @@ export default function Collections() {
                                 <span className="text-sm text-gray-600 dark:text-gray-400">
                                     Searching for "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
                                 </span>
-                                <button 
+                                <button
                                     onClick={clearSearch}
                                     className="text-sm text-white bg-[#D4AF76] hover:bg-[#8B6B4C] px-4 py-1.5 rounded-full transition-colors font-medium flex items-center gap-1"
                                 >
@@ -186,7 +186,7 @@ export default function Collections() {
 
                 {/* Filter & Sort Bar - Only show for products */}
                 {!loading && !error && searchTerm && filteredProducts.length > 0 && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
@@ -226,11 +226,10 @@ export default function Collections() {
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${
-                                        viewMode === 'list' 
-                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]' 
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list'
+                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]'
                                             : 'text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-200'
-                                    }`}
+                                        }`}
                                     title="List View"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,11 +239,10 @@ export default function Collections() {
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${
-                                        viewMode === 'grid' 
-                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]' 
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid'
+                                            ? 'bg-white dark:bg-white/[0.1] shadow-sm text-[#D4AF76]'
                                             : 'text-gray-400 hover:text-[#2C2C2C] dark:hover:text-gray-200'
-                                    }`}
+                                        }`}
                                     title="Grid View"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,7 +256,7 @@ export default function Collections() {
 
                 {/* Loading State */}
                 {loading && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="flex flex-col items-center justify-center py-20"
@@ -275,7 +273,7 @@ export default function Collections() {
 
                 {/* Error State */}
                 {error && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
@@ -289,7 +287,7 @@ export default function Collections() {
                             </div>
                             <h3 className="text-2xl font-light text-gray-900 dark:text-gray-100 mb-3">Something went wrong</h3>
                             <p className="text-gray-600 dark:text-gray-400 font-light mb-6">{error}</p>
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={searchTerm ? fetchProducts : fetchCategories}
@@ -308,7 +306,7 @@ export default function Collections() {
                             // Show Products when searching
                             <>
                                 {filteredProducts.length === 0 ? (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.5 }}
@@ -324,7 +322,7 @@ export default function Collections() {
                                             <p className="text-gray-600 dark:text-gray-400 font-light mb-6">
                                                 We couldn't find any products matching "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
                                             </p>
-                                            <button 
+                                            <button
                                                 onClick={clearSearch}
                                                 className="px-6 py-3 bg-[#8B6B4C] text-white rounded-full hover:bg-[#7A5D42] transition-colors font-light"
                                             >
@@ -337,61 +335,125 @@ export default function Collections() {
                                         {/* Mobile View - List or Grid based on viewMode */}
                                         {viewMode === 'list' ? (
                                             <div className="md:hidden space-y-4">
-                                            {filteredProducts.map((product, index) => (
-                                                <motion.div
-                                                    key={product._id}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
-                                                >
-                                                    <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
-                                                            <div className="flex gap-3 md:gap-4 p-3 md:p-4">
-                                                                {/* Product Image */}
-                                                                <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
-                                                                    <div className="aspect-square overflow-hidden rounded-lg relative">
-                                                                        <SafeImage
-                                                                            src={product.images?.[0] || product.image}
-                                                                            alt={product.name}
-                                                                            fill
-                                                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                                                        />
-                                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                                        
-                                                                        {/* Stock Badge */}
-                                                                        {hasLowStock(product) && (
-                                                                            <div className="absolute top-1 right-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-1.5 py-0.5 shadow-lg">
-                                                                                <span className="text-[9px] sm:text-[10px] font-medium">{getEffectiveStock(product)}</span>
-                                                                            </div>
-                                                                        )}
-                                                                        {isProductOutOfStock(product) && (
-                                                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-                                                                                <span className="text-[9px] sm:text-[10px] text-white font-medium">Out</span>
-                                                                            </div>
-                                                                        )}
+                                                {filteredProducts.map((product, index) => (
+                                                    <motion.div
+                                                        key={product._id}
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
+                                                    >
+                                                        <Link href={`/products/${product._id}`} className="block group">
+                                                            <div className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
+                                                                <div className="flex gap-3 md:gap-4 p-3 md:p-4">
+                                                                    {/* Product Image */}
+                                                                    <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
+                                                                        <div className="aspect-square overflow-hidden rounded-lg relative">
+                                                                            <SafeImage
+                                                                                src={product.images?.[0] || product.image}
+                                                                                alt={product.name}
+                                                                                fill
+                                                                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                            />
+                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                                                                            {/* Stock Badge */}
+                                                                            {hasLowStock(product) && (
+                                                                                <div className="absolute top-1 right-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-1.5 py-0.5 shadow-lg">
+                                                                                    <span className="text-[9px] sm:text-[10px] font-medium">{getEffectiveStock(product)}</span>
+                                                                                </div>
+                                                                            )}
+                                                                            {isProductOutOfStock(product) && (
+                                                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+                                                                                    <span className="text-[9px] sm:text-[10px] text-white font-medium">Out</span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Product Info */}
+                                                                    <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
+                                                                        <div>
+                                                                            <p className="text-[9px] sm:text-[10px] text-[#D4AF76] font-light mb-0.5 sm:mb-1 uppercase tracking-wider">{product.category}</p>
+                                                                            <h3 className="text-xs sm:text-sm font-light text-[#2C2C2C] mb-1 sm:mb-1.5 line-clamp-2 leading-snug group-hover:text-[#D4AF76] transition-colors">
+                                                                                {product.name}
+                                                                            </h3>
+                                                                        </div>
+
+                                                                        {/* Price */}
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-sm sm:text-base font-medium text-[#2C2C2C]">
+                                                                                ₹{product.sellingPrice?.toLocaleString('en-IN')}
+                                                                            </span>
+                                                                            {product.mrp && product.mrp > product.sellingPrice && (
+                                                                                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                                                                                    <span className="text-[9px] sm:text-[10px] text-gray-400 line-through font-light">
+                                                                                        ₹{product.mrp.toLocaleString('en-IN')}
+                                                                                    </span>
+                                                                                    <span className="text-[9px] sm:text-[10px] text-green-600 font-medium bg-green-50 px-1 sm:px-1.5 py-0.5 rounded">
+                                                                                        {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% off
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                                
+                                                            </div>
+                                                        </Link>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            /* Mobile Grid View */
+                                            <div className="md:hidden grid grid-cols-2 gap-4">
+                                                {filteredProducts.map((product, index) => (
+                                                    <motion.div
+                                                        key={product._id}
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
+                                                    >
+                                                        <Link href={`/products/${product._id}`} className="block group">
+                                                            <div className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
+                                                                {/* Product Image */}
+                                                                <div className="aspect-square overflow-hidden relative">
+                                                                    <SafeImage
+                                                                        src={product.images?.[0] || product.image}
+                                                                        alt={product.name}
+                                                                        fill
+                                                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                                    />
+
+                                                                    {/* Stock Badge */}
+                                                                    {hasLowStock(product) && (
+                                                                        <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-2 py-1 shadow-lg">
+                                                                            <span className="text-xs font-medium">{getEffectiveStock(product)} left</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {isProductOutOfStock(product) && (
+                                                                        <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-2 py-1 shadow-lg">
+                                                                            <span className="text-xs font-medium">Out of Stock</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
                                                                 {/* Product Info */}
-                                                                <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
-                                                                    <div>
-                                                                        <p className="text-[9px] sm:text-[10px] text-[#D4AF76] font-light mb-0.5 sm:mb-1 uppercase tracking-wider">{product.category}</p>
-                                                                        <h3 className="text-xs sm:text-sm font-light text-[#2C2C2C] mb-1 sm:mb-1.5 line-clamp-2 leading-snug group-hover:text-[#D4AF76] transition-colors">
-                                                                            {product.name}
-                                                                        </h3>
-                                                                    </div>
-                                                                    
+                                                                <div className="p-3">
+                                                                    <p className="text-xs text-[#D4AF76] font-light mb-1 uppercase tracking-wide">{product.category}</p>
+                                                                    <h3 className="text-sm font-light text-[#2C2C2C] mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors">
+                                                                        {product.name}
+                                                                    </h3>
+
                                                                     {/* Price */}
-                                                                    <div className="flex flex-col gap-0.5">
-                                                                        <span className="text-sm sm:text-base font-medium text-[#2C2C2C]">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-lg font-light text-[#2C2C2C]">
                                                                             ₹{product.sellingPrice?.toLocaleString('en-IN')}
                                                                         </span>
                                                                         {product.mrp && product.mrp > product.sellingPrice && (
-                                                                            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                                                                                <span className="text-[9px] sm:text-[10px] text-gray-400 line-through font-light">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className="text-xs text-gray-400 line-through font-light">
                                                                                     ₹{product.mrp.toLocaleString('en-IN')}
                                                                                 </span>
-                                                                                <span className="text-[9px] sm:text-[10px] text-green-600 font-medium bg-green-50 px-1 sm:px-1.5 py-0.5 rounded">
+                                                                                <span className="text-xs text-green-600 font-medium">
                                                                                     {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% off
                                                                                 </span>
                                                                             </div>
@@ -399,183 +461,119 @@ export default function Collections() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </Link>
-                                                </motion.div>
-                                            ))}
-                                            </div>
-                                        ) : (
-                                            /* Mobile Grid View */
-                                            <div className="md:hidden grid grid-cols-2 gap-4">
-                                            {filteredProducts.map((product, index) => (
-                                                <motion.div
-                                                    key={product._id}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
-                                                >
-                                                    <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-lg transition-all duration-300">
-                                                            {/* Product Image */}
-                                                            <div className="aspect-square overflow-hidden relative">
-                                                                <SafeImage
-                                                                    src={product.images?.[0] || product.image}
-                                                                    alt={product.name}
-                                                                    fill
-                                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                                                />
-                                                                
-                                                                {/* Stock Badge */}
-                                                                {hasLowStock(product) && (
-                                                                    <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-2 py-1 shadow-lg">
-                                                                        <span className="text-xs font-medium">{getEffectiveStock(product)} left</span>
-                                                                    </div>
-                                                                )}
-                                                                {isProductOutOfStock(product) && (
-                                                                    <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-2 py-1 shadow-lg">
-                                                                        <span className="text-xs font-medium">Out of Stock</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            
-                                                            {/* Product Info */}
-                                                            <div className="p-3">
-                                                                <p className="text-xs text-[#D4AF76] font-light mb-1 uppercase tracking-wide">{product.category}</p>
-                                                                <h3 className="text-sm font-light text-[#2C2C2C] mb-2 line-clamp-2 group-hover:text-[#D4AF76] transition-colors">
-                                                                    {product.name}
-                                                                </h3>
-                                                                
-                                                                {/* Price */}
-                                                                <div className="flex flex-col gap-1">
-                                                                    <span className="text-lg font-light text-[#2C2C2C]">
-                                                                        ₹{product.sellingPrice?.toLocaleString('en-IN')}
-                                                                    </span>
-                                                                    {product.mrp && product.mrp > product.sellingPrice && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="text-xs text-gray-400 line-through font-light">
-                                                                                ₹{product.mrp.toLocaleString('en-IN')}
-                                                                            </span>
-                                                                            <span className="text-xs text-green-600 font-medium">
-                                                                                {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% off
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </Link>
-                                                </motion.div>
-                                            ))}
+                                                        </Link>
+                                                    </motion.div>
+                                                ))}
                                             </div>
                                         )}
 
                                         {/* Desktop View - List or Grid based on viewMode */}
                                         {viewMode === 'list' ? (
                                             <div className="hidden md:block space-y-6">
-                                            {filteredProducts.map((product, index) => (
-                                                <motion.div
-                                                    key={product._id}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
-                                                >
-                                                    <Link href={`/products/${product._id}`} className="block group">
-                                                        <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1">
-                                                            <div className="flex gap-6 p-6">
-                                                                {/* Product Image */}
-                                                                <div className="w-64 flex-shrink-0">
-                                                                    <div className="aspect-square overflow-hidden rounded-2xl relative">
-                                                                        <SafeImage
-                                                                            src={product.images?.[0] || product.image}
-                                                                            alt={product.name}
-                                                                            fill
-                                                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                                                        />
-                                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                                        
-                                                                        {/* Stock Badge */}
-                                                                        {hasLowStock(product) && (
-                                                                            <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-3 py-1.5 shadow-lg">
-                                                                                <span className="text-xs font-medium">Only {getEffectiveStock(product)} left</span>
-                                                                            </div>
-                                                                        )}
-                                                                        {isProductOutOfStock(product) && (
-                                                                            <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-3 py-1.5 shadow-lg">
-                                                                                <span className="text-xs font-medium">Out of Stock</span>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                {/* Product Info */}
-                                                                <div className="flex-1 flex flex-col justify-between py-2">
-                                                                    <div>
-                                                                        <div className="flex items-start justify-between mb-3">
-                                                                            <div>
-                                                                                <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">{product.category}</p>
-                                                                                <h3 className="text-2xl font-light text-[#2C2C2C] mb-3 group-hover:text-[#D4AF76] transition-colors">
-                                                                                    {product.name}
-                                                                                </h3>
-                                                                            </div>
-                                                                        </div>
-                                                                        
-                                                                        <p className="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mb-4 line-clamp-2">
-                                                                            {product.description}
-                                                                        </p>
-                                                                        
-                                                                        {/* Specifications if available */}
-                                                                        {(product.metal || product.purity || product.weight) && (
-                                                                            <div className="flex gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
-                                                                                {product.metal && (
-                                                                                    <span className="flex items-center gap-1">
-                                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                                                        </svg>
-                                                                                        {product.metal}
-                                                                                    </span>
-                                                                                )}
-                                                                                {product.purity && <span>{product.purity}</span>}
-                                                                                {product.weight && <span>{product.weight}g</span>}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    
-                                                                    {/* Price Section */}
-                                                                    <div className="flex items-end justify-between">
-                                                                        <div className="flex flex-col gap-2">
-                                                                            <div className="flex items-baseline gap-3">
-                                                                                <span className="text-3xl font-light text-[#2C2C2C]">
-                                                                                    ₹{product.sellingPrice?.toLocaleString('en-IN')}
-                                                                                </span>
-                                                                                {product.mrp && product.mrp > product.sellingPrice && (
-                                                                                    <span className="text-base text-gray-400 line-through font-light">
-                                                                                        ₹{product.mrp.toLocaleString('en-IN')}
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                            {product.mrp && product.mrp > product.sellingPrice && (
-                                                                                <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full inline-flex items-center gap-1 w-fit">
-                                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                                    </svg>
-                                                                                    Save {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}%
-                                                                                </span>
+                                                {filteredProducts.map((product, index) => (
+                                                    <motion.div
+                                                        key={product._id}
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
+                                                    >
+                                                        <Link href={`/products/${product._id}`} className="block group">
+                                                            <div className="bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/[0.06] overflow-hidden hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1">
+                                                                <div className="flex gap-6 p-6">
+                                                                    {/* Product Image */}
+                                                                    <div className="w-64 flex-shrink-0">
+                                                                        <div className="aspect-square overflow-hidden rounded-2xl relative">
+                                                                            <SafeImage
+                                                                                src={product.images?.[0] || product.image}
+                                                                                alt={product.name}
+                                                                                fill
+                                                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                                            />
+                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                                                                            {/* Stock Badge */}
+                                                                            {hasLowStock(product) && (
+                                                                                <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-3 py-1.5 shadow-lg">
+                                                                                    <span className="text-xs font-medium">Only {getEffectiveStock(product)} left</span>
+                                                                                </div>
+                                                                            )}
+                                                                            {isProductOutOfStock(product) && (
+                                                                                <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-3 py-1.5 shadow-lg">
+                                                                                    <span className="text-xs font-medium">Out of Stock</span>
+                                                                                </div>
                                                                             )}
                                                                         </div>
-                                                                        
-                                                                        {/* Arrow Icon */}
-                                                                        <div className="w-12 h-12 rounded-full bg-[#D4AF76]/10 group-hover:bg-[#D4AF76] flex items-center justify-center transition-all">
-                                                                            <svg className="w-6 h-6 text-[#D4AF76] group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                                            </svg>
+                                                                    </div>
+
+                                                                    {/* Product Info */}
+                                                                    <div className="flex-1 flex flex-col justify-between py-2">
+                                                                        <div>
+                                                                            <div className="flex items-start justify-between mb-3">
+                                                                                <div>
+                                                                                    <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">{product.category}</p>
+                                                                                    <h3 className="text-2xl font-light text-[#2C2C2C] mb-3 group-hover:text-[#D4AF76] transition-colors">
+                                                                                        {product.name}
+                                                                                    </h3>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <p className="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed mb-4 line-clamp-2">
+                                                                                {product.description}
+                                                                            </p>
+
+                                                                            {/* Specifications if available */}
+                                                                            {(product.metal || product.purity || product.weight) && (
+                                                                                <div className="flex gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
+                                                                                    {product.metal && (
+                                                                                        <span className="flex items-center gap-1">
+                                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                                                            </svg>
+                                                                                            {product.metal}
+                                                                                        </span>
+                                                                                    )}
+                                                                                    {product.purity && <span>{product.purity}</span>}
+                                                                                    {product.weight && <span>{product.weight}g</span>}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Price Section */}
+                                                                        <div className="flex items-end justify-between">
+                                                                            <div className="flex flex-col gap-2">
+                                                                                <div className="flex items-baseline gap-3">
+                                                                                    <span className="text-3xl font-light text-[#2C2C2C]">
+                                                                                        ₹{product.sellingPrice?.toLocaleString('en-IN')}
+                                                                                    </span>
+                                                                                    {product.mrp && product.mrp > product.sellingPrice && (
+                                                                                        <span className="text-base text-gray-400 line-through font-light">
+                                                                                            ₹{product.mrp.toLocaleString('en-IN')}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
+                                                                                {product.mrp && product.mrp > product.sellingPrice && (
+                                                                                    <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full inline-flex items-center gap-1 w-fit">
+                                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                                        </svg>
+                                                                                        Save {Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}%
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+
+                                                                            {/* Arrow Icon */}
+                                                                            <div className="w-12 h-12 rounded-full bg-[#D4AF76]/10 group-hover:bg-[#D4AF76] flex items-center justify-center transition-all">
+                                                                                <svg className="w-6 h-6 text-[#D4AF76] group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                                                </svg>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </Link>
-                                                </motion.div>
-                                            ))}
+                                                        </Link>
+                                                    </motion.div>
+                                                ))}
                                             </div>
                                         ) : (
                                             /* Desktop Grid View */
@@ -598,7 +596,7 @@ export default function Collections() {
                                                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                                     />
                                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                                    
+
                                                                     {/* Stock Badge */}
                                                                     {hasLowStock(product) && (
                                                                         <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full px-3 py-1.5 shadow-lg">
@@ -611,14 +609,16 @@ export default function Collections() {
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                
+
                                                                 {/* Product Info */}
                                                                 <div className="p-5">
-                                                                    <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">{product.category}</p>
+                                                                    <p className="text-xs text-[#D4AF76] font-light mb-2 uppercase tracking-widest">
+                                                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                                    </p>
                                                                     <h3 className="text-base font-light text-[#2C2C2C] mb-3 line-clamp-2 group-hover:text-[#D4AF76] transition-colors">
                                                                         {product.name}
                                                                     </h3>
-                                                                    
+
                                                                     {/* Price */}
                                                                     <div className="flex flex-col gap-2">
                                                                         <span className="text-2xl font-light text-[#2C2C2C]">
@@ -642,9 +642,9 @@ export default function Collections() {
                                                 ))}
                                             </div>
                                         )}
-                                        
+
                                         {/* Results Count */}
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             transition={{ duration: 0.5, delay: 0.3 }}
@@ -666,7 +666,7 @@ export default function Collections() {
                             // Show Categories when not searching
                             <>
                                 {categories.length === 0 ? (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.5 }}
@@ -707,7 +707,7 @@ export default function Collections() {
                                                                 className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                             />
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent group-hover:from-black/50 transition-all duration-300" />
-                                                            
+
                                                             {/* Products Count Badge */}
                                                             {category.productsCount > 0 && (
                                                                 <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm">
@@ -717,7 +717,7 @@ export default function Collections() {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        
+
                                                         {/* Category Info */}
                                                         <div className="p-6">
                                                             <h3 className="text-xl font-light text-[#2C2C2C] mb-2 group-hover:text-[#D4AF76] transition-colors">
@@ -726,7 +726,7 @@ export default function Collections() {
                                                             <p className="text-gray-500 text-sm font-light leading-relaxed mb-4 line-clamp-2">
                                                                 {category.description}
                                                             </p>
-                                                            
+
                                                             {/* Explore Button */}
                                                             <div className="flex items-center justify-between">
                                                                 <span className="text-[#D4AF76] text-sm font-light group-hover:text-[#8B6B4C] transition-colors">
@@ -743,9 +743,9 @@ export default function Collections() {
                                                 </motion.div>
                                             ))}
                                         </div>
-                                        
+
                                         {/* Results Count */}
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             transition={{ duration: 0.5, delay: 0.3 }}

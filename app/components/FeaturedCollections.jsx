@@ -24,35 +24,42 @@ export default function FeaturedCollections() {
                 });
                 const data = await response.json();
                 setCategories(data);
-                
-                // Create featured collections from all categories
-                const featured = data.map((category, index) => ({
-                    id: category._id,
-                    title: category.name,
-                    subtitle: category.description?.substring(0, 50) + "..." || "Premium Collection",
-                    description: category.description || "Exquisite pieces crafted with precision and care.",
-                    image: category.image || "carousel1_l76hra.jpg",
-                    products: category.productsCount || 0,
-                    category: category.name.toLowerCase(),
-                    color: getCollectionColor(index),
-                    realData: true
-                }));
-                
-                setFeaturedCollections(featured);
+
+                if (Array.isArray(data)) {
+                    // Create featured collections from all categories
+                    const featured = data
+                        .filter(item => item && item._id && item.name) // Filter valid items
+                        .map((category, index) => ({
+                            id: category._id,
+                            title: category.name,
+                            subtitle: category.description?.substring(0, 50) + "..." || "Premium Collection",
+                            description: category.description || "Exquisite pieces crafted with precision and care.",
+                            image: category.image || "carousel1_l76hra.jpg",
+                            products: category.productsCount || 0,
+                            category: category.name.toLowerCase(),
+                            color: getCollectionColor(index),
+                            realData: true
+                        }));
+
+                    setFeaturedCollections(featured);
+                } else {
+                    console.error('Categories data is not an array:', data);
+                    setFeaturedCollections([]);
+                }
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching categories:', error);
                 setLoading(false);
             }
         };
-        
+
         fetchCategories();
     }, []);
 
     const getCollectionColor = (index) => {
         const colors = [
             "from-rose-100 to-pink-50",
-            "from-amber-100 to-yellow-50", 
+            "from-amber-100 to-yellow-50",
             "from-purple-100 to-indigo-50",
             "from-emerald-100 to-teal-50",
             "from-blue-100 to-cyan-50"
@@ -63,7 +70,8 @@ export default function FeaturedCollections() {
     const handleCollectionClick = (collection) => {
         if (collection.realData) {
             // For real categories, navigate to products page with category filter
-            router.push(`/products?category=${encodeURIComponent(collection.title)}`);
+            const categoryName = typeof collection.title === 'object' ? collection.title.name : collection.title;
+            router.push(`/products?category=${encodeURIComponent(categoryName)}`);
         } else {
             // For default collections, navigate to products page
             router.push('/products');
@@ -94,7 +102,7 @@ export default function FeaturedCollections() {
 
             <div className="max-w-7xl mx-auto relative z-10">
                 {/* Section Header */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
@@ -118,7 +126,7 @@ export default function FeaturedCollections() {
                 {/* Collections Grid */}
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
                     {/* Collection Cards - Scrollable */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
@@ -128,62 +136,60 @@ export default function FeaturedCollections() {
                         {/* Scroll container */}
                         <div className="overflow-y-auto max-h-[600px] lg:max-h-[700px] space-y-6 pr-2 scrollbar-thin scrollbar-thumb-[#D4AF76] scrollbar-track-gray-100 hover:scrollbar-thumb-[#8B6B4C]">
                             {featuredCollections.map((collection, index) => (
-                            <motion.button
-                                key={collection.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                viewport={{ once: true }}
-                                onMouseEnter={() => setActiveCollection(index)}
-                                onClick={() => handleCollectionClick(collection)}
-                                className={`relative group p-8 rounded-3xl border transition-all duration-500 cursor-pointer hover:scale-[1.02] hover:shadow-2xl text-left w-full ${
-                                    activeCollection === index 
-                                        ? `bg-gradient-to-br ${collection.color} border-[#D4AF76]/30 shadow-2xl` 
-                                        : 'bg-white/80 dark:bg-white/[0.06] backdrop-blur-sm border-gray-200/50 dark:border-white/[0.1] hover:border-[#D4AF76]/20'
-                                }`}
-                            >
-                                <div className="flex items-start gap-6">
-                                    <div className={`flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] flex items-center justify-center text-white font-light text-lg transition-transform duration-300 ${
-                                        activeCollection === index ? 'scale-110' : 'group-hover:scale-105'
-                                    }`}>
-                                        {index + 1}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-xl lg:text-2xl font-light text-[#2C2C2C]">
-                                                {collection.title}
-                                            </h3>
-                                            <span className="text-xs text-[#D4AF76] bg-[#D4AF76]/10 px-3 py-1 rounded-full font-light">
-                                                {collection.products} pieces
-                                            </span>
+                                <motion.button
+                                    key={collection.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                                    viewport={{ once: true }}
+                                    onMouseEnter={() => setActiveCollection(index)}
+                                    onClick={() => handleCollectionClick(collection)}
+                                    className={`relative group p-8 rounded-3xl border transition-all duration-500 cursor-pointer hover:scale-[1.02] hover:shadow-2xl text-left w-full ${activeCollection === index
+                                            ? `bg-gradient-to-br ${collection.color} border-[#D4AF76]/30 shadow-2xl`
+                                            : 'bg-white/80 dark:bg-white/[0.06] backdrop-blur-sm border-gray-200/50 dark:border-white/[0.1] hover:border-[#D4AF76]/20'
+                                        }`}
+                                >
+                                    <div className="flex items-start gap-6">
+                                        <div className={`flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4AF76] to-[#8B6B4C] flex items-center justify-center text-white font-light text-lg transition-transform duration-300 ${activeCollection === index ? 'scale-110' : 'group-hover:scale-105'
+                                            }`}>
+                                            {index + 1}
                                         </div>
-                                        <p className="text-sm text-[#D4AF76] font-light tracking-wide uppercase mb-3">
-                                            {collection.subtitle}
-                                        </p>
-                                        <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
-                                            {collection.description}
-                                        </p>
-                                        {collection.realData && (
-                                            <div className="mt-4 flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-[#D4AF76]"></div>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-light">Live Collection</span>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <h3 className="text-xl lg:text-2xl font-light text-[#2C2C2C]">
+                                                    {collection.title}
+                                                </h3>
+                                                <span className="text-xs text-[#D4AF76] bg-[#D4AF76]/10 px-3 py-1 rounded-full font-light">
+                                                    {collection.products} pieces
+                                                </span>
                                             </div>
-                                        )}
+                                            <p className="text-sm text-[#D4AF76] font-light tracking-wide uppercase mb-3">
+                                                {collection.subtitle}
+                                            </p>
+                                            <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">
+                                                {collection.description}
+                                            </p>
+                                            {collection.realData && (
+                                                <div className="mt-4 flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-[#D4AF76]"></div>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-light">Live Collection</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Click to explore indicator */}
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="bg-[#D4AF76] text-white p-2 rounded-full">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
+                                    {/* Click to explore indicator */}
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div className="bg-[#D4AF76] text-white p-2 rounded-full">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
                                     </div>
-                                </div>
-                            </motion.button>
-                        ))}
+                                </motion.button>
+                            ))}
                         </div>
-                        
+
                         {/* Scroll indicator - Only show if there are more than 3 collections */}
                         {featuredCollections.length > 3 && (
                             <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/50 to-transparent pointer-events-none flex items-end justify-center pb-2">
@@ -202,7 +208,7 @@ export default function FeaturedCollections() {
                     </motion.div>
 
                     {/* Featured Image */}
-                    <motion.button 
+                    <motion.button
                         initial={{ opacity: 0, x: 50 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
@@ -230,9 +236,9 @@ export default function FeaturedCollections() {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                 </motion.div>
                             </AnimatePresence>
-                            
+
                             {/* Floating Badge */}
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}

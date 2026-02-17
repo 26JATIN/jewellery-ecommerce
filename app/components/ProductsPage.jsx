@@ -24,9 +24,9 @@ export default function ProductsPage() {
     const [totalProductsCount, setTotalProductsCount] = useState(0);
     const [totalPagesFromServer, setTotalPagesFromServer] = useState(0);
     const [dataReady, setDataReady] = useState(false); // Track when categories/subcategories are loaded
-    
+
     const PRODUCTS_PER_PAGE = 20;
-    
+
     // Use refs to prevent unnecessary re-fetches
     const abortControllerRef = useRef(null);
     const productsGridRef = useRef(null);
@@ -70,7 +70,7 @@ export default function ProductsPage() {
         }, 100);
         return () => clearTimeout(timer);
     }, [selectedSubcategory, subcategories, scrollSelectedToCenter]);
-    
+
     // Set initial search term, category, and subcategory from URL
     useEffect(() => {
         // Skip if this URL change was triggered by our own sync effect
@@ -83,7 +83,7 @@ export default function ProductsPage() {
         const subcategoryFromUrl = searchParams.get('subcategory');
         const tagFromUrl = searchParams.get('tag');
         const sortFromUrl = searchParams.get('sort');
-        
+
         if (searchFromUrl) {
             setSearchTerm(searchFromUrl);
         }
@@ -105,34 +105,35 @@ export default function ProductsPage() {
     // Auto-select parent category when subcategory comes from URL
     useEffect(() => {
         if (!dataReady || !urlParamsProcessed) return;
-        
+
         const subcategoryFromUrl = searchParams.get('subcategory');
         const categoryFromUrl = searchParams.get('category');
-        
+
         // Only auto-resolve if subcategory is set from URL but category is not
         if (subcategoryFromUrl && !categoryFromUrl && allSubcategories.length > 0) {
             const matchedSub = allSubcategories.find(sub => sub._id === subcategoryFromUrl);
-            if (matchedSub && matchedSub.category?.name) {
+            if (matchedSub && matchedSub.category && matchedSub.category.name) {
                 setSelectedCategory(matchedSub.category.name);
             }
         }
     }, [dataReady, urlParamsProcessed, allSubcategories, searchParams]);
-    
+
     // Update subcategories when category changes
     useEffect(() => {
         if (allSubcategories.length === 0 || !categories.length) return;
-        
+
         if (selectedCategory === 'All') {
             setSubcategories(allSubcategories);
         } else {
             // Find the category object to get its ID
             const categoryObj = categories.find(cat => cat.name === selectedCategory);
-            
+
             const filtered = allSubcategories.filter(sub => {
+                if (!sub) return false;
                 // Check if subcategory's category matches selected category
-                return sub.category?.name === selectedCategory || 
-                       sub.category === selectedCategory ||
-                       (categoryObj && (sub.category?._id === categoryObj._id || sub.category === categoryObj._id));
+                return sub.category?.name === selectedCategory ||
+                    sub.category === selectedCategory ||
+                    (categoryObj && (sub.category?._id === categoryObj._id || sub.category === categoryObj._id));
             });
             setSubcategories(filtered);
         }
@@ -149,16 +150,16 @@ export default function ProductsPage() {
                 }
             });
             const data = await response.json();
-            
+
             // Deduplicate categories based on name to prevent key collisions and layoutId crashes
-            const uniqueData = Array.isArray(data) ? data.filter((cat, index, self) => 
-                index === self.findIndex((t) => t.name === cat.name)
+            const uniqueData = Array.isArray(data) ? data.filter((cat, index, self) =>
+                cat && cat.name && index === self.findIndex((t) => t && t.name === cat.name)
             ) : [];
-            
+
             // Ensure we don't add "All" if it already exists in the data (case insensitive)
             const hasAll = uniqueData.some(cat => cat.name.toLowerCase() === 'all');
             const initialCategories = hasAll ? [] : [{ name: 'All', slug: 'all' }];
-            
+
             setCategories([...initialCategories, ...uniqueData]);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -179,8 +180,8 @@ export default function ProductsPage() {
             const data = await response.json();
             if (data.success && Array.isArray(data.subcategories)) {
                 // Deduplicate subcategories based on _id
-                const uniqueSubcategories = data.subcategories.filter((sub, index, self) => 
-                    index === self.findIndex((t) => t._id === sub._id)
+                const uniqueSubcategories = data.subcategories.filter((sub, index, self) =>
+                    sub && sub._id && index === self.findIndex((t) => t && t._id === sub._id)
                 );
                 setAllSubcategories(uniqueSubcategories);
                 setSubcategories(uniqueSubcategories);
@@ -201,7 +202,7 @@ export default function ProductsPage() {
             await Promise.all([fetchCategories(), fetchSubcategories()]);
             setDataReady(true); // Signal that data is ready
         };
-        
+
         loadInitialData();
     }, [fetchCategories, fetchSubcategories]);
 
@@ -211,19 +212,19 @@ export default function ProductsPage() {
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
-        
+
         // Create new abort controller
         abortControllerRef.current = new AbortController();
-        
+
         try {
             setLoading(true);
-            
+
             // Build query parameters — use server-side pagination
             const params = new URLSearchParams();
             params.append('limit', String(PRODUCTS_PER_PAGE));
             params.append('page', String(currentPage));
             params.append('_', Date.now()); // Cache busting
-            
+
             if (selectedCategory !== 'All' && selectedCategory) {
                 params.append('category', selectedCategory);
             }
@@ -236,7 +237,7 @@ export default function ProductsPage() {
             if (selectedTags.length > 0) {
                 params.append('tags', selectedTags.join(','));
             }
-            
+
             // Map sort values to API params
             if (sortBy && sortBy !== 'featured') {
                 if (sortBy === 'price-low') {
@@ -250,10 +251,10 @@ export default function ProductsPage() {
                     params.append('sortOrder', 'desc');
                 }
             }
-            
+
             const queryString = params.toString();
             const url = `/api/products${queryString ? `?${queryString}` : ''}`;
-            
+
             const response = await fetch(url, {
                 signal: abortControllerRef.current.signal,
                 cache: 'no-store',
@@ -262,13 +263,13 @@ export default function ProductsPage() {
                     'Cache-Control': 'no-cache'
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             const data = await response.json();
-            
+
             // API returns paginated response with data nested
             if (data.success && Array.isArray(data.data)) {
                 setProducts(data.data);
@@ -299,17 +300,17 @@ export default function ProductsPage() {
             setLoading(false);
         }
     }, [selectedCategory, selectedSubcategory, searchTerm, currentPage, sortBy, selectedTags]);
-    
+
     // Fetch products when filters change OR when data becomes ready
     useEffect(() => {
         // Wait for BOTH initial data AND URL params to be processed
         if (!dataReady || !urlParamsProcessed) {
             return;
         }
-        
+
         // Fetch products immediately after data is ready
         fetchProducts();
-        
+
         // Cleanup on unmount
         return () => {
             if (abortControllerRef.current) {
@@ -322,19 +323,19 @@ export default function ProductsPage() {
     const filteredProducts = useMemo(() => {
         return (Array.isArray(products) ? products : [])
             .filter(product => {
-                const matchesTags = selectedTags.length === 0 || 
+                const matchesTags = selectedTags.length === 0 ||
                     (product.tags && product.tags.some(tag => selectedTags.includes(tag)));
-                const matchesMetalType = metalTypeFilter === 'all' || 
+                const matchesMetalType = metalTypeFilter === 'all' ||
                     product.metalType === metalTypeFilter;
                 return matchesTags && matchesMetalType;
             });
     }, [products, selectedTags, metalTypeFilter]);
-    
+
     // Use server-side pagination values
     const totalPages = totalPagesFromServer;
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
     const endIndex = startIndex + PRODUCTS_PER_PAGE;
-    
+
     // Reset to page 1 when filters change (not when page itself changes)
     useEffect(() => {
         setCurrentPage(1);
@@ -388,7 +389,7 @@ export default function ProductsPage() {
         <div className="min-h-screen bg-gradient-to-b from-white via-[#FAFAFA] to-white dark:from-black dark:via-[#050505] dark:to-black pt-4 md:pt-6 lg:pt-8 pb-6 md:pb-8 lg:pb-12">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -401,14 +402,14 @@ export default function ProductsPage() {
                         {searchTerm ? 'Product Search' : 'Explore Collections'}
                     </h1>
                     <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
-                        {searchTerm 
+                        {searchTerm
                             ? `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`
                             : 'Discover our curated selection of jewelry collections, each crafted with precision and passion'
                         }
                     </p>
 
                     {searchTerm && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.3, delay: 0.2 }}
@@ -417,7 +418,7 @@ export default function ProductsPage() {
                             <span className="text-sm text-gray-600">
                                 Searching for "<span className="font-medium text-[#D4AF76]">{searchTerm}</span>"
                             </span>
-                            <button 
+                            <button
                                 onClick={clearSearch}
                                 className="text-sm text-white bg-[#D4AF76] hover:bg-[#8B6B4C] px-4 py-1.5 rounded-full transition-colors font-medium flex items-center gap-1"
                             >
@@ -429,9 +430,9 @@ export default function ProductsPage() {
                         </motion.div>
                     )}
                 </motion.div>
-                
+
                 {/* Category Story Badges */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -458,8 +459,8 @@ export default function ProductsPage() {
                                     <div className="bg-white rounded-full p-[3px]">
                                         <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] to-[#F5F5F5] flex items-center justify-center shadow-sm">
                                             {category.image ? (
-                                                <img 
-                                                    src={category.image} 
+                                                <img
+                                                    src={category.image}
                                                     alt={category.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -478,7 +479,7 @@ export default function ProductsPage() {
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     {/* Active Indicator */}
                                     {selectedCategory === category.name && (
                                         <motion.div
@@ -493,12 +494,12 @@ export default function ProductsPage() {
                                         />
                                     )}
                                 </div>
-                                
+
                                 {/* Category Name */}
                                 <span className={`
                                     text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center
-                                    ${selectedCategory === category.name 
-                                        ? 'text-[#D4AF76] font-medium' 
+                                    ${selectedCategory === category.name
+                                        ? 'text-[#D4AF76] font-medium'
                                         : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
@@ -511,7 +512,7 @@ export default function ProductsPage() {
 
                 {/* Subcategory Filters - Story Style Badges */}
                 {allSubcategories.length > 0 && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.25 }}
@@ -541,7 +542,7 @@ export default function ProductsPage() {
                                 </button>
                             )}
                         </div>
-                        
+
                         {/* Story-style Scrollable Badges */}
                         <div ref={subcategoryScrollRef} className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide py-2 px-1">
                             {/* All Collections Badge */}
@@ -570,7 +571,7 @@ export default function ProductsPage() {
                                             </svg>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Active Indicator */}
                                     {selectedSubcategory === 'All' && (
                                         <motion.div
@@ -585,12 +586,12 @@ export default function ProductsPage() {
                                         />
                                     )}
                                 </div>
-                                
+
                                 {/* Label */}
                                 <span className={`
                                     text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center line-clamp-2 leading-tight
-                                    ${selectedSubcategory === 'All' 
-                                        ? 'text-[#D4AF76] font-medium' 
+                                    ${selectedSubcategory === 'All'
+                                        ? 'text-[#D4AF76] font-medium'
                                         : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
@@ -619,8 +620,8 @@ export default function ProductsPage() {
                                         <div className="bg-white rounded-full p-[3px]">
                                             <div className="w-16 h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] to-[#F5F5F5] flex items-center justify-center shadow-sm">
                                                 {subcategory.image ? (
-                                                    <img 
-                                                        src={subcategory.image} 
+                                                    <img
+                                                        src={subcategory.image}
                                                         alt={subcategory.name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -631,7 +632,7 @@ export default function ProductsPage() {
                                                 )}
                                             </div>
                                         </div>
-                                        
+
                                         {/* Active Indicator */}
                                         {selectedSubcategory === subcategory._id && (
                                             <motion.div
@@ -646,12 +647,12 @@ export default function ProductsPage() {
                                             />
                                         )}
                                     </div>
-                                    
+
                                     {/* Subcategory Name */}
                                     <span className={`
                                         text-[10px] md:text-xs font-light tracking-wide transition-colors duration-300 text-center line-clamp-2 leading-tight max-w-[70px] md:max-w-[80px] lg:max-w-[90px]
-                                        ${selectedSubcategory === subcategory._id 
-                                            ? 'text-[#D4AF76] font-medium' 
+                                        ${selectedSubcategory === subcategory._id
+                                            ? 'text-[#D4AF76] font-medium'
                                             : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                         }
                                     `}>
@@ -664,7 +665,7 @@ export default function ProductsPage() {
                 )}
 
                 {/* Tag Filters */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
@@ -718,7 +719,7 @@ export default function ProductsPage() {
                 </motion.div>
 
                 {/* Metal Type Filter */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
@@ -810,11 +811,10 @@ export default function ProductsPage() {
                             <div className="flex items-center gap-0.5 md:gap-1 bg-gray-50 dark:bg-white/[0.06] rounded-lg md:rounded-xl p-0.5 md:p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-1.5 md:p-2.5 rounded-md md:rounded-lg transition-all ${
-                                        viewMode === 'grid' 
-                                            ? 'bg-white text-[#D4AF76] shadow-sm' 
-                                            : 'text-gray-400 hover:text-gray-600'
-                                    }`}
+                                    className={`p-1.5 md:p-2.5 rounded-md md:rounded-lg transition-all ${viewMode === 'grid'
+                                        ? 'bg-white text-[#D4AF76] shadow-sm'
+                                        : 'text-gray-400 hover:text-gray-600'
+                                        }`}
                                     title="Grid View"
                                 >
                                     <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -823,11 +823,10 @@ export default function ProductsPage() {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-1.5 md:p-2.5 rounded-md md:rounded-lg transition-all ${
-                                        viewMode === 'list' 
-                                            ? 'bg-white text-[#D4AF76] shadow-sm' 
-                                            : 'text-gray-400 hover:text-gray-600'
-                                    }`}
+                                    className={`p-1.5 md:p-2.5 rounded-md md:rounded-lg transition-all ${viewMode === 'list'
+                                        ? 'bg-white text-[#D4AF76] shadow-sm'
+                                        : 'text-gray-400 hover:text-gray-600'
+                                        }`}
                                     title="List View"
                                 >
                                     <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -845,7 +844,7 @@ export default function ProductsPage() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
                     </div>
                 ) : filteredProducts.length === 0 ? (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-col items-center justify-center h-64 text-center"
@@ -854,23 +853,23 @@ export default function ProductsPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
                         <p className="text-xl text-[#2C2C2C] dark:text-gray-100 font-light">
-                            {searchTerm || selectedCategory !== 'All' 
-                                ? 'No products found' 
+                            {searchTerm || selectedCategory !== 'All'
+                                ? 'No products found'
                                 : 'No products available'
                             }
                         </p>
                         <p className="text-gray-500 dark:text-gray-400 mt-2">
-                            {searchTerm 
-                                ? 'Try adjusting your search terms' 
-                                : selectedCategory !== 'All' 
-                                    ? 'Try selecting a different category' 
+                            {searchTerm
+                                ? 'Try adjusting your search terms'
+                                : selectedCategory !== 'All'
+                                    ? 'Try selecting a different category'
                                     : 'Check back soon for new items'
                             }
                         </p>
                     </motion.div>
                 ) : (
                     <AnimatePresence mode="wait">
-                        <motion.div 
+                        <motion.div
                             key={`${selectedCategory}-${viewMode}-${currentPage}-${sortBy}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -892,10 +891,10 @@ export default function ProductsPage() {
                         </motion.div>
                     </AnimatePresence>
                 )}
-                
+
                 {/* Pagination Controls */}
                 {!loading && filteredProducts.length > 0 && totalPages > 1 && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
@@ -907,7 +906,7 @@ export default function ProductsPage() {
                             <span className="font-medium text-[#D4AF76]">{Math.min(endIndex, totalProductsCount)}</span> of{' '}
                             <span className="font-medium text-[#D4AF76]">{totalProductsCount}</span> products
                         </div>
-                        
+
                         {/* Pagination Buttons */}
                         <div className="flex items-center gap-2">
                             {/* Previous Button */}
@@ -919,17 +918,16 @@ export default function ProductsPage() {
                                     scrollToProducts();
                                 }}
                                 disabled={currentPage === 1}
-                                className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                                    currentPage === 1
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-[#D4AF76] text-white hover:bg-[#8B6B4C] shadow-sm'
-                                }`}
+                                className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${currentPage === 1
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-[#D4AF76] text-white hover:bg-[#8B6B4C] shadow-sm'
+                                    }`}
                             >
                                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </motion.button>
-                            
+
                             {/* Page Numbers */}
                             <div className="flex items-center gap-1 md:gap-2">
                                 {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -947,7 +945,7 @@ export default function ProductsPage() {
                                             {index > 0 && array[index - 1] !== page - 1 && (
                                                 <span className="px-2 text-gray-400">...</span>
                                             )}
-                                            
+
                                             <motion.button
                                                 whileHover={{ scale: 1.1 }}
                                                 whileTap={{ scale: 0.9 }}
@@ -955,18 +953,17 @@ export default function ProductsPage() {
                                                     setCurrentPage(page);
                                                     scrollToProducts();
                                                 }}
-                                                className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-medium text-sm transition-all ${
-                                                    currentPage === page
-                                                        ? 'bg-[#D4AF76] text-white shadow-md'
-                                                        : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
-                                                }`}
+                                                className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-medium text-sm transition-all ${currentPage === page
+                                                    ? 'bg-[#D4AF76] text-white shadow-md'
+                                                    : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
+                                                    }`}
                                             >
                                                 {page}
                                             </motion.button>
                                         </React.Fragment>
                                     ))}
                             </div>
-                            
+
                             {/* Next Button */}
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -976,11 +973,10 @@ export default function ProductsPage() {
                                     scrollToProducts();
                                 }}
                                 disabled={currentPage === totalPages}
-                                className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                                    currentPage === totalPages
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-[#D4AF76] text-white hover:bg-[#8B6B4C] shadow-sm'
-                                }`}
+                                className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-all ${currentPage === totalPages
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-[#D4AF76] text-white hover:bg-[#8B6B4C] shadow-sm'
+                                    }`}
                             >
                                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1015,7 +1011,7 @@ function ProductCard({ product, index }) {
                         {/* Mobile-optimized badge */}
                         <div className="absolute top-2 left-2 md:top-3 md:left-3 flex flex-col gap-1">
                             <span className="bg-white/90 backdrop-blur-sm text-[#D4AF76] text-[10px] md:text-xs px-2 py-1 rounded-full font-medium">
-                                {product.category}
+                                {typeof product.category === 'object' ? product.category?.name : product.category}
                             </span>
                             {product.subcategory?.name && (
                                 <span className="bg-[#D4AF76]/90 backdrop-blur-sm text-white text-[10px] md:text-xs px-2 py-1 rounded-full font-medium">
@@ -1061,7 +1057,7 @@ function ProductListItem({ product, index }) {
                         <div className="flex-1 flex flex-col justify-center min-w-0">
                             <div className="flex items-center gap-2 mb-1 sm:mb-2">
                                 <p className="text-[10px] sm:text-xs text-[#D4AF76] font-medium tracking-wide uppercase">
-                                    {product.category}
+                                    {typeof product.category === 'object' ? product.category?.name : product.category}
                                 </p>
                                 {product.subcategory?.name && (
                                     <>

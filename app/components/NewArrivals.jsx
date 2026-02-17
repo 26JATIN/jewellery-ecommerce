@@ -71,7 +71,7 @@ export default function NewArrivals() {
         <section id="new-arrivals" className="py-12 md:py-20 px-4 bg-gradient-to-b from-[#FAFAFA] via-white to-[#FAFAFA] dark:from-black dark:via-[#050505] dark:to-black">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -90,7 +90,7 @@ export default function NewArrivals() {
                             Latest Collection
                         </span>
                     </motion.div>
-                    
+
                     <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-4">
                         New Creations, Just For You
                     </h2>
@@ -127,14 +127,14 @@ export default function NewArrivals() {
                             <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">Unable to Load New Arrivals</h3>
                             <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">We're having trouble loading our latest collection right now.</p>
                             <div className="flex gap-3 justify-center flex-wrap">
-                                <button 
-                                    onClick={() => fetchNewArrivals()} 
+                                <button
+                                    onClick={() => fetchNewArrivals()}
                                     className="px-6 py-2.5 bg-[#D4AF76] text-white rounded-lg hover:bg-[#C19A65] transition-colors font-medium text-sm"
                                 >
                                     Try Again
                                 </button>
-                                <button 
-                                    onClick={() => router.push('/products')} 
+                                <button
+                                    onClick={() => router.push('/products')}
                                     className="px-6 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-colors font-medium text-sm"
                                 >
                                     View All Products
@@ -145,8 +145,8 @@ export default function NewArrivals() {
                 ) : products.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-gray-600 dark:text-gray-400 mb-4">No new arrivals at the moment. Check back soon!</p>
-                        <button 
-                            onClick={() => router.push('/products')} 
+                        <button
+                            onClick={() => router.push('/products')}
                             className="px-6 py-3 bg-[#8B6B4C] text-white rounded-lg hover:bg-[#725939] transition-colors"
                         >
                             View All Products
@@ -181,10 +181,10 @@ export default function NewArrivals() {
                                                     fill={true}
                                                     className="object-cover transform group-hover:scale-110 transition-transform duration-700"
                                                 />
-                                                
+
                                                 {/* Gradient Overlay */}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                                
+
                                                 {/* Badges - stacked top-left */}
                                                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
                                                     <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-full px-2.5 py-1 shadow-lg w-fit">
@@ -213,7 +213,7 @@ export default function NewArrivals() {
                                                         </motion.div>
                                                     )}
                                                 </AnimatePresence>
-                                                
+
 
                                             </div>
                                         </div>
@@ -221,7 +221,7 @@ export default function NewArrivals() {
                                         {/* Product Info */}
                                         <div className="mt-5 text-center px-2">
                                             <p className="text-xs text-[#D4AF76] font-medium tracking-widest uppercase mb-2">
-                                                {product.category}
+                                                {typeof product.category === 'object' ? product.category?.name : product.category}
                                             </p>
                                             <h3 className="text-[#2C2C2C] dark:text-gray-100 font-medium text-base lg:text-lg mb-2 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors">
                                                 {product.name}
@@ -236,7 +236,7 @@ export default function NewArrivals() {
                         </motion.div>
 
                         {/* View Latest Collection Button */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}

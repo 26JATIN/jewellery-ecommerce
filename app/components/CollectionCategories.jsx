@@ -25,8 +25,14 @@ export default function CollectionCategories() {
             });
             if (response.ok) {
                 const data = await response.json();
-                // Show only first 6 categories for homepage
-                setCategories(data.slice(0, 6));
+                if (Array.isArray(data)) {
+                    // Filter valid categories and show only first 6
+                    const validCategories = data.filter(cat => cat && cat._id && cat.name && cat.isActive);
+                    setCategories(validCategories.slice(0, 6));
+                } else {
+                    console.error('Categories data is not an array:', data);
+                    setCategories([]);
+                }
             }
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -35,8 +41,8 @@ export default function CollectionCategories() {
         }
     };
 
-    const handleCategoryClick = (categorySlug) => {
-        router.push(`/collections/${categorySlug}`);
+    const handleCategoryClick = (category) => {
+        router.push(`/products?category=${encodeURIComponent(category.name)}`);
     };
 
     const handleViewAll = () => {
@@ -70,7 +76,7 @@ export default function CollectionCategories() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8 md:mb-12">
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
@@ -79,7 +85,7 @@ export default function CollectionCategories() {
                     >
                         Explore Our
                     </motion.p>
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
@@ -88,7 +94,7 @@ export default function CollectionCategories() {
                     >
                         Collections
                     </motion.h2>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
@@ -109,7 +115,7 @@ export default function CollectionCategories() {
                             transition={{ duration: 0.6, delay: index * 0.1 }}
                             viewport={{ once: true }}
                             className="group cursor-pointer"
-                            onClick={() => handleCategoryClick(category.slug)}
+                            onClick={() => handleCategoryClick(category)}
                         >
                             <div className="relative overflow-hidden bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none dark:border dark:border-white/[0.06] transition-all duration-500 group-hover:-translate-y-2">
                                 {/* Category Image */}
@@ -120,10 +126,10 @@ export default function CollectionCategories() {
                                         fill
                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
-                                    
+
                                     {/* Gradient Overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                    
+
                                     {/* Products Count Badge */}
                                     {category.productsCount > 0 && (
                                         <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-white/95 backdrop-blur-sm rounded-full px-2.5 md:px-3 py-1 shadow-md">
@@ -132,7 +138,7 @@ export default function CollectionCategories() {
                                             </span>
                                         </div>
                                     )}
-                                    
+
                                     {/* Category Info Overlay */}
                                     <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
                                         <h3 className="text-xl md:text-2xl font-light text-white mb-1 md:mb-2 group-hover:text-[#D4AF76] transition-colors">
@@ -141,7 +147,7 @@ export default function CollectionCategories() {
                                         <p className="text-white/90 text-xs md:text-sm font-light leading-relaxed mb-3 md:mb-4 line-clamp-2">
                                             {category.description}
                                         </p>
-                                        
+
                                         {/* Explore Button */}
                                         <div className="inline-flex items-center text-white bg-white/10 backdrop-blur-sm px-4 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-light group-hover:bg-[#D4AF76] group-hover:text-white transition-all duration-300">
                                             <span>Explore Collection</span>
@@ -157,7 +163,7 @@ export default function CollectionCategories() {
                 </div>
 
                 {/* View All Button */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}

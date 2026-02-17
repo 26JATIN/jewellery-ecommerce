@@ -19,7 +19,7 @@ export default function AdminLayout({ children }) {
         // Force light mode for admin pages
         const html = document.documentElement;
         wasDarkRef.current = html.classList.contains('dark');
-        
+
         // Remove dark class immediately
         if (wasDarkRef.current) {
             html.classList.remove('dark');
@@ -50,12 +50,22 @@ export default function AdminLayout({ children }) {
     // Scroll lock for mobile sidebar
     useEffect(() => {
         if (isMobileSidebarOpen) {
+            // Prevent scrolling on both html and body
+            document.documentElement.style.overflow = 'hidden';
             document.body.style.overflow = 'hidden';
+            document.body.style.height = '100vh';
+            document.body.style.touchAction = 'none'; // Disable touch actions on body
         } else {
-            document.body.style.overflow = 'unset';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.touchAction = '';
         }
         return () => {
-            document.body.style.overflow = 'unset';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.touchAction = '';
         };
     }, [isMobileSidebarOpen]);
 
@@ -88,8 +98,8 @@ export default function AdminLayout({ children }) {
     }
 
     const navItems = [
-        { 
-            path: '/admin', 
+        {
+            path: '/admin',
             label: 'Dashboard',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,8 +108,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/categories', 
+        {
+            path: '/admin/categories',
             label: 'Categories',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,8 +117,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/products', 
+        {
+            path: '/admin/products',
             label: 'Products',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,8 +126,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/gold-prices', 
+        {
+            path: '/admin/gold-prices',
             label: 'Gold Prices',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,8 +135,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/orders', 
+        {
+            path: '/admin/orders',
             label: 'Orders',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,8 +144,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/returns', 
+        {
+            path: '/admin/returns',
             label: 'Returns',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,8 +153,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/users', 
+        {
+            path: '/admin/users',
             label: 'Users',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,8 +162,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/coupons', 
+        {
+            path: '/admin/coupons',
             label: 'Coupons',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,8 +171,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/blogs', 
+        {
+            path: '/admin/blogs',
             label: 'Blogs',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,8 +180,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/hero-videos', 
+        {
+            path: '/admin/hero-videos',
             label: 'Hero Videos',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,8 +189,8 @@ export default function AdminLayout({ children }) {
                 </svg>
             )
         },
-        { 
-            path: '/admin/gallery', 
+        {
+            path: '/admin/gallery',
             label: 'Model Gallery',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +234,7 @@ export default function AdminLayout({ children }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
-                            
+
                             <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-[#8B6B4C] rounded-lg flex items-center justify-center">
                                     <span className="text-white font-bold text-sm">A</span>
@@ -235,13 +245,13 @@ export default function AdminLayout({ children }) {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2 lg:space-x-4">
                             {/* Quick Stats */}
                             <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-600">
                                 <span>Welcome back, {user?.name}</span>
                             </div>
-                            
+
                             {/* Profile Dropdown */}
                             <div className="relative">
                                 <button
@@ -257,12 +267,12 @@ export default function AdminLayout({ children }) {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
-                                
+
                                 {isProfileOpen && (
                                     <>
                                         {/* Backdrop for mobile */}
-                                        <div 
-                                            className="fixed inset-0 z-40 lg:hidden" 
+                                        <div
+                                            className="fixed inset-0 z-40 lg:hidden"
                                             onClick={() => setIsProfileOpen(false)}
                                         />
                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
@@ -308,19 +318,18 @@ export default function AdminLayout({ children }) {
 
             <div className="flex pt-[40px]">
                 {/* Desktop Sidebar */}
-                <aside className="hidden lg:block w-64 bg-white shadow-sm border-r border-gray-200 fixed left-0 top-[73px] bottom-0 overflow-y-auto">
-                    <nav className="p-4 space-y-2">
+                <aside className="hidden lg:block w-64 bg-white shadow-sm border-r border-gray-200 fixed left-0 top-[73px] bottom-0 z-30 overflow-y-auto overscroll-contain">
+                    <nav className="p-4 space-y-2 pb-20">
                         {navItems.map((item) => {
                             const isActive = pathname === item.path;
                             return (
                                 <Link
                                     key={item.path}
                                     href={item.path}
-                                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                                        isActive
-                                            ? 'bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white shadow-md'
-                                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                    }`}
+                                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                                        ? 'bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white shadow-md'
+                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                        }`}
                                 >
                                     <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400'}`}>
                                         {item.icon}
@@ -332,7 +341,7 @@ export default function AdminLayout({ children }) {
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 z-10">
                         <div className="text-center">
                             <p className="text-xs font-medium text-gray-600">Jewelry Store Admin</p>
                             <p className="text-xs text-gray-400 mt-0.5">v1.0.0</p>
@@ -395,11 +404,10 @@ export default function AdminLayout({ children }) {
                                             key={item.path}
                                             href={item.path}
                                             onClick={() => setIsMobileSidebarOpen(false)}
-                                            className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
-                                                isActive
-                                                    ? 'bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white shadow-lg scale-[1.02]'
-                                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 active:scale-95'
-                                            }`}
+                                            className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive
+                                                ? 'bg-gradient-to-r from-[#8B6B4C] to-[#7A5D42] text-white shadow-lg scale-[1.02]'
+                                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 active:scale-95'
+                                                }`}
                                         >
                                             <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400'}`}>
                                                 {item.icon}
@@ -450,8 +458,8 @@ export default function AdminLayout({ children }) {
                 </AnimatePresence>
 
                 {/* Main Content */}
-                <main className="flex-1 lg:ml-64 min-h-screen bg-gray-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <main className="flex-1 lg:ml-64 bg-gray-50 min-h-[calc(100vh-73px)]">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                         {children}
                     </div>
                 </main>

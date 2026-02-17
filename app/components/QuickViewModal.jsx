@@ -33,7 +33,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                 onClose();
                 return;
             }
-            
+
             const result = await addToCart(product);
             if (result !== false) {
                 setIsCartOpen(true);
@@ -75,7 +75,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                             {/* Mobile Layout */}
                             <div className="block lg:hidden max-h-[90vh] overflow-y-auto">
                                 <div className="relative h-80 bg-gradient-to-br from-gray-50 to-gray-100">
-                                    <ImageCarousel 
+                                    <ImageCarousel
                                         images={product.images && product.images.length > 0 ? product.images : product.image}
                                         productName={product.name}
                                         showThumbnails={true}
@@ -84,11 +84,11 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                         autoPlayInterval={4000}
                                     />
                                 </div>
-                                
+
                                 <div className="p-6">
                                     <h2 className="text-2xl font-light text-[#2C2C2C] mb-2">{product.name}</h2>
                                     <p className="text-[#D4AF76] text-sm mb-4">{product.category}</p>
-                                    
+
                                     <div className="flex items-baseline gap-3 mb-6">
                                         <span className="text-3xl font-light text-[#2C2C2C]">₹{product.sellingPrice}</span>
                                         {product.mrp && product.mrp > product.sellingPrice && (
@@ -100,14 +100,14 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                             </>
                                         )}
                                     </div>
-                                    
+
                                     <button
                                         onClick={handleAddToCart}
                                         disabled={isProductOutOfStock(product)}
                                         className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl font-medium text-lg hover:bg-[#D4AF76] transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                     >
-                                        {isProductOutOfStock(product) ? 'Out of Stock' : 
-                                         product.hasVariants ? 'Select Options' : 'Add to Cart'}
+                                        {isProductOutOfStock(product) ? 'Out of Stock' :
+                                            product.hasVariants ? 'Select Options' : 'Add to Cart'}
                                     </button>
                                 </div>
                             </div>
@@ -116,7 +116,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                             <div className="hidden lg:flex min-h-[600px]">
                                 <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-8 flex items-center justify-center">
                                     <div className="aspect-square w-full max-w-lg">
-                                        <ImageCarousel 
+                                        <ImageCarousel
                                             images={product.images && product.images.length > 0 ? product.images : product.image}
                                             productName={product.name}
                                             showThumbnails={true}
@@ -126,11 +126,13 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex-1 p-8 flex flex-col justify-center" style={{ maxWidth: '500px' }}>
                                     <h2 className="text-4xl font-light text-[#2C2C2C] mb-3">{product.name}</h2>
-                                    <p className="text-[#D4AF76] mb-6">{product.category}</p>
-                                    
+                                    <p className="text-[#D4AF76] mb-6">
+                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                    </p>
+
                                     <div className="flex items-baseline gap-4 mb-8">
                                         <span className="text-4xl font-light text-[#2C2C2C]">₹{product.sellingPrice}</span>
                                         {product.mrp && product.mrp > product.sellingPrice && (
@@ -142,14 +144,14 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                             </>
                                         )}
                                     </div>
-                                    
+
                                     <button
                                         onClick={handleAddToCart}
                                         disabled={isProductOutOfStock(product)}
                                         className="bg-[#2C2C2C] text-white py-4 px-8 rounded-2xl font-light text-lg hover:bg-[#D4AF76] transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                     >
-                                        {isProductOutOfStock(product) ? 'Out of Stock' : 
-                                         product.hasVariants ? 'Select Options' : 'Add to Cart'}
+                                        {isProductOutOfStock(product) ? 'Out of Stock' :
+                                            product.hasVariants ? 'Select Options' : 'Add to Cart'}
                                     </button>
                                 </div>
                             </div>

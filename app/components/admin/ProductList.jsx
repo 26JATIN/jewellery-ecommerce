@@ -65,7 +65,7 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                         <div className="text-lg mb-2">📦</div>
                                         <p className="text-lg font-medium mb-2">No products found</p>
                                         <p className="text-sm">
-                                            {products.length === 0 
+                                            {products.length === 0
                                                 ? "Start by adding your first product using the 'Add New Product' button above."
                                                 : "Try adjusting your search or filter criteria."
                                             }
@@ -201,11 +201,10 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                    product.isActive
-                                                        ? 'text-green-800 bg-green-100'
-                                                        : 'text-red-800 bg-red-100'
-                                                }`}
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.isActive
+                                                    ? 'text-green-800 bg-green-100'
+                                                    : 'text-red-800 bg-red-100'
+                                                    }`}
                                             >
                                                 {product.isActive ? 'Active' : 'Inactive'}
                                             </span>
@@ -256,15 +255,14 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                                                         <div className="font-medium text-sm text-gray-900">
                                                                             {variant.sku}
                                                                         </div>
-                                                                        <div className={`px-2 py-1 rounded-full text-xs ${
-                                                                            variant.isActive 
-                                                                                ? 'bg-green-100 text-green-800' 
-                                                                                : 'bg-red-100 text-red-800'
-                                                                        }`}>
+                                                                        <div className={`px-2 py-1 rounded-full text-xs ${variant.isActive
+                                                                            ? 'bg-green-100 text-green-800'
+                                                                            : 'bg-red-100 text-red-800'
+                                                                            }`}>
                                                                             {variant.isActive ? 'Active' : 'Inactive'}
                                                                         </div>
                                                                     </div>
-                                                                    
+
                                                                     {/* Variant Options */}
                                                                     <div className="mb-2">
                                                                         {variant.optionCombination && Object.entries(variant.optionCombination).map(([key, value]) => (
@@ -273,7 +271,7 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                                                             </div>
                                                                         ))}
                                                                     </div>
-                                                                    
+
                                                                     {/* Variant Pricing */}
                                                                     <div className="mb-2 text-xs space-y-1">
                                                                         <div>
@@ -285,19 +283,18 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                                                             <span className="font-medium ml-1 text-green-600">₹{variant.price?.sellingPrice || variant.price || 'N/A'}</span>
                                                                         </div>
                                                                     </div>
-                                                                    
+
                                                                     {/* Stock Status */}
                                                                     <div className="flex justify-between items-center">
                                                                         <div className="text-sm font-medium">
                                                                             Stock: {variant.stock || 0}
                                                                         </div>
-                                                                        <div className={`px-2 py-1 rounded-full text-xs ${
-                                                                            (variant.stock || 0) === 0 
-                                                                                ? 'bg-red-100 text-red-800'
-                                                                                : (variant.stock || 0) < 10 
-                                                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                                                    : 'bg-green-100 text-green-800'
-                                                                        }`}>
+                                                                        <div className={`px-2 py-1 rounded-full text-xs ${(variant.stock || 0) === 0
+                                                                            ? 'bg-red-100 text-red-800'
+                                                                            : (variant.stock || 0) < 10
+                                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                                : 'bg-green-100 text-green-800'
+                                                                            }`}>
                                                                             {(variant.stock || 0) === 0 ? 'Out' : (variant.stock || 0) < 10 ? 'Low' : 'Good'}
                                                                         </div>
                                                                     </div>
@@ -332,7 +329,7 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                             <div className="text-4xl mb-2">📦</div>
                             <p className="text-lg font-medium mb-2">No products found</p>
                             <p className="text-sm">
-                                {products.length === 0 
+                                {products.length === 0
                                     ? "Start by adding your first product using the 'Add New Product' button above."
                                     : "Try adjusting your search or filter criteria."
                                 }
@@ -366,7 +363,9 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
                                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                                            <span className="text-xs text-gray-500">{product.category}</span>
+                                            <span className="text-xs text-gray-500">
+                                                {typeof product.category === 'object' ? product.category?.name : product.category}
+                                            </span>
                                             {product.hasVariants && (
                                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                     🎨 {product.variants?.length || 0} variants
@@ -376,11 +375,10 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                         <p className="text-xs text-gray-600">SKU: {product.sku}</p>
                                     </div>
                                     <span
-                                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                            product.isActive
-                                                ? 'text-green-800 bg-green-100'
-                                                : 'text-red-800 bg-red-100'
-                                        }`}
+                                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${product.isActive
+                                            ? 'text-green-800 bg-green-100'
+                                            : 'text-red-800 bg-red-100'
+                                            }`}
                                     >
                                         {product.isActive ? 'Active' : 'Inactive'}
                                     </span>
@@ -468,21 +466,20 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                                                             <div className="font-medium text-xs text-gray-900">
                                                                 {variant.sku}
                                                             </div>
-                                                            <div className={`px-1.5 py-0.5 rounded-full text-xs ${
-                                                                variant.isActive 
-                                                                    ? 'bg-green-100 text-green-800' 
-                                                                    : 'bg-red-100 text-red-800'
-                                                            }`}>
+                                                            <div className={`px-1.5 py-0.5 rounded-full text-xs ${variant.isActive
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-red-100 text-red-800'
+                                                                }`}>
                                                                 {variant.isActive ? 'Active' : 'Inactive'}
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {variant.optionCombination && Object.entries(variant.optionCombination).map(([key, value]) => (
                                                             <div key={key} className="text-xs text-gray-600 mb-1">
                                                                 <span className="font-medium">{key}:</span> {value}
                                                             </div>
                                                         ))}
-                                                        
+
                                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                                             <div>
                                                                 <span className="text-gray-500">Price:</span>
