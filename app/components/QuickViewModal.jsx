@@ -87,7 +87,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
 
                                 <div className="p-6">
                                     <h2 className="text-2xl font-light text-[#2C2C2C] mb-2">{product.name}</h2>
-                                    <p className="text-[#D4AF76] text-sm mb-4">{typeof product.category === 'object' ? product.category?.name : product.category}</p>
+                                    <p className="text-[#D4AF76] text-sm mb-4">{typeof product.category === 'object' ? (typeof product.category.name === 'object' ? product.category.name?.name : product.category.name) : product.category}</p>
 
                                     <div className="flex items-baseline gap-3 mb-6">
                                         <span className="text-3xl font-light text-[#2C2C2C]">₹{product.sellingPrice}</span>
@@ -130,7 +130,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                                 <div className="flex-1 p-8 flex flex-col justify-center" style={{ maxWidth: '500px' }}>
                                     <h2 className="text-4xl font-light text-[#2C2C2C] mb-3">{product.name}</h2>
                                     <p className="text-[#D4AF76] mb-6">
-                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                        {typeof product.category === 'object' ? (typeof product.category.name === 'object' ? product.category.name?.name : product.category.name) : product.category}
                                     </p>
 
                                     <div className="flex items-baseline gap-4 mb-8">

@@ -99,7 +99,7 @@ export default function ProductGrid({
                                 <div className="p-4">
                                     <h3 className="text-[#2C2C2C] text-sm font-medium mb-1 line-clamp-2">{product.name}</h3>
                                     <p className="text-xs text-[#D4AF76] mb-2">
-                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                        {typeof product.category === 'object' ? (typeof product.category.name === 'object' ? product.category.name?.name : product.category.name) : product.category}
                                     </p>
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="text-[#2C2C2C] font-semibold text-sm">₹{product.sellingPrice || product.price}</span>
@@ -166,7 +166,7 @@ export default function ProductGrid({
                                 </div>
                                 <div className="mt-5 text-center p-4">
                                     <p className="text-xs text-[#D4AF76] font-light tracking-widest uppercase mb-2">
-                                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                                        {typeof product.category === 'object' ? (typeof product.category.name === 'object' ? product.category.name?.name : product.category.name) : product.category}
                                     </p>
                                     <h3 className="text-[#2C2C2C] font-light text-base mb-2 px-2">{product.name}</h3>
                                     <div className="flex justify-center items-center gap-2">

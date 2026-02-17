@@ -167,7 +167,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             setFormData({
                 name: product.name || '',
                 description: product.description || '',
-                category: product.category || '',
+                category: product.category?.name || product.category || '',
                 subcategory: product.subcategory?._id || product.subcategory || '',
                 mrp: product.mrp || '',
                 sellingPrice: product.sellingPrice || '',

@@ -31,12 +31,12 @@ export default function FeaturedCollections() {
                         .filter(item => item && item._id && item.name) // Filter valid items
                         .map((category, index) => ({
                             id: category._id,
-                            title: category.name,
+                            title: typeof category.name === 'object' ? category.name?.name || '' : category.name,
                             subtitle: category.description?.substring(0, 50) + "..." || "Premium Collection",
                             description: category.description || "Exquisite pieces crafted with precision and care.",
                             image: category.image || "carousel1_l76hra.jpg",
                             products: category.productsCount || 0,
-                            category: category.name.toLowerCase(),
+                            category: (typeof category.name === 'object' ? category.name?.name || '' : category.name).toLowerCase(),
                             color: getCollectionColor(index),
                             realData: true
                         }));
@@ -70,7 +70,8 @@ export default function FeaturedCollections() {
     const handleCollectionClick = (collection) => {
         if (collection.realData) {
             // For real categories, navigate to products page with category filter
-            const categoryName = typeof collection.title === 'object' ? collection.title.name : collection.title;
+            // title is already sanitized in the mapping above, but we keep the check for safety
+            const categoryName = typeof collection.title === 'object' ? collection.title?.name : collection.title;
             router.push(`/products?category=${encodeURIComponent(categoryName)}`);
         } else {
             // For default collections, navigate to products page

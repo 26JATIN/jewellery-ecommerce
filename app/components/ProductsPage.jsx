@@ -154,7 +154,10 @@ export default function ProductsPage() {
             // Deduplicate categories based on name to prevent key collisions and layoutId crashes
             const uniqueData = Array.isArray(data) ? data.filter((cat, index, self) =>
                 cat && cat.name && index === self.findIndex((t) => t && t.name === cat.name)
-            ) : [];
+            ).map(cat => ({
+                ...cat,
+                name: typeof cat.name === 'object' ? cat.name?.name || '' : cat.name
+            })) : [];
 
             // Ensure we don't add "All" if it already exists in the data (case insensitive)
             const hasAll = uniqueData.some(cat => cat.name.toLowerCase() === 'all');
@@ -182,7 +185,14 @@ export default function ProductsPage() {
                 // Deduplicate subcategories based on _id
                 const uniqueSubcategories = data.subcategories.filter((sub, index, self) =>
                     sub && sub._id && index === self.findIndex((t) => t && t._id === sub._id)
-                );
+                ).map(sub => ({
+                    ...sub,
+                    name: typeof sub.name === 'object' ? sub.name?.name || '' : sub.name,
+                    category: sub.category ? {
+                        ...sub.category,
+                        name: typeof sub.category.name === 'object' ? sub.category.name?.name || '' : sub.category.name
+                    } : sub.category
+                }));
                 setAllSubcategories(uniqueSubcategories);
                 setSubcategories(uniqueSubcategories);
             } else {
@@ -503,7 +513,7 @@ export default function ProductsPage() {
                                         : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
-                                    {category.name}
+                                    {typeof category.name === 'object' ? category.name?.name || '' : category.name}
                                 </span>
                             </motion.button>
                         ))}
@@ -656,7 +666,7 @@ export default function ProductsPage() {
                                             : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                         }
                                     `}>
-                                        {subcategory.name}
+                                        {typeof subcategory.name === 'object' ? subcategory.name?.name || '' : subcategory.name}
                                     </span>
                                 </motion.button>
                             ))}

@@ -44,10 +44,20 @@ function CollectionContent({ params }) {
             const categoriesData = await categoriesRes.json();
             const subcategoriesData = await subcategoriesRes.json();
 
-            const activeCategories = categoriesData.filter(cat => cat.isActive);
+            const activeCategories = categoriesData.filter(cat => cat.isActive).map(cat => ({
+                ...cat,
+                name: typeof cat.name === 'object' ? cat.name?.name || '' : cat.name
+            }));
             setCategories(activeCategories);
             
-            const activeSubcategories = subcategoriesData.success ? subcategoriesData.data : [];
+            const activeSubcategories = subcategoriesData.success ? subcategoriesData.data.map(sub => ({
+                ...sub,
+                name: typeof sub.name === 'object' ? sub.name?.name || '' : sub.name,
+                category: sub.category ? {
+                    ...sub.category,
+                    name: typeof sub.category.name === 'object' ? sub.category.name?.name || '' : sub.category.name
+                } : sub.category
+            })) : [];
             setSubcategories(activeSubcategories);
 
             // Find category by slug if provided
@@ -264,7 +274,7 @@ function CollectionContent({ params }) {
                                                                     />
                                                                 </div>
                                                             )}
-                                                            <span className="font-medium">{category.name}</span>
+                                                            <span className="font-medium">{typeof category.name === 'object' ? category.name?.name || '' : category.name}</span>
                                                         </div>
                                                         <ChevronRight className="w-4 h-4" />
                                                     </div>
@@ -311,7 +321,7 @@ function CollectionContent({ params }) {
                                                                 : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-white/[0.06] hover:shadow-sm'
                                                         }`}
                                                     >
-                                                        {sub.name}
+                                                        {typeof sub.name === 'object' ? sub.name?.name || '' : sub.name}
                                                     </motion.button>
                                                 ))}
                                             </div>

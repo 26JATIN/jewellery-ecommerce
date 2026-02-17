@@ -448,13 +448,13 @@ export default function SearchBar({ className = "", placeholder = "Search for je
                                         <p className="text-xs text-gray-500">
                                             {suggestion.type === 'product' && suggestion.category ? (
                                                 <>
-                                                    {getTypeLabel(suggestion.type)} • {typeof suggestion.category === 'object' ? suggestion.category?.name : suggestion.category}
+                                                    {getTypeLabel(suggestion.type)} • {typeof suggestion.category === 'object' ? (typeof suggestion.category.name === 'object' ? suggestion.category.name?.name : suggestion.category.name) : suggestion.category}
                                                     {suggestion.subcategory && (
-                                                        <> • <span className="text-[#8B6B4C]">{typeof suggestion.subcategory === 'object' ? suggestion.subcategory?.name : suggestion.subcategory}</span></>
+                                                        <> • <span className="text-[#8B6B4C]">{typeof suggestion.subcategory === 'object' ? (typeof suggestion.subcategory.name === 'object' ? suggestion.subcategory.name?.name : suggestion.subcategory.name) : suggestion.subcategory}</span></>
                                                     )}
                                                 </>
                                             ) : suggestion.category ? (
-                                                `${getTypeLabel(suggestion.type)} • ${typeof suggestion.category === 'object' ? suggestion.category?.name : suggestion.category}`
+                                                `${getTypeLabel(suggestion.type)} • ${typeof suggestion.category === 'object' ? (typeof suggestion.category.name === 'object' ? suggestion.category.name?.name : suggestion.category.name) : suggestion.category}`
                                             ) : (
                                                 getTypeLabel(suggestion.type)
                                             )}

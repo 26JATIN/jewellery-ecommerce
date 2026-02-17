@@ -221,7 +221,7 @@ export default function NewArrivals() {
                                         {/* Product Info */}
                                         <div className="mt-5 text-center px-2">
                                             <p className="text-xs text-[#D4AF76] font-medium tracking-widest uppercase mb-2">
-                                                {typeof product.category === 'object' ? product.category?.name : product.category}
+                                                {typeof product.category === 'object' ? (typeof product.category.name === 'object' ? product.category.name?.name : product.category.name) : product.category}
                                             </p>
                                             <h3 className="text-[#2C2C2C] dark:text-gray-100 font-medium text-base lg:text-lg mb-2 line-clamp-2 group-hover:text-[#8B6B4C] transition-colors">
                                                 {product.name}

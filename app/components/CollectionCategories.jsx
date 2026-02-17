@@ -27,7 +27,10 @@ export default function CollectionCategories() {
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     // Filter valid categories and show only first 6
-                    const validCategories = data.filter(cat => cat && cat._id && cat.name && cat.isActive);
+                    const validCategories = data.filter(cat => cat && cat._id && cat.name && cat.isActive).map(cat => ({
+                        ...cat,
+                        name: typeof cat.name === 'object' ? cat.name?.name || '' : cat.name
+                    }));
                     setCategories(validCategories.slice(0, 6));
                 } else {
                     console.error('Categories data is not an array:', data);
@@ -42,7 +45,7 @@ export default function CollectionCategories() {
     };
 
     const handleCategoryClick = (category) => {
-        const categoryName = typeof category.name === 'object' ? category.name?.name : category.name;
+        const categoryName = category.name;
         router.push(`/products?category=${encodeURIComponent(categoryName)}`);
     };
 
