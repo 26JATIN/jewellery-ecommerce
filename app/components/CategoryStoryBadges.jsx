@@ -107,7 +107,7 @@ export default function CategoryStoryBadges() {
 
                                 {/* Category Name */}
                                 <span className="text-[10px] md:text-xs font-light tracking-wide text-[#2C2C2C] group-hover:text-[#D4AF76] transition-colors duration-300 text-center">
-                                    {category.name}
+                                    {typeof category.name === 'object' ? category.name?.name : category.name}
                                 </span>
                             </motion.button>
                         ))}

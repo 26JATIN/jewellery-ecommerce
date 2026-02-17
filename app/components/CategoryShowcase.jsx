@@ -64,7 +64,7 @@ const CategoryPreview = React.memo(({ category, className }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#FAFAFA] to-[#F5F5F5] dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
           <div className="text-center text-gray-500 dark:text-gray-400 p-4">
             <Sparkles className="w-12 h-12 mx-auto mb-2 opacity-40 text-[#D4AF76]" />
-            <div className="text-sm font-medium mb-1">{category.name}</div>
+            <div className="text-sm font-medium mb-1">{typeof category.name === 'object' ? category.name?.name : category.name}</div>
           </div>
         </div>
       )}
@@ -121,7 +121,7 @@ const SubcategoryBadge = React.memo(({ subcategory, onClick, index }) => {
         {/* Subcategory Name */}
         <div className="absolute inset-x-0 bottom-0 p-2">
           <p className="text-white text-xs font-medium text-center line-clamp-2 drop-shadow-lg">
-            {subcategory.name}
+            {typeof subcategory.name === 'object' ? subcategory.name?.name : subcategory.name}
           </p>
         </div>
       </div>
@@ -186,7 +186,7 @@ export const Card = React.memo(({
               layoutId={layout ? `title-${card._id || card.name}` : undefined}
               className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-foreground leading-tight flex-1"
             >
-              {card.name}
+              {typeof card.name === 'object' ? card.name?.name : card.name}
             </motion.h3>
           </div>
           {card.description && (
@@ -419,8 +419,9 @@ export default function CategoryShowcase() {
   const categoryFilters = useMemo(() => {
     const filters = ['ALL'];
     categories.forEach(cat => {
-      if (cat.name && !filters.includes(cat.name)) {
-        filters.push(cat.name);
+      const name = typeof cat.name === 'object' ? cat.name?.name : cat.name;
+      if (name && !filters.includes(name)) {
+        filters.push(name);
       }
     });
     return filters;
@@ -432,15 +433,18 @@ export default function CategoryShowcase() {
       return subcategories;
     }
     // Find the selected category
-    const category = categories.find(cat => cat.name === selectedCategory);
+    const category = categories.find(cat => (typeof cat.name === 'object' ? cat.name?.name : cat.name) === selectedCategory);
     if (!category) return [];
 
     return subcategories.filter(sub => {
       if (!sub) return false;
+      const subCatName = typeof sub.category?.name === 'object' ? sub.category.name.name : sub.category?.name;
+      const catName = typeof category.name === 'object' ? category.name.name : category.name;
+
       const match = sub.category?._id === category._id ||
-        sub.category?.name === category.name ||
+        subCatName === catName ||
         sub.category === category._id ||
-        sub.category === category.name;
+        sub.category === catName;
       return match && sub.isActive;
     });
   }, [subcategories, selectedCategory, categories]);
@@ -537,13 +541,16 @@ export default function CategoryShowcase() {
                     const count = filter === 'ALL'
                       ? subcategories.length
                       : (() => {
-                        const category = categories.find(cat => cat.name === filter);
+                        const category = categories.find(cat => (typeof cat.name === 'object' ? cat.name?.name : cat.name) === filter);
                         if (!category) return 0;
                         return subcategories.filter(sub => {
+                          const subCatName = typeof sub.category?.name === 'object' ? sub.category.name.name : sub.category?.name;
+                          const catName = typeof category.name === 'object' ? category.name.name : category.name;
+
                           const match = sub.category?._id === category._id ||
-                            sub.category?.name === category.name ||
+                            subCatName === catName ||
                             sub.category === category._id ||
-                            sub.category === category.name;
+                            sub.category === catName;
                           return match && sub.isActive;
                         }).length;
                       })();
@@ -576,13 +583,16 @@ export default function CategoryShowcase() {
                       const count = filter === 'ALL'
                         ? subcategories.length
                         : (() => {
-                          const category = categories.find(cat => cat.name === filter);
+                          const category = categories.find(cat => (typeof cat.name === 'object' ? cat.name?.name : cat.name) === filter);
                           if (!category) return 0;
                           return subcategories.filter(sub => {
+                            const subCatName = typeof sub.category?.name === 'object' ? sub.category.name.name : sub.category?.name;
+                            const catName = typeof category.name === 'object' ? category.name.name : category.name;
+
                             const match = sub.category?._id === category._id ||
-                              sub.category?.name === category.name ||
+                              subCatName === catName ||
                               sub.category === category._id ||
-                              sub.category === category.name;
+                              sub.category === catName;
                             return match && sub.isActive;
                           }).length;
                         })();
