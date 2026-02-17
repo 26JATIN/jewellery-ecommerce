@@ -100,7 +100,7 @@ function OrdersContent() {
         <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pb-20 sm:pb-0">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white z-40 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 sm:pt-6 sm:pb-6 lg:pt-24 lg:pb-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-4 sm:pt-24 sm:pb-6 lg:pt-24 lg:pb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 sm:gap-4">
                             <div className="p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">

@@ -173,7 +173,7 @@ export const Card = React.memo(({
 
   return (
     <motion.div
-      layoutId={layout ? `card-${card.name}` : undefined}
+      layoutId={layout ? `card-${card._id || card.name}` : undefined}
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleOpen}
@@ -184,7 +184,7 @@ export const Card = React.memo(({
         <div className="flex flex-col gap-1 sm:gap-2">
           <div className="flex justify-between items-start gap-2">
             <motion.h3 
-              layoutId={layout ? `title-${card.name}` : undefined}
+              layoutId={layout ? `title-${card._id || card.name}` : undefined}
               className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-foreground leading-tight flex-1"
             >
               {card.name}
