@@ -19,16 +19,45 @@ export default function AdminLayout({ children }) {
         // Force light mode for admin pages
         const html = document.documentElement;
         wasDarkRef.current = html.classList.contains('dark');
+        
+        // Remove dark class immediately
         if (wasDarkRef.current) {
             html.classList.remove('dark');
         }
+
+        // Add observer to prevent dark mode re-application
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    if (html.classList.contains('dark')) {
+                        html.classList.remove('dark');
+                    }
+                }
+            });
+        });
+
+        observer.observe(html, { attributes: true });
+
         return () => {
+            observer.disconnect();
             // Restore dark mode when leaving admin
             if (wasDarkRef.current) {
                 html.classList.add('dark');
             }
         };
     }, []);
+
+    // Scroll lock for mobile sidebar
+    useEffect(() => {
+        if (isMobileSidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMobileSidebarOpen]);
 
     // Admin access protection
     useEffect(() => {

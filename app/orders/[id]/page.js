@@ -209,16 +209,16 @@ export default function OrderDetailPage({ params }) {
         <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pb-20 sm:pb-0">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#D4AF76] to-[#C4A067] text-white z-40 shadow-lg">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-3 sm:pt-22 sm:pb-4 lg:pt-24 lg:pb-5">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:pt-[84px] sm:pb-5 lg:pt-10 lg:pb-5">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <Link
                             href="/orders"
-                            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                         >
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                         </Link>
                         <div className="flex-1 min-w-0">
-                            <h1 className="text-base sm:text-lg lg:text-xl font-bold truncate">
+                            <h1 className="text-xl sm:text-2xl font-bold truncate">
                                 Order Details
                             </h1>
                             <p className="text-xs sm:text-sm text-[#F5E6D3] mt-1">{order.orderNumber}</p>

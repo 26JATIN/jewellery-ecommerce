@@ -100,14 +100,14 @@ function OrdersContent() {
         <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] pb-20 sm:pb-0">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white z-40 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-3 sm:pt-22 sm:pb-4 lg:pt-24 lg:pb-5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:pt-[84px] sm:pb-5 lg:pt-10 lg:pb-5">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="p-1.5 sm:p-2 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl">
                                 <Package className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div>
-                                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">
+                                <h1 className="text-xl sm:text-2xl font-bold">
                                     My Orders
                                 </h1>
                                 <p className="text-xs sm:text-sm text-[#F5E6D3] mt-0.5 sm:mt-1 hidden sm:block">
