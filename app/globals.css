@@ -174,6 +174,7 @@ html {
   -webkit-overflow-scrolling: touch;
   /* Edge-to-edge PWA: extend page behind gesture pill / nav bar */
   height: 100%;
+  background-color: var(--background);
 }
 
 /* PWA: fill the gesture-bar / safe-area gap with the page background */

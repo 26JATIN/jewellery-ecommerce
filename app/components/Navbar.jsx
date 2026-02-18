@@ -381,7 +381,7 @@ export default function Navbar() {
             >
                 {/* Scroll Gap 'Apron' - Extends background below the navbar */}
                 <div 
-                    className="absolute top-[50%] left-0 right-0 h-[50vh] z-[-1]"
+                    className="absolute top-full left-0 right-0 h-[50vh] -mt-px z-[-1]"
                     style={{
                         backgroundColor: "var(--navbar-bg)",
                         WebkitBackdropFilter: "blur(24px) saturate(200%)",
