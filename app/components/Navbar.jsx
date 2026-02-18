@@ -365,7 +365,8 @@ export default function Navbar() {
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
                     boxShadow: "var(--navbar-shadow)",
-                    paddingBottom: "env(safe-area-inset-bottom, 0px)"
+                    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 100px)",
+                    marginBottom: "-100px" // Hack to cover browser bar scroll gap
                 }}
                 initial={{ y: 100 }}
                 animate={{ 
