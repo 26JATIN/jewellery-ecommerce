@@ -2,39 +2,43 @@
   "name": "Nandika Jewellers",
   "short_name": "Nandika",
   "description": "Premium jewelry e-commerce platform - A Bond of trust & Quality",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "fullscreen",
-  "display_override": ["fullscreen"],
+  "display_override": ["fullscreen", "window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["shopping", "lifestyle"],
+  "categories": ["shopping", "lifestyle", "fashion"],
+  "screenshots": [
+    {
+      "src": "/carousel1-mobile.png",
+      "sizes": "1170x2532",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Screen"
+    },
+    {
+      "src": "/carousel1.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop Home"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Shop Now",
@@ -65,5 +69,6 @@
   "related_applications": [],
   "scope": "/",
   "dir": "ltr",
-  "lang": "en-US"
+  "lang": "en-US",
+  "id": "nandika-jewellers-pwa"
 }
