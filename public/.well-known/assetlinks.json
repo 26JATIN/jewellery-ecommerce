@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.nandikajewellers.twa",
+      "sha256_cert_fingerprints": [
+        "AC:4B:07:CC:CF:B7:94:8B:B4:CB:12:D5:A4:FD:CD:53:DA:7D:83:4D:6F:51:1D:CE:8E:A9:07:AD:CD:EC:17:42"
+      ]
+    }
+  }
+]

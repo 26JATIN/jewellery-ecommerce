@@ -44,3 +44,22 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# TWA / Android
+*.apk
+*.aab
+*.idsig
+keystore.jks
+twa-manifest.json
+build_twa.py
+manifest-checksum.txt
+/.gradle/
+/gradle/
+gradlew
+gradlew.bat
+build.gradle
+gradle.properties
+settings.gradle
+app-release-bundle.aab
+app-release-signed.apk
+store_icon.png
