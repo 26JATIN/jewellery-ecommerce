@@ -365,8 +365,7 @@ export default function Navbar() {
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
                     boxShadow: "var(--navbar-shadow)",
-                    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 100px)",
-                    marginBottom: "-100px" // Hack to cover browser bar scroll gap
+                    paddingBottom: "env(safe-area-inset-bottom, 0px)"
                 }}
                 initial={{ y: 100 }}
                 animate={{ 
@@ -380,6 +379,15 @@ export default function Navbar() {
                     duration: 0.4 
                 }}
             >
+                {/* Scroll Gap 'Apron' - Extends background below the navbar */}
+                <div 
+                    className="absolute top-full left-0 right-0 h-[300px] -mt-1"
+                    style={{
+                        backgroundColor: "var(--navbar-bg)",
+                        WebkitBackdropFilter: "blur(24px) saturate(200%)",
+                        backdropFilter: "blur(24px) saturate(200%)",
+                    }}
+                />
                 <div className="flex items-center justify-around py-2.5">
                     {/* Home */}
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}>
