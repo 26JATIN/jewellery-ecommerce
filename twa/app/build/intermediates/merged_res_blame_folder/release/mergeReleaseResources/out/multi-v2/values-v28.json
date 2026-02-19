@@ -1,16 +1,11 @@
 {
     "logs": [
         {
-            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-23:/values-v28/values-v28.xml",
+            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-25:/values-v28/values-v28.xml",
             "map": [
                 {
                     "source": "/home/jatin/.gradle/caches/8.11.1/transforms/183ebbc8ed821348f80a6d36d20b75e3/transformed/appcompat-1.7.0/res/values-v28/values-v28.xml",
                     "from": {
-                        "startLines": "-1,-1,-1,-1",
-                        "startColumns": "-1,-1,-1,-1",
-                        "startOffsets": "-1,-1,-1,-1"
-                    },
-                    "to": {
                         "startLines": "2,3,4,8",
                         "startColumns": "4,4,4,4",
                         "startOffsets": "55,130,217,397",
@@ -22,63 +17,20 @@
                 {
                     "source": "/home/jatin/Documents/jewellery-ecommerce/twa/app/src/main/res/values-v28/styles.xml",
                     "from": {
-                        "startLines": "3",
+                        "startLines": "2",
                         "startColumns": "4",
-                        "startOffsets": "131",
+                        "startOffsets": "55",
                         "endLines": "10",
                         "endColumns": "12",
-                        "endOffsets": "679"
+                        "endOffsets": "573"
                     },
                     "to": {
                         "startLines": "12",
                         "startColumns": "4",
                         "startOffsets": "589",
-                        "endLines": "19",
+                        "endLines": "20",
                         "endColumns": "12",
-                        "endOffsets": "1137"
-                    }
-                }
-            ]
-        },
-        {
-            "outputFile": "/home/jatin/.gradle/daemon/8.11.1/com.nandikajewellers.twa.app-mergeReleaseResources-23:/values-v28/values-v28.xml",
-            "map": [
-                {
-                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/183ebbc8ed821348f80a6d36d20b75e3/transformed/appcompat-1.7.0/res/values-v28/values-v28.xml",
-                    "from": {
-                        "startLines": "2,3,4,8",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,130,217,397",
-                        "endLines": "2,3,7,11",
-                        "endColumns": "74,86,12,12",
-                        "endOffsets": "125,212,392,584"
-                    },
-                    "to": {
-                        "startLines": "5,6,7,11",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "228,303,390,570",
-                        "endLines": "5,6,10,14",
-                        "endColumns": "74,86,12,12",
-                        "endOffsets": "298,385,565,757"
-                    }
-                },
-                {
-                    "source": "/home/jatin/Documents/jewellery-ecommerce/twa/app/src/main/res/values-v28/styles.xml",
-                    "from": {
-                        "startLines": "1",
-                        "startColumns": "4",
-                        "startOffsets": "16",
-                        "endLines": "3",
-                        "endColumns": "12",
-                        "endOffsets": "184"
-                    },
-                    "to": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endLines": "4",
-                        "endColumns": "12",
-                        "endOffsets": "223"
+                        "endOffsets": "1062"
                     }
                 }
             ]

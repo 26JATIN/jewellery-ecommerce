@@ -10,6 +10,7 @@ color navigationColorDark
 color navigationDividerColor
 color navigationDividerColorDark
 color shortcut_background
+color statusBarTransparent
 drawable ic_notification_icon
 drawable shortcut_legacy_background
 drawable splash
@@ -27,6 +28,6 @@ string launcherName
 string orientation
 string providerAuthority
 string webManifestUrl
-style Theme.TWA.Translucent
+style Theme.TwaFullscreen
 xml filepaths
 xml shortcuts

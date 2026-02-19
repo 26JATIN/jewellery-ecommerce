@@ -50,7 +50,7 @@ export default function CollectionCategories() {
     };
 
     const handleViewAll = () => {
-        router.push('/collections');
+        router.push('/products');
     };
 
     if (loading) {

@@ -127,12 +127,13 @@ export async function GET(request) {
             }),
             ...categorySuggestions.map(category => {
                 const imageUrl = getImageUrl(category.image, 'category');
+                const categoryName = typeof category.name === 'object' ? category.name?.name || '' : category.name;
                 return {
                     id: category._id.toString(),
-                    text: category.name,
+                    text: categoryName,
                     type: 'category',
                     image: imageUrl,
-                    url: `/collections/${category.slug || category.name.toLowerCase().replace(/\s+/g, '-')}`
+                    url: `/products?category=${encodeURIComponent(categoryName)}`
                 };
             }),
             ...subcategorySuggestions.map(subcategory => {

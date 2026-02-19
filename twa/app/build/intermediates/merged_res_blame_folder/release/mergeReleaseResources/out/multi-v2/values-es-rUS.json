@@ -1,8 +1,25 @@
 {
     "logs": [
         {
-            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-23:/values-es-rUS/values-es-rUS.xml",
+            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-25:/values-es-rUS/values-es-rUS.xml",
             "map": [
+                {
+                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/b254143b94e3658fd7ff0429265dc0ad/transformed/browser-1.10.0-alpha02/res/values-es-rUS/values-es-rUS.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,164,266,381",
+                        "endColumns": "108,101,114,105",
+                        "endOffsets": "159,261,376,482"
+                    },
+                    "to": {
+                        "startLines": "36,37,38,39",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "3553,3662,3764,3879",
+                        "endColumns": "108,101,114,105",
+                        "endOffsets": "3657,3759,3874,3980"
+                    }
+                },
                 {
                     "source": "/home/jatin/.gradle/caches/8.11.1/transforms/183ebbc8ed821348f80a6d36d20b75e3/transformed/appcompat-1.7.0/res/values-es-rUS/values-es-rUS.xml",
                     "from": {
@@ -21,7 +38,7 @@
                     }
                 },
                 {
-                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/a5429f7b20c607b890f08b5283ad4ec0/transformed/core-1.13.0/res/values-es-rUS/values-es-rUS.xml",
+                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/1cdcdc1afd1ba58bdf96faeeac79f5ae/transformed/core-1.17.0/res/values-es-rUS/values-es-rUS.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -35,23 +52,6 @@
                         "startOffsets": "2821,2920,3022,3122,3220,3327,3433,4068",
                         "endColumns": "98,101,99,97,106,105,119,100",
                         "endOffsets": "2915,3017,3117,3215,3322,3428,3548,4164"
-                    }
-                },
-                {
-                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/be57bd43967b699c12a0f6b8bd2f21c6/transformed/browser-1.9.0-alpha04/res/values-es-rUS/values-es-rUS.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,164,266,381",
-                        "endColumns": "108,101,114,105",
-                        "endOffsets": "159,261,376,482"
-                    },
-                    "to": {
-                        "startLines": "36,37,38,39",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "3553,3662,3764,3879",
-                        "endColumns": "108,101,114,105",
-                        "endOffsets": "3657,3759,3874,3980"
                     }
                 }
             ]

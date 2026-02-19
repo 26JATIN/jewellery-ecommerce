@@ -44,7 +44,7 @@
       "name": "Shop Now",
       "short_name": "Shop",
       "description": "Browse our latest collections",
-      "url": "/collections",
+      "url": "/products",
       "icons": [
         {
           "src": "/icons/icon-192x192.png",

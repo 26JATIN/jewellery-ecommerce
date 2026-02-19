@@ -27,7 +27,7 @@
     android:versionName="1.0.1" >
 
     <uses-sdk
-        android:minSdkVersion="21"
+        android:minSdkVersion="23"
         android:targetSdkVersion="35" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -52,12 +52,12 @@
         android:name="com.nandikajewellers.twa.Application"
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-        android:extractNativeLibs="true"
+        android:extractNativeLibs="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TWA.Translucent" >
+        android:theme="@style/Theme.TwaFullscreen" >
         <meta-data
             android:name="asset_statements"
             android:resource="@string/assetStatements" />
@@ -87,7 +87,8 @@
             android:name="com.nandikajewellers.twa.LauncherActivity"
             android:alwaysRetainTaskState="true"
             android:exported="true"
-            android:label="@string/launcherName" >
+            android:label="@string/launcherName"
+            android:theme="@style/Theme.TwaFullscreen" >
             <meta-data
                 android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="@string/launchUrl" />

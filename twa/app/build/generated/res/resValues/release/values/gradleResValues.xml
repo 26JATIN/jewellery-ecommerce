@@ -10,17 +10,17 @@
     <!-- Value from default config. -->
     <color name="backgroundColor">#FFFFFF</color>
     <!-- Value from default config. -->
-    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimary">#00000000</color>
     <!-- Value from default config. -->
-    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorPrimaryDark">#00000000</color>
     <!-- Value from default config. -->
-    <color name="navigationColor">#FFFFFF</color>
+    <color name="navigationColor">#00000000</color>
     <!-- Value from default config. -->
-    <color name="navigationColorDark">#000000</color>
+    <color name="navigationColorDark">#00000000</color>
     <!-- Value from default config. -->
-    <color name="navigationDividerColor">#000000</color>
+    <color name="navigationDividerColor">#00000000</color>
     <!-- Value from default config. -->
-    <color name="navigationDividerColorDark">#000000</color>
+    <color name="navigationDividerColorDark">#00000000</color>
     <!-- Value from default config. -->
     <integer name="splashScreenFadeOutDuration">0</integer>
     <!-- Value from default config. -->

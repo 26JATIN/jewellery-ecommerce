@@ -179,6 +179,7 @@ export default function SearchBar({ className = "", placeholder = "Search for je
             // Navigate directly to product detail page
             router.push(`/products/${suggestion.id}`);
         } else if (suggestion.type === 'category') {
+            // Navigate to products page with category filter (subcategory defaults to All)
             router.push(suggestion.url);
         } else if (suggestion.type === 'subcategory') {
             // Navigate to products page with category and subcategory filters
@@ -287,7 +288,7 @@ export default function SearchBar({ className = "", placeholder = "Search for je
     const getTypeLabel = (type) => {
         switch (type) {
             case 'product': return 'Product';
-            case 'category': return 'Collection';
+            case 'category': return 'Category';
             case 'subcategory': return 'Subcategory';
             case 'popular': return 'Popular';
             default: return '';

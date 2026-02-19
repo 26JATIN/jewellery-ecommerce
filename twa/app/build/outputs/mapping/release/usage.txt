@@ -5,7 +5,6 @@ _COROUTINE._CREATION
 android.support.customtabs.IAuthTabCallback$Default
 android.support.customtabs.IAuthTabCallback$Stub$Proxy
 android.support.customtabs.IAuthTabCallback$Stub
-android.support.customtabs.IAuthTabCallback$_Parcel
 android.support.customtabs.IAuthTabCallback
 android.support.customtabs.ICustomTabsCallback$Default
 android.support.customtabs.ICustomTabsCallback$Stub$Proxy
@@ -22,8 +21,6 @@ android.support.customtabs.ICustomTabsCallback$Stub:
     static final int TRANSACTION_onUnminimized
     static final int TRANSACTION_onWarmupCompleted
     public static android.support.customtabs.ICustomTabsCallback asInterface(android.os.IBinder)
-android.support.customtabs.ICustomTabsCallback$_Parcel:
-    public void <init>()
 android.support.customtabs.ICustomTabsService$Default
 android.support.customtabs.ICustomTabsService$Stub$Proxy:
     public android.os.Bundle extraCommand(java.lang.String,android.os.Bundle)
@@ -59,8 +56,6 @@ android.support.customtabs.ICustomTabsService$Stub:
     public boolean onTransact(int,android.os.Parcel,android.os.Parcel,int)
 android.support.customtabs.ICustomTabsService$_Parcel:
     public void <init>()
-    static synthetic java.lang.Object access$000(android.os.Parcel,android.os.Parcelable$Creator)
-    private static java.lang.Object readTypedObject(android.os.Parcel,android.os.Parcelable$Creator)
 android.support.customtabs.ICustomTabsService:
     public abstract android.os.Bundle extraCommand(java.lang.String,android.os.Bundle)
     public abstract boolean isEngagementSignalsApiAvailable(android.support.customtabs.ICustomTabsCallback,android.os.Bundle)
@@ -75,12 +70,10 @@ android.support.customtabs.ICustomTabsService:
 android.support.customtabs.IEngagementSignalsCallback$Default
 android.support.customtabs.IEngagementSignalsCallback$Stub$Proxy
 android.support.customtabs.IEngagementSignalsCallback$Stub
-android.support.customtabs.IEngagementSignalsCallback$_Parcel
 android.support.customtabs.IEngagementSignalsCallback
 android.support.customtabs.IPostMessageService$Default
 android.support.customtabs.IPostMessageService$Stub$Proxy
 android.support.customtabs.IPostMessageService$Stub
-android.support.customtabs.IPostMessageService$_Parcel
 android.support.customtabs.IPostMessageService
 android.support.customtabs.trusted.ITrustedWebActivityCallback$Default
 android.support.customtabs.trusted.ITrustedWebActivityCallback$Stub$Proxy:
@@ -91,7 +84,6 @@ android.support.customtabs.trusted.ITrustedWebActivityCallback$Stub:
     public void <init>()
     public android.os.IBinder asBinder()
     public boolean onTransact(int,android.os.Parcel,android.os.Parcel,int)
-android.support.customtabs.trusted.ITrustedWebActivityCallback$_Parcel
 android.support.customtabs.trusted.ITrustedWebActivityCallback:
     public abstract void onExtraCallback(java.lang.String,android.os.Bundle)
 android.support.customtabs.trusted.ITrustedWebActivityService$Default
@@ -105,8 +97,6 @@ android.support.customtabs.trusted.ITrustedWebActivityService$Stub:
     static final int TRANSACTION_getSmallIconId
     static final int TRANSACTION_notifyNotificationWithChannel
     public static android.support.customtabs.trusted.ITrustedWebActivityService asInterface(android.os.IBinder)
-android.support.customtabs.trusted.ITrustedWebActivityService$_Parcel:
-    public void <init>()
 android.support.v4.app.INotificationSideChannel$Default
 android.support.v4.app.INotificationSideChannel$Stub$Proxy
 android.support.v4.app.INotificationSideChannel$Stub
@@ -2864,6 +2854,10 @@ androidx.browser.browseractions.BrowserServiceFileProvider$FileCleanupTask
 androidx.browser.browseractions.BrowserServiceFileProvider$FileSaveTask
 androidx.browser.browseractions.BrowserServiceFileProvider
 androidx.browser.customtabs.Api33Impl
+androidx.browser.customtabs.ContentActionSelectedData
+androidx.browser.customtabs.CustomContentAction$1
+androidx.browser.customtabs.CustomContentAction$Builder
+androidx.browser.customtabs.CustomContentAction
 androidx.browser.customtabs.CustomTabColorSchemeParams$Builder:
     public androidx.browser.customtabs.CustomTabColorSchemeParams$Builder setSecondaryToolbarColor(int)
 androidx.browser.customtabs.CustomTabsCallback$ActivityLayoutState
@@ -2920,6 +2914,7 @@ androidx.browser.customtabs.CustomTabsIntent$Api36Impl:
     private void <init>()
 androidx.browser.customtabs.CustomTabsIntent$Builder:
     public void <init>(androidx.browser.customtabs.CustomTabsSession)
+    public androidx.browser.customtabs.CustomTabsIntent$Builder addCustomContentAction(androidx.browser.customtabs.CustomContentAction)
     public androidx.browser.customtabs.CustomTabsIntent$Builder addDefaultShareMenuItem()
     public androidx.browser.customtabs.CustomTabsIntent$Builder addMenuItem(java.lang.String,android.app.PendingIntent)
     public androidx.browser.customtabs.CustomTabsIntent$Builder addToolbarItem(int,android.graphics.Bitmap,java.lang.String,android.app.PendingIntent)
@@ -2944,6 +2939,7 @@ androidx.browser.customtabs.CustomTabsIntent$Builder:
     public androidx.browser.customtabs.CustomTabsIntent$Builder setInitialActivityHeightPx(int)
     public androidx.browser.customtabs.CustomTabsIntent$Builder setInitialActivityHeightPx(int,int)
     public androidx.browser.customtabs.CustomTabsIntent$Builder setInitialActivityWidthPx(int)
+    public androidx.browser.customtabs.CustomTabsIntent$Builder setInitialNavigationAllowedToLeaveBrowser(boolean)
     public androidx.browser.customtabs.CustomTabsIntent$Builder setInstantAppsEnabled(boolean)
     private void setLanguageTag(java.util.Locale)
     public androidx.browser.customtabs.CustomTabsIntent$Builder setNetwork(android.net.Network)
@@ -2962,6 +2958,7 @@ androidx.browser.customtabs.CustomTabsIntent$Builder:
     public androidx.browser.customtabs.CustomTabsIntent$Builder setUrlBarHidingEnabled(boolean)
 androidx.browser.customtabs.CustomTabsIntent$CloseButtonPosition
 androidx.browser.customtabs.CustomTabsIntent$ColorScheme
+androidx.browser.customtabs.CustomTabsIntent$ContentTargetType
 androidx.browser.customtabs.CustomTabsIntent$OpenInBrowserState
 androidx.browser.customtabs.CustomTabsIntent$ShareState
 androidx.browser.customtabs.CustomTabsIntent:
@@ -2990,6 +2987,8 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static final int COLOR_SCHEME_LIGHT
     private static final int COLOR_SCHEME_MAX
     public static final int COLOR_SCHEME_SYSTEM
+    public static final int CONTENT_TARGET_TYPE_IMAGE
+    public static final int CONTENT_TARGET_TYPE_LINK
     public static final java.lang.String EXTRA_ACTION_BUTTON_BUNDLE
     public static final java.lang.String EXTRA_ACTIVITY_HEIGHT_RESIZE_BEHAVIOR
     public static final java.lang.String EXTRA_ACTIVITY_SIDE_SHEET_BREAKPOINT_DP
@@ -2997,11 +2996,18 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static final java.lang.String EXTRA_ACTIVITY_SIDE_SHEET_ENABLE_MAXIMIZATION
     public static final java.lang.String EXTRA_ACTIVITY_SIDE_SHEET_POSITION
     public static final java.lang.String EXTRA_ACTIVITY_SIDE_SHEET_ROUNDED_CORNERS_POSITION
+    public static final java.lang.String EXTRA_CLICKED_CONTENT_TARGET_TYPE
     public static final java.lang.String EXTRA_CLOSE_BUTTON_ENABLED
     public static final java.lang.String EXTRA_CLOSE_BUTTON_ICON
     public static final java.lang.String EXTRA_CLOSE_BUTTON_POSITION
     public static final java.lang.String EXTRA_COLOR_SCHEME
     public static final java.lang.String EXTRA_COLOR_SCHEME_PARAMS
+    public static final java.lang.String EXTRA_CONTEXT_IMAGE_ALT_TEXT
+    public static final java.lang.String EXTRA_CONTEXT_IMAGE_DATA_URI
+    public static final java.lang.String EXTRA_CONTEXT_IMAGE_URL
+    public static final java.lang.String EXTRA_CONTEXT_LINK_TEXT
+    public static final java.lang.String EXTRA_CONTEXT_LINK_URL
+    public static final java.lang.String EXTRA_CUSTOM_CONTENT_ACTIONS
     public static final java.lang.String EXTRA_DEFAULT_SHARE_MENU_ITEM
     public static final java.lang.String EXTRA_DISABLE_BACKGROUND_INTERACTION
     public static final java.lang.String EXTRA_DISABLE_BOOKMARKS_BUTTON
@@ -3012,6 +3018,7 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static final java.lang.String EXTRA_EXIT_ANIMATION_BUNDLE
     public static final java.lang.String EXTRA_INITIAL_ACTIVITY_HEIGHT_PX
     public static final java.lang.String EXTRA_INITIAL_ACTIVITY_WIDTH_PX
+    public static final java.lang.String EXTRA_INITIAL_NAVIGATION_CAN_LEAVE_BROWSER
     public static final java.lang.String EXTRA_MENU_ITEMS
     public static final java.lang.String EXTRA_NAVIGATION_BAR_COLOR
     public static final java.lang.String EXTRA_NAVIGATION_BAR_DIVIDER_COLOR
@@ -3033,6 +3040,7 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static final java.lang.String EXTRA_TOOLBAR_CORNER_RADIUS_DP
     public static final java.lang.String EXTRA_TOOLBAR_ITEMS
     public static final java.lang.String EXTRA_TRANSLATE_LANGUAGE_TAG
+    public static final java.lang.String EXTRA_TRIGGERED_CUSTOM_CONTENT_ACTION_ID
     private static final java.lang.String EXTRA_USER_OPT_OUT_FROM_CUSTOM_TABS
     private static final java.lang.String HTTP_ACCEPT_LANGUAGE
     public static final java.lang.String KEY_DESCRIPTION
@@ -3059,6 +3067,7 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static int getActivitySideSheetPosition(android.content.Intent)
     public static int getActivitySideSheetRoundedCornersPosition(android.content.Intent)
     public static int getCloseButtonPosition(android.content.Intent)
+    public static java.util.List getCustomContentActions(android.content.Intent)
     public static int getInitialActivityHeightPx(android.content.Intent)
     public static int getInitialActivityWidthPx(android.content.Intent)
     private static java.util.Locale getLocaleForLanguageTag(android.content.Intent)
@@ -3073,6 +3082,7 @@ androidx.browser.customtabs.CustomTabsIntent:
     public static boolean isCloseButtonEnabled(android.content.Intent)
     public static boolean isDownloadButtonEnabled(android.content.Intent)
     public boolean isEphemeralBrowsingEnabled()
+    public static boolean isInitialNavigationAllowedToLeaveBrowser(android.content.Intent)
     public static boolean isSendToExternalDefaultHandlerEnabled(android.content.Intent)
     public static android.content.Intent setAlwaysUseBrowserUI(android.content.Intent)
     public static boolean shouldAlwaysUseBrowserUI(android.content.Intent)
@@ -3111,7 +3121,8 @@ androidx.browser.customtabs.CustomTabsSessionToken$MockCallback
 androidx.browser.customtabs.CustomTabsSessionToken
 androidx.browser.customtabs.EngagementSignalsCallback
 androidx.browser.customtabs.EngagementSignalsCallbackRemote
-androidx.browser.customtabs.ExperimentalEphemeralBrowsing
+androidx.browser.customtabs.ExperimentalCustomContentAction
+androidx.browser.customtabs.ExperimentalInitialNavigationCanLeaveBrowser
 androidx.browser.customtabs.ExperimentalOpenInBrowser
 androidx.browser.customtabs.ExperimentalPendingSession
 androidx.browser.customtabs.ExperimentalPrefetch
@@ -3163,16 +3174,22 @@ androidx.browser.trusted.TrustedWebActivityDisplayMode$ImmersiveMode:
     public int layoutInDisplayCutoutMode()
 androidx.browser.trusted.TrustedWebActivityDisplayMode$MinimalUiMode:
     private static final int ID
+androidx.browser.trusted.TrustedWebActivityDisplayMode$TabbedMode:
+    private static final int ID
+androidx.browser.trusted.TrustedWebActivityDisplayMode$WindowControlsOverlayMode:
+    private static final int ID
 androidx.browser.trusted.TrustedWebActivityDisplayMode:
     public static final java.lang.String KEY_ID
     public static androidx.browser.trusted.TrustedWebActivityDisplayMode fromBundle(android.os.Bundle)
 androidx.browser.trusted.TrustedWebActivityIntent:
+    public java.util.List getDisplayOverrideList()
     public androidx.browser.trusted.FileHandlingData getFileHandlingData()
     public int getLaunchHandlerClientMode()
     public android.net.Uri getOriginalLaunchUrl()
 androidx.browser.trusted.TrustedWebActivityIntentBuilder:
     public static final java.lang.String EXTRA_ADDITIONAL_TRUSTED_ORIGINS
     public static final java.lang.String EXTRA_DISPLAY_MODE
+    public static final java.lang.String EXTRA_DISPLAY_OVERRIDE
     public static final java.lang.String EXTRA_FILE_HANDLING_DATA
     public static final java.lang.String EXTRA_LAUNCH_HANDLER_CLIENT_MODE
     public static final java.lang.String EXTRA_ORIGINAL_LAUNCH_URL
@@ -3541,6 +3558,7 @@ androidx.core.R$attr:
     public static int font
     public static int fontProviderAuthority
     public static int fontProviderCerts
+    public static int fontProviderFallbackQuery
     public static int fontProviderFetchStrategy
     public static int fontProviderFetchTimeout
     public static int fontProviderPackage
@@ -3585,6 +3603,7 @@ androidx.core.R$id:
     public static int tag_on_receive_content_mime_types
     public static int tag_transition_group
     public static int tag_unhandled_key_event_manager
+    public static int tag_unhandled_key_listeners
     public static int text
     public static int text2
     public static int time
@@ -3605,8 +3624,6 @@ androidx.core.animation.AnimatorKt$addListener$2
 androidx.core.animation.AnimatorKt$addListener$3
 androidx.core.animation.AnimatorKt$addListener$4
 androidx.core.animation.AnimatorKt$addListener$listener$1
-androidx.core.animation.AnimatorKt$addPauseListener$1
-androidx.core.animation.AnimatorKt$addPauseListener$2
 androidx.core.animation.AnimatorKt$addPauseListener$listener$1
 androidx.core.animation.AnimatorKt$doOnCancel$$inlined$addListener$default$1
 androidx.core.animation.AnimatorKt$doOnEnd$$inlined$addListener$default$1
@@ -3617,6 +3634,8 @@ androidx.core.app.ActivityCompat$Api21Impl
 androidx.core.app.ActivityCompat$Api22Impl
 androidx.core.app.ActivityCompat$Api23Impl:
     private void <init>()
+    static void onSharedElementsReady(java.lang.Object)
+    static boolean shouldShowRequestPermissionRationale(android.app.Activity,java.lang.String)
 androidx.core.app.ActivityCompat$Api28Impl
 androidx.core.app.ActivityCompat$Api30Impl
 androidx.core.app.ActivityCompat$Api31Impl
@@ -3647,10 +3666,7 @@ androidx.core.app.ActivityCompat:
     public static void startPostponedEnterTransition(android.app.Activity)
 androidx.core.app.ActivityManagerCompat
 androidx.core.app.ActivityOptionsCompat$ActivityOptionsCompatImpl
-androidx.core.app.ActivityOptionsCompat$Api21Impl
-androidx.core.app.ActivityOptionsCompat$Api23Impl
-androidx.core.app.ActivityOptionsCompat$Api24Impl
-androidx.core.app.ActivityOptionsCompat$Api34Impl
+androidx.core.app.ActivityOptionsCompat$BackgroundActivityStartMode
 androidx.core.app.ActivityOptionsCompat
 androidx.core.app.ActivityRecreator$1
 androidx.core.app.ActivityRecreator$2
@@ -3740,6 +3756,7 @@ androidx.core.app.NotificationCompat$Api26Impl
 androidx.core.app.NotificationCompat$Api28Impl
 androidx.core.app.NotificationCompat$Api29Impl
 androidx.core.app.NotificationCompat$Api31Impl
+androidx.core.app.NotificationCompat$Api36Impl
 androidx.core.app.NotificationCompat$BadgeIconType
 androidx.core.app.NotificationCompat$BigPictureStyle$Api23Impl
 androidx.core.app.NotificationCompat$BigPictureStyle$Api31Impl
@@ -3779,6 +3796,10 @@ androidx.core.app.NotificationCompat$MessagingStyle$Message$Api28Impl
 androidx.core.app.NotificationCompat$MessagingStyle$Message
 androidx.core.app.NotificationCompat$MessagingStyle
 androidx.core.app.NotificationCompat$NotificationVisibility
+androidx.core.app.NotificationCompat$ProgressStyle$Api36Impl
+androidx.core.app.NotificationCompat$ProgressStyle$Point
+androidx.core.app.NotificationCompat$ProgressStyle$Segment
+androidx.core.app.NotificationCompat$ProgressStyle
 androidx.core.app.NotificationCompat$ServiceNotificationBehavior
 androidx.core.app.NotificationCompat$StreamType
 androidx.core.app.NotificationCompat$Style$Api24Impl
@@ -3798,6 +3819,7 @@ androidx.core.app.NotificationCompatBuilder$Api26Impl
 androidx.core.app.NotificationCompatBuilder$Api28Impl
 androidx.core.app.NotificationCompatBuilder$Api29Impl
 androidx.core.app.NotificationCompatBuilder$Api31Impl
+androidx.core.app.NotificationCompatBuilder$Api36Impl
 androidx.core.app.NotificationCompatBuilder
 androidx.core.app.NotificationCompatExtras
 androidx.core.app.NotificationCompatJellybean
@@ -3806,11 +3828,22 @@ androidx.core.app.NotificationCompatSideChannelService
 androidx.core.app.NotificationManagerCompat$Api23Impl
 androidx.core.app.NotificationManagerCompat$Api24Impl:
     private void <init>()
+    static int getImportance(android.app.NotificationManager)
 androidx.core.app.NotificationManagerCompat$Api26Impl:
     private void <init>()
+    static void createNotificationChannelGroup(android.app.NotificationManager,android.app.NotificationChannelGroup)
+    static void createNotificationChannelGroups(android.app.NotificationManager,java.util.List)
+    static void createNotificationChannels(android.app.NotificationManager,java.util.List)
+    static void deleteNotificationChannel(android.app.NotificationManager,java.lang.String)
+    static void deleteNotificationChannelGroup(android.app.NotificationManager,java.lang.String)
+    static java.lang.String getId(android.app.NotificationChannel)
+    static java.lang.String getId(android.app.NotificationChannelGroup)
+    static java.util.List getNotificationChannelGroups(android.app.NotificationManager)
+    static java.util.List getNotificationChannels(android.app.NotificationManager)
 androidx.core.app.NotificationManagerCompat$Api28Impl
 androidx.core.app.NotificationManagerCompat$Api30Impl
 androidx.core.app.NotificationManagerCompat$Api34Impl
+androidx.core.app.NotificationManagerCompat$Api36Impl
 androidx.core.app.NotificationManagerCompat$CancelTask
 androidx.core.app.NotificationManagerCompat$InterruptionFilter
 androidx.core.app.NotificationManagerCompat$NotificationWithIdAndTag
@@ -3844,6 +3877,7 @@ androidx.core.app.NotificationManagerCompat:
     private static java.lang.String sEnabledNotificationListeners
     private static androidx.core.app.NotificationManagerCompat$SideChannelManager sSideChannelManager
     void <init>(android.app.NotificationManager,android.content.Context)
+    public boolean canPostPromotedNotifications()
     public boolean canUseFullScreenIntent()
     public void cancel(int)
     public void cancel(java.lang.String,int)
@@ -3938,8 +3972,12 @@ androidx.core.content.ContentResolverCompat
 androidx.core.content.ContentValuesKt
 androidx.core.content.ContextCompat$Api21Impl:
     private void <init>()
+    static java.io.File getCodeCacheDir(android.content.Context)
+    static java.io.File getNoBackupFilesDir(android.content.Context)
 androidx.core.content.ContextCompat$Api23Impl:
     private void <init>()
+    static java.lang.Object getSystemService(android.content.Context,java.lang.Class)
+    static java.lang.String getSystemServiceName(android.content.Context,java.lang.Class)
 androidx.core.content.ContextCompat$Api24Impl
 androidx.core.content.ContextCompat$Api26Impl
 androidx.core.content.ContextCompat$Api28Impl
@@ -4060,6 +4098,8 @@ androidx.core.content.res.FontResourcesParserCompat$Api21Impl:
 androidx.core.content.res.FontResourcesParserCompat$FetchStrategy
 androidx.core.content.res.FontResourcesParserCompat$ProviderResourceEntry:
     public void <init>(androidx.core.provider.FontRequest,int,int)
+    public androidx.core.provider.FontRequest getFallbackRequest()
+    public androidx.core.provider.FontRequest getRequest()
 androidx.core.content.res.FontResourcesParserCompat:
     private static final int DEFAULT_TIMEOUT_MILLIS
     public static final int FETCH_STRATEGY_ASYNC
@@ -4086,6 +4126,7 @@ androidx.core.content.res.ResourcesCompat$Api21Impl:
     private void <init>()
 androidx.core.content.res.ResourcesCompat$Api23Impl:
     private void <init>()
+    static int getColor(android.content.res.Resources,int,android.content.res.Resources$Theme)
 androidx.core.content.res.ResourcesCompat$Api29Impl
 androidx.core.content.res.ResourcesCompat$ThemeCompat$Api23Impl
 androidx.core.content.res.ResourcesCompat$ThemeCompat$Api29Impl
@@ -4120,6 +4161,12 @@ androidx.core.database.DatabaseUtilsCompat
 androidx.core.database.sqlite.SQLiteCursorCompat$Api28Impl
 androidx.core.database.sqlite.SQLiteCursorCompat
 androidx.core.database.sqlite.SQLiteDatabaseKt
+androidx.core.flagging.AconfigPackageCompat$Companion
+androidx.core.flagging.AconfigPackageCompat
+androidx.core.flagging.AconfigPackageCompatApi36Impl
+androidx.core.flagging.AconfigPackageCompatNoopImpl
+androidx.core.flagging.Flags$Companion
+androidx.core.flagging.Flags
 androidx.core.graphics.BitmapCompat$Api27Impl
 androidx.core.graphics.BitmapCompat$Api29Impl
 androidx.core.graphics.BitmapCompat$Api31Impl
@@ -4174,7 +4221,6 @@ androidx.core.graphics.Insets$Api29Impl:
     private void <init>()
 androidx.core.graphics.Insets:
     public static androidx.core.graphics.Insets add(androidx.core.graphics.Insets,androidx.core.graphics.Insets)
-    public static androidx.core.graphics.Insets min(androidx.core.graphics.Insets,androidx.core.graphics.Insets)
     public static androidx.core.graphics.Insets subtract(androidx.core.graphics.Insets,androidx.core.graphics.Insets)
     public static androidx.core.graphics.Insets wrap(android.graphics.Insets)
 androidx.core.graphics.MatrixKt
@@ -4207,6 +4253,10 @@ androidx.core.graphics.RegionKt$iterator$1
 androidx.core.graphics.RegionKt
 androidx.core.graphics.ShaderKt
 androidx.core.graphics.TypefaceCompat:
+    public static final boolean DOWNLOADABLE_FALLBACK_DEBUG
+    public static final boolean DOWNLOADABLE_FONT_TRACING
+    private static final java.lang.String REFERENCE_CHAR_FOR_PRIMARY_FONT
+    private static final java.lang.String TAG
     private void <init>()
     public static void clearCache()
     public static android.graphics.Typeface create(android.content.Context,android.graphics.Typeface,int,boolean)
@@ -4241,7 +4291,10 @@ androidx.core.graphics.TypefaceCompatApi28Impl:
     private static final int RESOLVE_BY_FONT_TABLE
     android.graphics.Typeface createWeightStyle(android.content.Context,android.graphics.Typeface,int,boolean)
 androidx.core.graphics.TypefaceCompatApi29Impl:
+    private static final java.lang.String TAG
     android.graphics.Typeface createWeightStyle(android.content.Context,android.graphics.Typeface,int,boolean)
+androidx.core.graphics.TypefaceCompatApi31Impl:
+    private static final java.lang.String TAG
 androidx.core.graphics.TypefaceCompatBaseImpl$3
 androidx.core.graphics.TypefaceCompatBaseImpl:
     private static final int INVALID_KEY
@@ -4272,13 +4325,18 @@ androidx.core.graphics.drawable.IconCompat$Api23Impl:
     private void <init>()
     static androidx.core.graphics.drawable.IconCompat createFromIcon(android.content.Context,android.graphics.drawable.Icon)
     static androidx.core.graphics.drawable.IconCompat createFromIconInner(java.lang.Object)
+    static java.lang.String getResPackage(java.lang.Object)
     static int getType(java.lang.Object)
-androidx.core.graphics.drawable.IconCompat$Api26Impl:
-    private void <init>()
+    static android.net.Uri getUri(java.lang.Object)
+    static android.graphics.drawable.Drawable loadDrawable(android.graphics.drawable.Icon,android.content.Context)
+    static android.graphics.drawable.Icon toIcon(androidx.core.graphics.drawable.IconCompat,android.content.Context)
+androidx.core.graphics.drawable.IconCompat$Api26Impl
 androidx.core.graphics.drawable.IconCompat$Api28Impl:
     private void <init>()
-androidx.core.graphics.drawable.IconCompat$Api30Impl:
-    private void <init>()
+    static java.lang.String getResPackage(java.lang.Object)
+    static int getType(java.lang.Object)
+    static android.net.Uri getUri(java.lang.Object)
+androidx.core.graphics.drawable.IconCompat$Api30Impl
 androidx.core.graphics.drawable.IconCompat$IconType
 androidx.core.graphics.drawable.IconCompat:
     private static final float ADAPTIVE_ICON_INSET_FACTOR
@@ -4310,6 +4368,7 @@ androidx.core.graphics.drawable.IconCompat:
     public static androidx.core.graphics.drawable.IconCompat createFromIcon(android.content.Context,android.graphics.drawable.Icon)
     public static androidx.core.graphics.drawable.IconCompat createFromIcon(android.graphics.drawable.Icon)
     public static androidx.core.graphics.drawable.IconCompat createFromIconOrNullIfZeroResId(android.graphics.drawable.Icon)
+    static android.graphics.Bitmap createLegacyIconFromAdaptiveIcon(android.graphics.Bitmap,boolean)
     public static androidx.core.graphics.drawable.IconCompat createWithAdaptiveBitmap(android.graphics.Bitmap)
     public static androidx.core.graphics.drawable.IconCompat createWithAdaptiveBitmapContentUri(android.net.Uri)
     public static androidx.core.graphics.drawable.IconCompat createWithAdaptiveBitmapContentUri(java.lang.String)
@@ -4320,8 +4379,11 @@ androidx.core.graphics.drawable.IconCompat:
     public static androidx.core.graphics.drawable.IconCompat createWithResource(android.content.Context,int)
     public static androidx.core.graphics.drawable.IconCompat createWithResource(android.content.res.Resources,java.lang.String,int)
     public android.graphics.Bitmap getBitmap()
+    public java.lang.String getResPackage()
     static android.content.res.Resources getResources(android.content.Context,java.lang.String)
     public int getType()
+    public android.net.Uri getUri()
+    public java.io.InputStream getUriInputStream(android.content.Context)
     public android.graphics.drawable.Drawable loadDrawable(android.content.Context)
     private android.graphics.drawable.Drawable loadDrawableInner(android.content.Context)
     public androidx.core.graphics.drawable.IconCompat setTint(int)
@@ -4341,6 +4403,7 @@ androidx.core.graphics.drawable.WrappedDrawableApi14:
 androidx.core.graphics.drawable.WrappedDrawableApi21:
     private static final java.lang.String TAG
 androidx.core.hardware.display.DisplayManagerCompat
+androidx.core.hardware.display.ExperimentalDisplayApi
 androidx.core.hardware.fingerprint.FingerprintManagerCompat$1
 androidx.core.hardware.fingerprint.FingerprintManagerCompat$Api23Impl
 androidx.core.hardware.fingerprint.FingerprintManagerCompat$AuthenticationCallback
@@ -4394,6 +4457,7 @@ androidx.core.location.GpsStatusWrapper
 androidx.core.location.LocationCompat$Api26Impl
 androidx.core.location.LocationCompat$Api28Impl
 androidx.core.location.LocationCompat$Api29Impl
+androidx.core.location.LocationCompat$Api31Impl
 androidx.core.location.LocationCompat$Api33Impl
 androidx.core.location.LocationCompat$Api34Impl
 androidx.core.location.LocationCompat
@@ -4448,12 +4512,20 @@ androidx.core.net.TrafficStatsCompat$Api24Impl
 androidx.core.net.TrafficStatsCompat
 androidx.core.net.UriCompat
 androidx.core.net.UriKt
+androidx.core.os.BufferFillPolicy$Companion
+androidx.core.os.BufferFillPolicy$Discard
+androidx.core.os.BufferFillPolicy$RingBuffer
+androidx.core.os.BufferFillPolicy
 androidx.core.os.BuildCompat$Api30Impl
 androidx.core.os.BuildCompat$PrereleaseSdkCheck
 androidx.core.os.BuildCompat
 androidx.core.os.BundleApi21ImplKt
 androidx.core.os.BundleCompat$Api33Impl:
     private void <init>()
+    static java.lang.Object getParcelable(android.os.Bundle,java.lang.String,java.lang.Class)
+    static java.lang.Object[] getParcelableArray(android.os.Bundle,java.lang.String,java.lang.Class)
+    static java.io.Serializable getSerializable(android.os.Bundle,java.lang.String,java.lang.Class)
+    static android.util.SparseArray getSparseParcelableArray(android.os.Bundle,java.lang.String,java.lang.Class)
 androidx.core.os.BundleCompat:
     private void <init>()
     public static android.os.IBinder getBinder(android.os.Bundle,java.lang.String)
@@ -4478,6 +4550,8 @@ androidx.core.os.HandlerCompat
 androidx.core.os.HandlerKt$postAtTime$runnable$1
 androidx.core.os.HandlerKt$postDelayed$runnable$1
 androidx.core.os.HandlerKt
+androidx.core.os.HeapProfileRequestBuilder
+androidx.core.os.JavaHeapDumpRequestBuilder
 androidx.core.os.LocaleListCompat$Api21Impl
 androidx.core.os.LocaleListCompat$Api24Impl
 androidx.core.os.LocaleListCompat
@@ -4488,11 +4562,13 @@ androidx.core.os.LocaleListPlatformWrapper
 androidx.core.os.MessageCompat$Api22Impl
 androidx.core.os.MessageCompat
 androidx.core.os.OperationCanceledException
+androidx.core.os.OutcomeReceiverCompat
 androidx.core.os.OutcomeReceiverKt
 androidx.core.os.ParcelCompat$Api29Impl
 androidx.core.os.ParcelCompat$Api30Impl
 androidx.core.os.ParcelCompat$Api33Impl
 androidx.core.os.ParcelCompat
+androidx.core.os.ParcelKt
 androidx.core.os.ParcelableCompat$ParcelableCompatCreatorHoneycombMR2
 androidx.core.os.ParcelableCompat
 androidx.core.os.ParcelableCompatCreatorCallbacks
@@ -4502,6 +4578,12 @@ androidx.core.os.PersistableBundleKt
 androidx.core.os.ProcessCompat$Api19Impl
 androidx.core.os.ProcessCompat$Api24Impl
 androidx.core.os.ProcessCompat
+androidx.core.os.Profiling$registerForAllProfilingResults$1
+androidx.core.os.Profiling
+androidx.core.os.ProfilingRequest
+androidx.core.os.ProfilingRequestBuilder
+androidx.core.os.StackSamplingRequestBuilder
+androidx.core.os.SystemTraceRequestBuilder
 androidx.core.os.TraceCompat$Api29Impl
 androidx.core.os.TraceCompat:
     private static final java.lang.String TAG
@@ -4515,7 +4597,7 @@ androidx.core.os.UserHandleCompat$Api24Impl
 androidx.core.os.UserHandleCompat
 androidx.core.os.UserManagerCompat$Api24Impl
 androidx.core.os.UserManagerCompat
-androidx.core.provider.CallbackWithHandler:
+androidx.core.provider.CallbackWrapper:
     void <init>(androidx.core.provider.FontsContractCompat$FontRequestCallback)
 androidx.core.provider.CalleeHandler:
     private void <init>()
@@ -4525,6 +4607,7 @@ androidx.core.provider.DocumentsContractCompat$DocumentsContractApi24Impl
 androidx.core.provider.DocumentsContractCompat
 androidx.core.provider.FontProvider:
     private void <init>()
+    static void clearProviderCache()
 androidx.core.provider.FontRequest:
     public void <init>(java.lang.String,java.lang.String,java.lang.String,int)
     public java.lang.String getIdentifier()
@@ -4547,6 +4630,7 @@ androidx.core.provider.FontsContractCompat$FontRequestCallback:
     public static final int FAIL_REASON_WRONG_CERTIFICATES
     public static final int RESULT_OK
     static final int RESULT_SUCCESS
+androidx.core.provider.FontsContractCompat$TypefaceStyle
 androidx.core.provider.FontsContractCompat:
     public static final java.lang.String PARCEL_FONT_RESULTS
     static final int RESULT_CODE_PROVIDER_NOT_FOUND
@@ -4555,13 +4639,14 @@ androidx.core.provider.FontsContractCompat:
     public static android.graphics.Typeface getFontSync(android.content.Context,androidx.core.provider.FontRequest,androidx.core.content.res.ResourcesCompat$FontCallback,android.os.Handler,boolean,int,int)
     public static android.content.pm.ProviderInfo getProvider(android.content.pm.PackageManager,androidx.core.provider.FontRequest,android.content.res.Resources)
     public static java.util.Map prepareFontData(android.content.Context,androidx.core.provider.FontsContractCompat$FontInfo[],android.os.CancellationSignal)
+    public static android.graphics.Typeface requestFont(android.content.Context,androidx.core.provider.FontRequest,int,boolean,int,android.os.Handler,androidx.core.provider.FontsContractCompat$FontRequestCallback)
+    public static void requestFont(android.content.Context,androidx.core.provider.FontRequest,int,java.util.concurrent.Executor,java.util.concurrent.Executor,androidx.core.provider.FontsContractCompat$FontRequestCallback)
     public static void requestFont(android.content.Context,androidx.core.provider.FontRequest,androidx.core.provider.FontsContractCompat$FontRequestCallback,android.os.Handler)
+    public static void requestFontWithFallbackChain(android.content.Context,java.util.List,int,java.util.concurrent.Executor,java.util.concurrent.Executor,androidx.core.provider.FontsContractCompat$FontRequestCallback)
     public static void resetCache()
     public static void resetTypefaceCache()
-androidx.core.provider.RequestExecutor$HandlerExecutor
 androidx.core.provider.RequestExecutor:
     private void <init>()
-    static java.util.concurrent.Executor createHandlerExecutor(android.os.Handler)
 androidx.core.provider.SelfDestructiveThread$1
 androidx.core.provider.SelfDestructiveThread$2$1
 androidx.core.provider.SelfDestructiveThread$2
@@ -4774,13 +4859,19 @@ androidx.core.view.DisplayCompat$ModeCompat
 androidx.core.view.DisplayCompat
 androidx.core.view.DisplayCutoutCompat$Api28Impl:
     private void <init>()
+    static android.view.DisplayCutout createDisplayCutout(android.graphics.Rect,java.util.List)
+    static java.util.List getBoundingRects(android.view.DisplayCutout)
 androidx.core.view.DisplayCutoutCompat$Api29Impl
 androidx.core.view.DisplayCutoutCompat$Api30Impl
+androidx.core.view.DisplayCutoutCompat$Api31Impl
+androidx.core.view.DisplayCutoutCompat$Api33Impl
 androidx.core.view.DisplayCutoutCompat:
     public void <init>(android.graphics.Rect,java.util.List)
     public void <init>(androidx.core.graphics.Insets,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,androidx.core.graphics.Insets)
-    private static android.view.DisplayCutout constructDisplayCutout(androidx.core.graphics.Insets,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,androidx.core.graphics.Insets)
+    public void <init>(androidx.core.graphics.Insets,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,androidx.core.graphics.Insets,android.graphics.Path)
+    private static android.view.DisplayCutout constructDisplayCutout(androidx.core.graphics.Insets,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,android.graphics.Rect,androidx.core.graphics.Insets,android.graphics.Path)
     public java.util.List getBoundingRects()
+    public android.graphics.Path getCutoutPath()
     public androidx.core.graphics.Insets getWaterfallInsets()
     android.view.DisplayCutout unwrap()
 androidx.core.view.DragAndDropPermissionsCompat$Api24Impl
@@ -4822,6 +4913,13 @@ androidx.core.view.MenuHostHelper:
 androidx.core.view.MenuItemCompat$1
 androidx.core.view.MenuItemCompat$Api26Impl:
     private void <init>()
+    static int getAlphabeticModifiers(android.view.MenuItem)
+    static java.lang.CharSequence getContentDescription(android.view.MenuItem)
+    static android.content.res.ColorStateList getIconTintList(android.view.MenuItem)
+    static android.graphics.PorterDuff$Mode getIconTintMode(android.view.MenuItem)
+    static int getNumericModifiers(android.view.MenuItem)
+    static java.lang.CharSequence getTooltipText(android.view.MenuItem)
+    static android.view.MenuItem setShortcut(android.view.MenuItem,char,char,int,int)
 androidx.core.view.MenuItemCompat$OnActionExpandListener
 androidx.core.view.MenuItemCompat:
     public static final int SHOW_AS_ACTION_ALWAYS
@@ -4946,18 +5044,36 @@ androidx.core.view.NestedScrollingParentHelper:
 androidx.core.view.OnReceiveContentListener
 androidx.core.view.OnReceiveContentViewBehavior:
     public abstract androidx.core.view.ContentInfoCompat onReceiveContent(androidx.core.view.ContentInfoCompat)
-androidx.core.view.OneShotPreDrawListener
 androidx.core.view.PointerIconCompat$Api24Impl
 androidx.core.view.PointerIconCompat
+androidx.core.view.RoundedCornerCompat$Position
+androidx.core.view.RoundedCornerCompat
 androidx.core.view.ScaleGestureDetectorCompat
+androidx.core.view.ScrollFeedbackProviderCompat$ScrollFeedbackProviderApi35Impl:
+    public void onSnapToItem(int,int,int)
+androidx.core.view.ScrollFeedbackProviderCompat$ScrollFeedbackProviderBaseImpl:
+    public void onSnapToItem(int,int,int)
+androidx.core.view.ScrollFeedbackProviderCompat$ScrollFeedbackProviderImpl:
+    public abstract void onSnapToItem(int,int,int)
+androidx.core.view.ScrollFeedbackProviderCompat:
+    public void onSnapToItem(int,int,int)
 androidx.core.view.ScrollingView
-androidx.core.view.SoftwareKeyboardControllerCompat$Impl20
-androidx.core.view.SoftwareKeyboardControllerCompat$Impl30
-androidx.core.view.SoftwareKeyboardControllerCompat$Impl
-androidx.core.view.SoftwareKeyboardControllerCompat
+androidx.core.view.SoftwareKeyboardControllerCompat$Impl20:
+    private static synthetic void lambda$show$0(android.view.View)
+    void show()
+androidx.core.view.SoftwareKeyboardControllerCompat$Impl30:
+    void <init>(android.view.WindowInsetsController)
+    void show()
+androidx.core.view.SoftwareKeyboardControllerCompat$Impl:
+    void show()
+androidx.core.view.SoftwareKeyboardControllerCompat:
+    void <init>(android.view.WindowInsetsController)
+    public void show()
 androidx.core.view.TreeIterator
 androidx.core.view.VelocityTrackerCompat$Api34Impl:
     private void <init>()
+    static float getAxisVelocity(android.view.VelocityTracker,int,int)
+    static boolean isAxisSupported(android.view.VelocityTracker,int)
 androidx.core.view.VelocityTrackerCompat$VelocityTrackableMotionEventAxis
 androidx.core.view.VelocityTrackerCompat:
     private void <init>()
@@ -4977,25 +5093,59 @@ androidx.core.view.ViewCompat$$InternalSyntheticLambda$1$e3cdbeb62374cdd4f3b5b60
     public final androidx.core.view.ContentInfoCompat onReceiveContent(androidx.core.view.ContentInfoCompat)
 androidx.core.view.ViewCompat$Api20Impl:
     private void <init>()
+    static android.view.WindowInsets onApplyWindowInsets(android.view.View,android.view.WindowInsets)
 androidx.core.view.ViewCompat$Api21Impl:
     private void <init>()
+    static boolean dispatchNestedFling(android.view.View,float,float,boolean)
+    static boolean dispatchNestedPreFling(android.view.View,float,float)
+    static boolean dispatchNestedPreScroll(android.view.View,int,int,int[],int[])
+    static boolean dispatchNestedScroll(android.view.View,int,int,int,int,int[])
+    static float getElevation(android.view.View)
+    static java.lang.String getTransitionName(android.view.View)
+    static float getTranslationZ(android.view.View)
+    static float getZ(android.view.View)
+    static boolean hasNestedScrollingParent(android.view.View)
+    static boolean isImportantForAccessibility(android.view.View)
+    static boolean isNestedScrollingEnabled(android.view.View)
+    static void setElevation(android.view.View,float)
+    static void setNestedScrollingEnabled(android.view.View,boolean)
+    static void setTransitionName(android.view.View,java.lang.String)
+    static void setTranslationZ(android.view.View,float)
+    static void setZ(android.view.View,float)
+    static boolean startNestedScroll(android.view.View,int)
 androidx.core.view.ViewCompat$Api23Impl:
     private void <init>()
+    static int getScrollIndicators(android.view.View)
+    static void setScrollIndicators(android.view.View,int)
+    static void setScrollIndicators(android.view.View,int,int)
 androidx.core.view.ViewCompat$Api24Impl
 androidx.core.view.ViewCompat$Api26Impl
 androidx.core.view.ViewCompat$Api28Impl:
     private void <init>()
+    static void addOnUnhandledKeyEventListener(android.view.View,androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat)
+    static void removeOnUnhandledKeyEventListener(android.view.View,androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat)
+    static java.lang.Object requireViewById(android.view.View,int)
+    public static void setAutofillId(android.view.View,androidx.core.view.autofill.AutofillIdCompat)
 androidx.core.view.ViewCompat$Api29Impl:
     private void <init>()
+    static android.view.contentcapture.ContentCaptureSession getContentCaptureSession(android.view.View)
+    static java.util.List getSystemGestureExclusionRects(android.view.View)
+    static void setContentCaptureSession(android.view.View,androidx.core.view.contentcapture.ContentCaptureSessionCompat)
+    static void setSystemGestureExclusionRects(android.view.View,java.util.List)
+    static void transformMatrixToGlobal(android.view.View,android.graphics.Matrix)
 androidx.core.view.ViewCompat$Api30Impl:
     private void <init>()
+    static int getImportantForContentCapture(android.view.View)
     public static androidx.core.view.WindowInsetsControllerCompat getWindowInsetsController(android.view.View)
+    static boolean isImportantForContentCapture(android.view.View)
+    static void setImportantForContentCapture(android.view.View,int)
 androidx.core.view.ViewCompat$Api31Impl
 androidx.core.view.ViewCompat$FocusDirection
 androidx.core.view.ViewCompat$FocusRealDirection
 androidx.core.view.ViewCompat$FocusRelativeDirection
 androidx.core.view.ViewCompat$NestedScrollType
 androidx.core.view.ViewCompat$OnReceiveContentListenerAdapter
+androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat
 androidx.core.view.ViewCompat$ScrollAxis
 androidx.core.view.ViewCompat$ScrollIndicators
 androidx.core.view.ViewCompat$UnhandledKeyEventManager
@@ -5050,6 +5200,7 @@ androidx.core.view.ViewCompat:
     private static void addAccessibilityAction(android.view.View,androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat)
     public static void addKeyboardNavigationClusters(android.view.View,java.util.Collection,int)
     public static void addOnUnhandledKeyEventListener(android.view.View,androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat)
+    public static void addOverlayView(android.view.ViewGroup,android.view.View)
     public static androidx.core.view.ViewPropertyAnimatorCompat animate(android.view.View)
     private static void bindTempDetach()
     public static boolean canScrollHorizontally(android.view.View,int)
@@ -5070,6 +5221,7 @@ androidx.core.view.ViewCompat:
     static boolean dispatchUnhandledKeyEventBeforeCallback(android.view.View,android.view.KeyEvent)
     static boolean dispatchUnhandledKeyEventBeforeHierarchy(android.view.View,android.view.KeyEvent)
     public static void enableAccessibleClickableSpanSupport(android.view.View)
+    static void fallbackTransformMatrixToGlobal(android.view.View,android.graphics.Matrix)
     public static int generateViewId()
     public static int getAccessibilityLiveRegion(android.view.View)
     public static androidx.core.view.accessibility.AccessibilityNodeProviderCompat getAccessibilityNodeProvider(android.view.View)
@@ -5183,7 +5335,6 @@ androidx.core.view.ViewCompat:
     public static void setLayoutDirection(android.view.View,int)
     public static void setNestedScrollingEnabled(android.view.View,boolean)
     public static void setNextClusterForwardId(android.view.View,int)
-    public static void setOnApplyWindowInsetsListener(android.view.View,androidx.core.view.OnApplyWindowInsetsListener)
     public static void setOnReceiveContentListener(android.view.View,java.lang.String[],androidx.core.view.OnReceiveContentListener)
     public static void setOverScrollMode(android.view.View,int)
     public static void setPaddingRelative(android.view.View,int,int,int,int)
@@ -5206,7 +5357,6 @@ androidx.core.view.ViewCompat:
     public static void setTranslationX(android.view.View,float)
     public static void setTranslationY(android.view.View,float)
     public static void setTranslationZ(android.view.View,float)
-    public static void setWindowInsetsAnimationCallback(android.view.View,androidx.core.view.WindowInsetsAnimationCompat$Callback)
     public static void setX(android.view.View,float)
     public static void setY(android.view.View,float)
     public static void setZ(android.view.View,float)
@@ -5215,6 +5365,7 @@ androidx.core.view.ViewCompat:
     public static boolean startNestedScroll(android.view.View,int,int)
     public static void stopNestedScroll(android.view.View,int)
     private static void tickleInvalidationFlag(android.view.View)
+    public static void transformMatrixToGlobal(android.view.View,android.graphics.Matrix)
     public static void updateDragShadow(android.view.View,android.view.View$DragShadowBuilder)
 androidx.core.view.ViewConfigurationCompat$Api26Impl
 androidx.core.view.ViewConfigurationCompat$Api28Impl:
@@ -5234,7 +5385,19 @@ androidx.core.view.ViewConfigurationCompat:
     public static float getScaledVerticalScrollFactor(android.view.ViewConfiguration,android.content.Context)
     public static boolean hasPermanentMenuKey(android.view.ViewConfiguration)
 androidx.core.view.ViewGroupCompat$Api21Impl
-androidx.core.view.ViewGroupCompat
+androidx.core.view.ViewGroupCompat:
+    public static final int LAYOUT_MODE_CLIP_BOUNDS
+    public static final int LAYOUT_MODE_OPTICAL_BOUNDS
+    private void <init>()
+    public static int getLayoutMode(android.view.ViewGroup)
+    public static int getNestedScrollAxes(android.view.ViewGroup)
+    public static void installCompatInsetsDispatch(android.view.View)
+    public static boolean isTransitionGroup(android.view.ViewGroup)
+    private static synthetic android.view.WindowInsets lambda$installCompatInsetsDispatch$0(android.view.View,android.view.WindowInsets)
+    public static boolean onRequestSendAccessibilityEvent(android.view.ViewGroup,android.view.View,android.view.accessibility.AccessibilityEvent)
+    public static void setLayoutMode(android.view.ViewGroup,int)
+    public static void setMotionEventSplittingEnabled(android.view.ViewGroup,boolean)
+    public static void setTransitionGroup(android.view.ViewGroup,boolean)
 androidx.core.view.ViewGroupKt$children$1
 androidx.core.view.ViewGroupKt$descendants$1$1
 androidx.core.view.ViewGroupKt$iterator$1
@@ -5312,22 +5475,42 @@ androidx.core.view.ViewPropertyAnimatorListenerAdapter
 androidx.core.view.ViewPropertyAnimatorUpdateListener
 androidx.core.view.ViewStructureCompat$Api23Impl
 androidx.core.view.ViewStructureCompat
-androidx.core.view.WindowCompat$Api16Impl
+androidx.core.view.WindowCompat$Api16Impl:
+    private void <init>()
 androidx.core.view.WindowCompat$Api28Impl
-androidx.core.view.WindowCompat$Api30Impl
-androidx.core.view.WindowCompat
-androidx.core.view.WindowInsetsAnimationCompat$BoundsCompat
+androidx.core.view.WindowCompat$Api30Impl:
+    private void <init>()
+androidx.core.view.WindowCompat$Api35Impl:
+    private void <init>()
+androidx.core.view.WindowCompat:
+    public static final int FEATURE_ACTION_BAR
+    public static final int FEATURE_ACTION_BAR_OVERLAY
+    public static final int FEATURE_ACTION_MODE_OVERLAY
+    private void <init>()
+    public static android.view.View requireViewById(android.view.Window,int)
+androidx.core.view.WindowInsetsAnimationCompat$BoundsCompat:
+    public androidx.core.view.WindowInsetsAnimationCompat$BoundsCompat inset(androidx.core.graphics.Insets)
 androidx.core.view.WindowInsetsAnimationCompat$Callback$DispatchMode
-androidx.core.view.WindowInsetsAnimationCompat$Callback
-androidx.core.view.WindowInsetsAnimationCompat$Impl21$Impl21OnApplyWindowInsetsListener$1
-androidx.core.view.WindowInsetsAnimationCompat$Impl21$Impl21OnApplyWindowInsetsListener$2
-androidx.core.view.WindowInsetsAnimationCompat$Impl21$Impl21OnApplyWindowInsetsListener$3
-androidx.core.view.WindowInsetsAnimationCompat$Impl21$Impl21OnApplyWindowInsetsListener
-androidx.core.view.WindowInsetsAnimationCompat$Impl21
-androidx.core.view.WindowInsetsAnimationCompat$Impl30$ProxyCallback
-androidx.core.view.WindowInsetsAnimationCompat$Impl30
-androidx.core.view.WindowInsetsAnimationCompat$Impl
-androidx.core.view.WindowInsetsAnimationCompat
+androidx.core.view.WindowInsetsAnimationCompat$Callback:
+    public static final int DISPATCH_MODE_CONTINUE_ON_SUBTREE
+    public static final int DISPATCH_MODE_STOP
+androidx.core.view.WindowInsetsAnimationCompat$Impl21$Impl21OnApplyWindowInsetsListener:
+    private static final int COMPAT_ANIMATION_DURATION_IME
+    private static final int COMPAT_ANIMATION_DURATION_SYSTEM_BAR
+androidx.core.view.WindowInsetsAnimationCompat$Impl30:
+    public float getFraction()
+    public android.view.animation.Interpolator getInterpolator()
+    public void setAlpha(float)
+androidx.core.view.WindowInsetsAnimationCompat$Impl:
+    public float getFraction()
+    public android.view.animation.Interpolator getInterpolator()
+    public void setAlpha(float)
+androidx.core.view.WindowInsetsAnimationCompat:
+    private static final boolean DEBUG
+    private static final java.lang.String TAG
+    public float getFraction()
+    public android.view.animation.Interpolator getInterpolator()
+    public void setAlpha(float)
 androidx.core.view.WindowInsetsAnimationControlListenerCompat
 androidx.core.view.WindowInsetsAnimationControllerCompat$Impl30
 androidx.core.view.WindowInsetsAnimationControllerCompat$Impl
@@ -5336,33 +5519,47 @@ androidx.core.view.WindowInsetsCompat$Api21ReflectionHolder:
     private void <init>()
 androidx.core.view.WindowInsetsCompat$Builder:
     public androidx.core.view.WindowInsetsCompat$Builder setDisplayCutout(androidx.core.view.DisplayCutoutCompat)
-    public androidx.core.view.WindowInsetsCompat$Builder setInsets(int,androidx.core.graphics.Insets)
     public androidx.core.view.WindowInsetsCompat$Builder setInsetsIgnoringVisibility(int,androidx.core.graphics.Insets)
     public androidx.core.view.WindowInsetsCompat$Builder setMandatorySystemGestureInsets(androidx.core.graphics.Insets)
+    public androidx.core.view.WindowInsetsCompat$Builder setPrivacyIndicatorBounds(android.graphics.Rect)
+    public androidx.core.view.WindowInsetsCompat$Builder setRoundedCorner(int,androidx.core.view.RoundedCornerCompat)
     public androidx.core.view.WindowInsetsCompat$Builder setSystemGestureInsets(androidx.core.graphics.Insets)
     public androidx.core.view.WindowInsetsCompat$Builder setTappableElementInsets(androidx.core.graphics.Insets)
     public androidx.core.view.WindowInsetsCompat$Builder setVisible(int,boolean)
 androidx.core.view.WindowInsetsCompat$BuilderImpl29:
     void setDisplayCutout(androidx.core.view.DisplayCutoutCompat)
 androidx.core.view.WindowInsetsCompat$BuilderImpl30:
-    void setInsets(int,androidx.core.graphics.Insets)
+    void setInsetsIgnoringVisibility(int,androidx.core.graphics.Insets)
+    void setVisible(int,boolean)
+androidx.core.view.WindowInsetsCompat$BuilderImpl31:
+    void setPrivacyIndicatorBounds(android.graphics.Rect)
+    void setRoundedCorner(int,androidx.core.view.RoundedCornerCompat)
+androidx.core.view.WindowInsetsCompat$BuilderImpl34:
     void setInsetsIgnoringVisibility(int,androidx.core.graphics.Insets)
     void setVisible(int,boolean)
 androidx.core.view.WindowInsetsCompat$BuilderImpl:
     void setDisplayCutout(androidx.core.view.DisplayCutoutCompat)
-    void setInsets(int,androidx.core.graphics.Insets)
     void setInsetsIgnoringVisibility(int,androidx.core.graphics.Insets)
+    void setPrivacyIndicatorBounds(android.graphics.Rect)
+    void setRoundedCorner(int,androidx.core.view.RoundedCornerCompat)
     void setVisible(int,boolean)
 androidx.core.view.WindowInsetsCompat$Impl20:
-    public androidx.core.graphics.Insets getInsetsIgnoringVisibility(int)
+    private static final int SYSTEM_BAR_VISIBILITY_MASK
     protected boolean isTypeVisible(int)
     boolean isVisible(int)
 androidx.core.view.WindowInsetsCompat$Impl30:
-    public androidx.core.graphics.Insets getInsetsIgnoringVisibility(int)
+    public boolean isVisible(int)
+androidx.core.view.WindowInsetsCompat$Impl31:
+    android.graphics.Rect getPrivacyIndicatorBounds()
+    androidx.core.view.RoundedCornerCompat getRoundedCorner(int)
+androidx.core.view.WindowInsetsCompat$Impl34:
     public boolean isVisible(int)
 androidx.core.view.WindowInsetsCompat$Impl:
-    androidx.core.graphics.Insets getInsetsIgnoringVisibility(int)
+    android.graphics.Rect getPrivacyIndicatorBounds()
+    androidx.core.view.RoundedCornerCompat getRoundedCorner(int)
     boolean isVisible(int)
+androidx.core.view.WindowInsetsCompat$Side$InsetsSide
+androidx.core.view.WindowInsetsCompat$Side
 androidx.core.view.WindowInsetsCompat$Type$InsetsType
 androidx.core.view.WindowInsetsCompat$Type:
     static final int CAPTION_BAR
@@ -5375,25 +5572,27 @@ androidx.core.view.WindowInsetsCompat$Type:
     static final int SIZE
     static final int STATUS_BARS
     static final int SYSTEM_GESTURES
+    static final int SYSTEM_OVERLAYS
     static final int TAPPABLE_ELEMENT
     static final int WINDOW_DECOR
     private void <init>()
     static int all()
     public static int captionBar()
     public static int displayCutout()
-    public static int ime()
     public static int mandatorySystemGestures()
     public static int navigationBars()
     public static int statusBars()
-    public static int systemBars()
     public static int systemGestures()
-    public static int tappableElement()
+    public static int systemOverlays()
 androidx.core.view.WindowInsetsCompat$TypeImpl30:
+    private void <init>()
+androidx.core.view.WindowInsetsCompat$TypeImpl34:
     private void <init>()
 androidx.core.view.WindowInsetsCompat:
     private static final java.lang.String TAG
-    public androidx.core.graphics.Insets getInsetsIgnoringVisibility(int)
     public androidx.core.graphics.Insets getMandatorySystemGestureInsets()
+    public android.graphics.Rect getPrivacyIndicatorBounds()
+    public androidx.core.view.RoundedCornerCompat getRoundedCorner(int)
     public int getStableInsetBottom()
     public int getStableInsetLeft()
     public int getStableInsetRight()
@@ -5410,14 +5609,68 @@ androidx.core.view.WindowInsetsCompat:
     public boolean isVisible(int)
     public androidx.core.view.WindowInsetsCompat replaceSystemWindowInsets(int,int,int,int)
     public androidx.core.view.WindowInsetsCompat replaceSystemWindowInsets(android.graphics.Rect)
-androidx.core.view.WindowInsetsControllerCompat$Impl20
-androidx.core.view.WindowInsetsControllerCompat$Impl23
-androidx.core.view.WindowInsetsControllerCompat$Impl26
+androidx.core.view.WindowInsetsControllerCompat$Impl20:
+    void addOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    void controlWindowInsetsAnimation(int,long,android.view.animation.Interpolator,android.os.CancellationSignal,androidx.core.view.WindowInsetsAnimationControlListenerCompat)
+    int getSystemBarsBehavior()
+    void removeOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    protected void setWindowFlag(int)
+    void show(int)
+    private void showForType(int)
+    protected void unsetWindowFlag(int)
+androidx.core.view.WindowInsetsControllerCompat$Impl23:
+    public boolean isAppearanceLightStatusBars()
+    public void setAppearanceLightStatusBars(boolean)
+androidx.core.view.WindowInsetsControllerCompat$Impl26:
+    public boolean isAppearanceLightNavigationBars()
+    public void setAppearanceLightNavigationBars(boolean)
 androidx.core.view.WindowInsetsControllerCompat$Impl30$1
-androidx.core.view.WindowInsetsControllerCompat$Impl30
-androidx.core.view.WindowInsetsControllerCompat$Impl
+androidx.core.view.WindowInsetsControllerCompat$Impl30:
+    void addOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    void controlWindowInsetsAnimation(int,long,android.view.animation.Interpolator,android.os.CancellationSignal,androidx.core.view.WindowInsetsAnimationControlListenerCompat)
+    int getSystemBarsBehavior()
+    public boolean isAppearanceLightNavigationBars()
+    public boolean isAppearanceLightStatusBars()
+    private synthetic void lambda$addOnControllableInsetsChangedListener$0(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener,android.view.WindowInsetsController,int)
+    void removeOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    public void setAppearanceLightNavigationBars(boolean)
+    public void setAppearanceLightStatusBars(boolean)
+    void show(int)
+androidx.core.view.WindowInsetsControllerCompat$Impl31:
+    void <init>(android.view.WindowInsetsController,androidx.core.view.WindowInsetsControllerCompat,androidx.core.view.SoftwareKeyboardControllerCompat)
+    int getSystemBarsBehavior()
+androidx.core.view.WindowInsetsControllerCompat$Impl35:
+    void <init>(android.view.WindowInsetsController,androidx.core.view.WindowInsetsControllerCompat,androidx.core.view.SoftwareKeyboardControllerCompat)
+    public boolean isAppearanceLightNavigationBars()
+    public boolean isAppearanceLightStatusBars()
+androidx.core.view.WindowInsetsControllerCompat$Impl:
+    static final int KEY_BEHAVIOR
+    void addOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    void controlWindowInsetsAnimation(int,long,android.view.animation.Interpolator,android.os.CancellationSignal,androidx.core.view.WindowInsetsAnimationControlListenerCompat)
+    int getSystemBarsBehavior()
+    public boolean isAppearanceLightNavigationBars()
+    public boolean isAppearanceLightStatusBars()
+    void removeOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    public void setAppearanceLightNavigationBars(boolean)
+    public void setAppearanceLightStatusBars(boolean)
+    void show(int)
 androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener
-androidx.core.view.WindowInsetsControllerCompat
+androidx.core.view.WindowInsetsControllerCompat:
+    public static final int BEHAVIOR_DEFAULT
+    public static final int BEHAVIOR_SHOW_BARS_BY_SWIPE
+    public static final int BEHAVIOR_SHOW_BARS_BY_TOUCH
+    public static final int BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    private void <init>(android.view.WindowInsetsController)
+    public void addOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    public void controlWindowInsetsAnimation(int,long,android.view.animation.Interpolator,android.os.CancellationSignal,androidx.core.view.WindowInsetsAnimationControlListenerCompat)
+    public int getSystemBarsBehavior()
+    public boolean isAppearanceLightNavigationBars()
+    public boolean isAppearanceLightStatusBars()
+    public void removeOnControllableInsetsChangedListener(androidx.core.view.WindowInsetsControllerCompat$OnControllableInsetsChangedListener)
+    public void setAppearanceLightNavigationBars(boolean)
+    public void setAppearanceLightStatusBars(boolean)
+    public void show(int)
+    public static androidx.core.view.WindowInsetsControllerCompat toWindowInsetsControllerCompat(android.view.WindowInsetsController)
 androidx.core.view.accessibility.AccessibilityClickableSpanCompat:
     public static final java.lang.String SPAN_ID
 androidx.core.view.accessibility.AccessibilityEventCompat$Api34Impl
@@ -5434,26 +5687,47 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityAction
     private static final java.lang.String TAG
     public void <init>(int,java.lang.CharSequence,androidx.core.view.accessibility.AccessibilityViewCommand)
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat createReplacementAction(java.lang.CharSequence,androidx.core.view.accessibility.AccessibilityViewCommand)
-androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api21Impl
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api30Impl:
     private void <init>()
+    public static java.lang.Object createRangeInfo(int,float,float,float)
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api33Impl:
     private void <init>()
+    public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat buildCollectionItemInfoCompat(boolean,int,int,int,int,boolean,java.lang.String,java.lang.String)
+    public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat getChild(android.view.accessibility.AccessibilityNodeInfo,int,int)
+    public static java.lang.String getCollectionItemColumnTitle(java.lang.Object)
+    public static java.lang.String getCollectionItemRowTitle(java.lang.Object)
+    public static android.view.accessibility.AccessibilityNodeInfo$ExtraRenderingInfo getExtraRenderingInfo(android.view.accessibility.AccessibilityNodeInfo)
+    public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat getParent(android.view.accessibility.AccessibilityNodeInfo,int)
+    public static void setTextSelectable(android.view.accessibility.AccessibilityNodeInfo,boolean)
+    public static void setUniqueId(android.view.accessibility.AccessibilityNodeInfo,java.lang.String)
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api34Impl:
     private void <init>()
+    public static long getMinDurationBetweenContentChangeMillis(android.view.accessibility.AccessibilityNodeInfo)
+    public static boolean hasRequestInitialAccessibilityFocus(android.view.accessibility.AccessibilityNodeInfo)
+    public static void setAccessibilityDataSensitive(android.view.accessibility.AccessibilityNodeInfo,boolean)
+    public static void setBoundsInWindow(android.view.accessibility.AccessibilityNodeInfo,android.graphics.Rect)
+    public static void setContainerTitle(android.view.accessibility.AccessibilityNodeInfo,java.lang.CharSequence)
+    public static void setMinDurationBetweenContentChangeMillis(android.view.accessibility.AccessibilityNodeInfo,long)
+    public static void setQueryFromAppProcessEnabled(android.view.accessibility.AccessibilityNodeInfo,android.view.View,boolean)
+    public static void setRequestInitialAccessibilityFocus(android.view.accessibility.AccessibilityNodeInfo,boolean)
+androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api35Impl
+androidx.core.view.accessibility.AccessibilityNodeInfoCompat$Api36Impl:
+    private void <init>()
+    static synthetic void access$100(android.view.accessibility.AccessibilityNodeInfo,int)
+    static synthetic void access$200(android.view.accessibility.AccessibilityNodeInfo,android.view.View,int)
+    static synthetic java.util.List access$300(android.view.accessibility.AccessibilityNodeInfo)
+    static synthetic boolean access$400(android.view.accessibility.AccessibilityNodeInfo,android.view.View,int)
+    private static void addLabeledBy(android.view.accessibility.AccessibilityNodeInfo,android.view.View,int)
+    private static java.util.List getLabeledByList(android.view.accessibility.AccessibilityNodeInfo)
+    private static boolean removeLabeledBy(android.view.accessibility.AccessibilityNodeInfo,android.view.View,int)
+    private static void setChecked(android.view.accessibility.AccessibilityNodeInfo,int)
+    public static void setExpandedState(android.view.accessibility.AccessibilityNodeInfo,int)
+    public static void setFieldRequired(android.view.accessibility.AccessibilityNodeInfo,boolean)
+    public static void setSupplementalDescription(android.view.accessibility.AccessibilityNodeInfo,java.lang.CharSequence)
+androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionInfoCompat$Builder
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionInfoCompat
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat$Builder
-androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat:
-    public int getColumnIndex()
-    public int getColumnSpan()
-    public java.lang.String getColumnTitle()
-    public int getRowIndex()
-    public int getRowSpan()
-    public java.lang.String getRowTitle()
-    public boolean isHeading()
-    public boolean isSelected()
-    public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat obtain(int,int,int,int,boolean)
-    public static androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat obtain(int,int,int,int,boolean,boolean)
+androidx.core.view.accessibility.AccessibilityNodeInfoCompat$CollectionItemInfoCompat
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$RangeInfoCompat
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$TouchDelegateInfoCompat
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
@@ -5503,10 +5777,13 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     private static final int BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING
     private static final int BOOLEAN_PROPERTY_TEXT_SELECTABLE
     private static final java.lang.String BOUNDS_IN_WINDOW_KEY
+    private static final java.lang.String CHECKED_KEY
     private static final java.lang.String CONTAINER_TITLE_KEY
+    private static final java.lang.String EXPANDED_STATE_KEY
     public static final java.lang.String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH
     public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH
     public static final java.lang.String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX
+    public static final java.lang.String EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY
     public static final java.lang.String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
     public static final int FLAG_PREFETCH_ANCESTORS
     public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
@@ -5517,6 +5794,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public static final int FOCUS_ACCESSIBILITY
     public static final int FOCUS_INPUT
     private static final java.lang.String HINT_TEXT_KEY
+    private static final java.lang.String IS_REQUIRED_KEY
     public static final int MAX_NUMBER_OF_PREFETCHED_NODES
     private static final java.lang.String MIN_DURATION_BETWEEN_CONTENT_CHANGES_KEY
     public static final int MOVEMENT_GRANULARITY_CHARACTER
@@ -5532,16 +5810,21 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     private static final java.lang.String SPANS_ID_KEY
     private static final java.lang.String SPANS_START_KEY
     private static final java.lang.String STATE_DESCRIPTION_KEY
+    private static final java.lang.String SUPPLEMENTAL_DESCRIPTION_KEY
     private static final java.lang.String TOOLTIP_TEXT_KEY
     private static final java.lang.String UNIQUE_ID_KEY
+    public void <init>(java.lang.Object)
     public void addAction(int)
     public void addChild(android.view.View)
     public void addChild(android.view.View,int)
+    public void addLabeledBy(android.view.View)
+    public void addLabeledBy(android.view.View,int)
     public boolean canOpenPopup()
     public java.util.List findAccessibilityNodeInfosByText(java.lang.String)
     public java.util.List findAccessibilityNodeInfosByViewId(java.lang.String)
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat findFocus(int)
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat focusSearch(int)
+    public int getActions()
     public java.util.List getAvailableExtraData()
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat getChild(int)
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat getChild(int,int)
@@ -5555,6 +5838,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public int getInputType()
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat getLabelFor()
     public androidx.core.view.accessibility.AccessibilityNodeInfoCompat getLabeledBy()
+    public java.util.List getLabeledByList()
     public int getLiveRegion()
     public long getMinDurationBetweenContentChangesMillis()
     public int getMovementGranularities()
@@ -5572,6 +5856,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public int getWindowId()
     public boolean hasRequestInitialAccessibilityFocus()
     public boolean isAccessibilityFocused()
+    public boolean isChecked()
     public boolean isContentInvalid()
     public boolean isDismissable()
     public boolean isEditable()
@@ -5590,6 +5875,8 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public boolean removeAction(androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat)
     public boolean removeChild(android.view.View)
     public boolean removeChild(android.view.View,int)
+    public boolean removeLabeledBy(android.view.View)
+    public boolean removeLabeledBy(android.view.View,int)
     public void setAccessibilityDataSensitive(boolean)
     public void setAccessibilityFocused(boolean)
     public void setAvailableExtraData(java.util.List)
@@ -5598,6 +5885,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public void setBoundsInWindow(android.graphics.Rect)
     public void setCanOpenPopup(boolean)
     public void setCheckable(boolean)
+    public void setChecked(int)
     public void setChecked(boolean)
     public void setClickable(boolean)
     public void setCollectionInfo(java.lang.Object)
@@ -5611,6 +5899,8 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public void setEditable(boolean)
     public void setEnabled(boolean)
     public void setError(java.lang.CharSequence)
+    public void setExpandedState(int)
+    public void setFieldRequired(boolean)
     public void setFocusable(boolean)
     public void setFocused(boolean)
     public void setGranularScrollingSupported(boolean)
@@ -5639,6 +5929,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public void setShowingHintText(boolean)
     public void setSource(android.view.View)
     public void setSource(android.view.View,int)
+    public void setSupplementalDescription(java.lang.CharSequence)
     public void setText(java.lang.CharSequence)
     public void setTextEntryKey(boolean)
     public void setTextSelectable(boolean)
@@ -5652,6 +5943,7 @@ androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
     public void setUniqueId(java.lang.String)
     public void setViewIdResourceName(java.lang.String)
     public void setVisibleToUser(boolean)
+    static androidx.core.view.accessibility.AccessibilityNodeInfoCompat wrapNonNullInstance(java.lang.Object)
 androidx.core.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderApi19
 androidx.core.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderApi26
 androidx.core.view.accessibility.AccessibilityNodeProviderCompat:
@@ -5755,30 +6047,17 @@ androidx.core.view.accessibility.AccessibilityWindowInfoCompat
 androidx.core.view.animation.PathInterpolatorApi14
 androidx.core.view.animation.PathInterpolatorCompat$Api21Impl
 androidx.core.view.animation.PathInterpolatorCompat
-androidx.core.view.autofill.AutofillIdCompat:
-    private final java.lang.Object mWrappedObj
-    private void <init>(android.view.autofill.AutofillId)
-    public static androidx.core.view.autofill.AutofillIdCompat toAutofillIdCompat(android.view.autofill.AutofillId)
+androidx.core.view.autofill.AutofillIdCompat
 androidx.core.view.contentcapture.ContentCaptureSessionCompat$Api23Impl
 androidx.core.view.contentcapture.ContentCaptureSessionCompat$Api29Impl
 androidx.core.view.contentcapture.ContentCaptureSessionCompat$Api34Impl
-androidx.core.view.contentcapture.ContentCaptureSessionCompat:
-    private static final java.lang.String KEY_VIEW_TREE_APPEARED
-    private static final java.lang.String KEY_VIEW_TREE_APPEARING
-    private final android.view.View mView
-    private final java.lang.Object mWrappedObj
-    private void <init>(android.view.contentcapture.ContentCaptureSession,android.view.View)
-    public android.view.autofill.AutofillId newAutofillId(long)
-    public androidx.core.view.ViewStructureCompat newVirtualViewStructure(android.view.autofill.AutofillId,long)
-    public void notifyViewTextChanged(android.view.autofill.AutofillId,java.lang.CharSequence)
-    public void notifyViewsAppeared(java.util.List)
-    public void notifyViewsDisappeared(long[])
-    public static androidx.core.view.contentcapture.ContentCaptureSessionCompat toContentCaptureSessionCompat(android.view.contentcapture.ContentCaptureSession,android.view.View)
+androidx.core.view.contentcapture.ContentCaptureSessionCompat
 androidx.core.view.inputmethod.EditorInfoCompat$Api30Impl:
     private void <init>()
     static java.lang.CharSequence getInitialSelectedText(android.view.inputmethod.EditorInfo,int)
     static java.lang.CharSequence getInitialTextAfterCursor(android.view.inputmethod.EditorInfo,int,int)
     static java.lang.CharSequence getInitialTextBeforeCursor(android.view.inputmethod.EditorInfo,int,int)
+androidx.core.view.inputmethod.EditorInfoCompat$Api35Impl
 androidx.core.view.inputmethod.EditorInfoCompat:
     private static final java.lang.String CONTENT_MIME_TYPES_INTEROP_KEY
     private static final java.lang.String CONTENT_MIME_TYPES_KEY
@@ -5789,7 +6068,7 @@ androidx.core.view.inputmethod.EditorInfoCompat:
     public static final int IME_FLAG_NO_PERSONALIZED_LEARNING
     static final int MAX_INITIAL_SELECTION_LENGTH
     static final int MEMORY_EFFICIENT_TEXT_LENGTH
-    private static final java.lang.String STYLUS_HANDWRITING_ENABLED_KEY
+    static final java.lang.String STYLUS_HANDWRITING_ENABLED_KEY
     public void <init>()
     public static java.lang.String[] getContentMimeTypes(android.view.inputmethod.EditorInfo)
     public static java.lang.CharSequence getInitialSelectedText(android.view.inputmethod.EditorInfo,int)
@@ -5808,6 +6087,34 @@ androidx.core.view.inputmethod.InputContentInfoCompat$InputContentInfoCompatApi2
 androidx.core.view.inputmethod.InputContentInfoCompat$InputContentInfoCompatBaseImpl
 androidx.core.view.inputmethod.InputContentInfoCompat$InputContentInfoCompatImpl
 androidx.core.view.inputmethod.InputContentInfoCompat
+androidx.core.view.insets.ColorProtection:
+    public int getColor()
+androidx.core.view.insets.GradientProtection
+androidx.core.view.insets.Protection$Attributes:
+    private static final int UNSPECIFIED
+androidx.core.view.insets.Protection:
+    private static final long DEFAULT_DURATION_IN
+    private static final long DEFAULT_DURATION_OUT
+    public void animateAlpha(float)
+    public void animateInsetsAmount(float)
+    private void cancelUserAlphaAnimation()
+    private void cancelUserInsetsAmountAnimation()
+    public float getAlpha()
+    public float getInsetAmount()
+    private synthetic void lambda$animateAlpha$0(android.animation.ValueAnimator)
+    private synthetic void lambda$animateInsetsAmount$1(android.animation.ValueAnimator)
+    public void setAlpha(float)
+    private void setAlphaInternal(float)
+    public void setInsetAmount(float)
+    private void setInsetAmountInternal(float)
+androidx.core.view.insets.ProtectionLayout:
+    public void <init>(android.content.Context)
+    public void <init>(android.content.Context,android.util.AttributeSet)
+    public void <init>(android.content.Context,android.util.AttributeSet,int)
+    public void <init>(android.content.Context,android.util.AttributeSet,int,int)
+androidx.core.viewtree.R$id
+androidx.core.viewtree.R
+androidx.core.viewtree.ViewTree
 androidx.core.widget.AutoScrollHelper:
     private static final int DEFAULT_EDGE_TYPE
     private static final float DEFAULT_MAXIMUM_EDGE
@@ -5858,6 +6165,8 @@ androidx.core.widget.ListPopupWindowCompat
 androidx.core.widget.ListViewCompat
 androidx.core.widget.NestedScrollView$Api21Impl:
     private void <init>()
+androidx.core.widget.NestedScrollView$Api35Impl:
+    private void <init>()
 androidx.core.widget.NestedScrollView:
     static final int ANIMATED_SCROLL_GAP
     private static final int DEFAULT_SMOOTH_SCROLL_DURATION
@@ -5877,6 +6186,8 @@ androidx.core.widget.NestedScrollView:
 androidx.core.widget.PopupMenuCompat
 androidx.core.widget.PopupWindowCompat$Api23Impl:
     private void <init>()
+    static boolean getOverlapAnchor(android.widget.PopupWindow)
+    static int getWindowLayoutType(android.widget.PopupWindow)
 androidx.core.widget.PopupWindowCompat:
     private static final java.lang.String TAG
     private static java.lang.reflect.Method sGetWindowLayoutTypeMethod
@@ -5887,6 +6198,8 @@ androidx.core.widget.PopupWindowCompat:
 androidx.core.widget.ScrollerCompat
 androidx.core.widget.TextViewCompat$Api23Impl:
     private void <init>()
+    static android.content.res.ColorStateList getCompoundDrawableTintList(android.widget.TextView)
+    static android.graphics.PorterDuff$Mode getCompoundDrawableTintMode(android.widget.TextView)
 androidx.core.widget.TextViewCompat$Api24Impl:
     private void <init>()
 androidx.core.widget.TextViewCompat$Api26Impl
@@ -7334,20 +7647,27 @@ androidx.startup.StartupLogger:
     public static void i(java.lang.String)
 androidx.tracing.R
 androidx.tracing.Trace:
+    static final int MAX_TRACE_LABEL_LENGTH
     static final java.lang.String TAG
     private static java.lang.reflect.Method sAsyncTraceBeginMethod
     private static java.lang.reflect.Method sAsyncTraceEndMethod
+    private static boolean sHasAppTracingEnabled
     private static java.lang.reflect.Method sTraceCounterMethod
     private void <init>()
     public static void beginAsyncSection(java.lang.String,int)
     private static void beginAsyncSectionFallback(java.lang.String,int)
     public static void endAsyncSection(java.lang.String,int)
     private static void endAsyncSectionFallback(java.lang.String,int)
+    public static void forceEnableAppTracing()
     public static void setCounter(java.lang.String,int)
     private static void setCounterFallback(java.lang.String,int)
 androidx.tracing.TraceApi18Impl:
     private void <init>()
-androidx.tracing.TraceApi29Impl
+androidx.tracing.TraceApi29Impl:
+    private void <init>()
+    public static void beginAsyncSection(java.lang.String,int)
+    public static void endAsyncSection(java.lang.String,int)
+    public static void setCounter(java.lang.String,int)
 androidx.vectordrawable.R$attr
 androidx.vectordrawable.R$color
 androidx.vectordrawable.R$dimen
@@ -7672,7 +7992,7 @@ com.google.androidbrowserhelper.BuildConfig
 com.google.androidbrowserhelper.R$drawable:
     private void <init>()
 com.google.androidbrowserhelper.R$string:
-    public static int app_name
+    public static int android_browser_helper_app_name
     public static int no_provider_toast
     public static int update_chrome_toast
     private void <init>()
@@ -7711,6 +8031,7 @@ com.google.androidbrowserhelper.trusted.LauncherActivityMetadata:
     private static final java.lang.String METADATA_ADDITIONAL_TRUSTED_ORIGINS
     private static final java.lang.String METADATA_DEFAULT_URL
     private static final java.lang.String METADATA_DISPLAY_MODE
+    private static final java.lang.String METADATA_DISPLAY_OVERRIDE
     private static final java.lang.String METADATA_FALLBACK_STRATEGY
     private static final java.lang.String METADATA_FILE_HANDLING_ACTION_URL
     private static final java.lang.String METADATA_FILE_PROVIDER_AUTHORITY
@@ -7787,6 +8108,11 @@ com.google.androidbrowserhelper.trusted.TwaSharedPreferencesManager:
     private static final java.lang.String PREFS_NAME
 com.google.androidbrowserhelper.trusted.Utils:
     public void <init>()
+    private static void addSystemUiVisibilityFlag(android.app.Activity,int)
+    private static float luminanceOfColorComponent(float)
+    public static void setNavigationBarColor(android.app.Activity,int)
+    public static void setStatusBarColor(android.app.Activity,int)
+    private static boolean shouldUseDarkIconsOnBackground(int)
 com.google.androidbrowserhelper.trusted.WebViewFallbackActivity:
     private static final java.lang.String KEY_EXTRA_ORIGINS
     private static final java.lang.String KEY_LAUNCH_URI
@@ -8498,13 +8824,11 @@ com.google.common.collect.ImmutableList:
     public final com.google.common.collect.ImmutableList asList()
     public static com.google.common.collect.ImmutableList$Builder builder()
     public static com.google.common.collect.ImmutableList$Builder builderWithExpectedSize(int)
-    private static varargs com.google.common.collect.ImmutableList construct(java.lang.Object[])
     public static com.google.common.collect.ImmutableList copyOf(java.lang.Iterable)
     public static com.google.common.collect.ImmutableList copyOf(java.util.Collection)
     public static com.google.common.collect.ImmutableList copyOf(java.util.Iterator)
     public static com.google.common.collect.ImmutableList copyOf(java.lang.Object[])
     public static com.google.common.collect.ImmutableList of(java.lang.Object)
-    public static com.google.common.collect.ImmutableList of(java.lang.Object,java.lang.Object)
     public static com.google.common.collect.ImmutableList of(java.lang.Object,java.lang.Object,java.lang.Object)
     public static com.google.common.collect.ImmutableList of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)
     public static com.google.common.collect.ImmutableList of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)
@@ -9109,9 +9433,6 @@ com.google.common.collect.NullsFirstOrdering
 com.google.common.collect.NullsLastOrdering
 com.google.common.collect.ObjectArrays:
     private void <init>()
-    static java.lang.Object checkElementNotNull(java.lang.Object,int)
-    static varargs java.lang.Object[] checkElementsNotNull(java.lang.Object[])
-    static java.lang.Object[] checkElementsNotNull(java.lang.Object[],int)
     public static java.lang.Object[] concat(java.lang.Object,java.lang.Object[])
     public static java.lang.Object[] concat(java.lang.Object[],java.lang.Object)
     public static java.lang.Object[] concat(java.lang.Object[],java.lang.Object[],java.lang.Class)
@@ -10292,6 +10613,7 @@ kotlin.BuilderInference
 kotlin.CharCodeJVMKt
 kotlin.CharCodeKt
 kotlin.CompareToKt
+kotlin.ConsistentCopyVisibility
 kotlin.ContextFunctionTypeParams
 kotlin.DeepRecursiveFunction
 kotlin.DeepRecursiveKt
@@ -10308,6 +10630,7 @@ kotlin.ExperimentalMultiplatform
 kotlin.ExperimentalStdlibApi
 kotlin.ExperimentalSubclassOptIn
 kotlin.ExperimentalUnsignedTypes
+kotlin.ExposedCopyVisibility
 kotlin.ExtensionFunctionType
 kotlin.Function
 kotlin.HashCodeKt
@@ -10414,7 +10737,6 @@ kotlin.annotation.Retention
 kotlin.annotation.Target
 kotlin.collections.AbstractCollection$toString$1
 kotlin.collections.AbstractCollection
-kotlin.collections.AbstractIterator$WhenMappings
 kotlin.collections.AbstractIterator
 kotlin.collections.AbstractList$Companion
 kotlin.collections.AbstractList$IteratorImpl
@@ -10498,60 +10820,33 @@ kotlin.collections.ArraysKt___ArraysJvmKt:
     private static final int contentDeepHashCodeNullable(java.lang.Object[])
     private static final java.lang.String contentDeepToStringInline(java.lang.Object[])
     private static final java.lang.String contentDeepToStringNullable(java.lang.Object[])
-    private static final synthetic boolean contentEquals(byte[],byte[])
-    private static final synthetic boolean contentEquals(char[],char[])
-    private static final synthetic boolean contentEquals(double[],double[])
-    private static final synthetic boolean contentEquals(float[],float[])
-    private static final synthetic boolean contentEquals(int[],int[])
-    private static final synthetic boolean contentEquals(long[],long[])
-    private static final synthetic boolean contentEquals(java.lang.Object[],java.lang.Object[])
-    private static final synthetic boolean contentEquals(short[],short[])
-    private static final synthetic boolean contentEquals(boolean[],boolean[])
-    private static final boolean contentEqualsNullable(byte[],byte[])
-    private static final boolean contentEqualsNullable(char[],char[])
-    private static final boolean contentEqualsNullable(double[],double[])
-    private static final boolean contentEqualsNullable(float[],float[])
-    private static final boolean contentEqualsNullable(int[],int[])
-    private static final boolean contentEqualsNullable(long[],long[])
-    private static final boolean contentEqualsNullable(java.lang.Object[],java.lang.Object[])
-    private static final boolean contentEqualsNullable(short[],short[])
-    private static final boolean contentEqualsNullable(boolean[],boolean[])
-    private static final synthetic int contentHashCode(byte[])
-    private static final synthetic int contentHashCode(char[])
-    private static final synthetic int contentHashCode(double[])
-    private static final synthetic int contentHashCode(float[])
-    private static final synthetic int contentHashCode(int[])
-    private static final synthetic int contentHashCode(long[])
-    private static final synthetic int contentHashCode(java.lang.Object[])
-    private static final synthetic int contentHashCode(short[])
-    private static final synthetic int contentHashCode(boolean[])
-    private static final int contentHashCodeNullable(byte[])
-    private static final int contentHashCodeNullable(char[])
-    private static final int contentHashCodeNullable(double[])
-    private static final int contentHashCodeNullable(float[])
-    private static final int contentHashCodeNullable(int[])
-    private static final int contentHashCodeNullable(long[])
-    private static final int contentHashCodeNullable(java.lang.Object[])
-    private static final int contentHashCodeNullable(short[])
-    private static final int contentHashCodeNullable(boolean[])
-    private static final synthetic java.lang.String contentToString(byte[])
-    private static final synthetic java.lang.String contentToString(char[])
-    private static final synthetic java.lang.String contentToString(double[])
-    private static final synthetic java.lang.String contentToString(float[])
-    private static final synthetic java.lang.String contentToString(int[])
-    private static final synthetic java.lang.String contentToString(long[])
-    private static final synthetic java.lang.String contentToString(java.lang.Object[])
-    private static final synthetic java.lang.String contentToString(short[])
-    private static final synthetic java.lang.String contentToString(boolean[])
-    private static final java.lang.String contentToStringNullable(byte[])
-    private static final java.lang.String contentToStringNullable(char[])
-    private static final java.lang.String contentToStringNullable(double[])
-    private static final java.lang.String contentToStringNullable(float[])
-    private static final java.lang.String contentToStringNullable(int[])
-    private static final java.lang.String contentToStringNullable(long[])
-    private static final java.lang.String contentToStringNullable(java.lang.Object[])
-    private static final java.lang.String contentToStringNullable(short[])
-    private static final java.lang.String contentToStringNullable(boolean[])
+    private static final boolean contentEquals(byte[],byte[])
+    private static final boolean contentEquals(char[],char[])
+    private static final boolean contentEquals(double[],double[])
+    private static final boolean contentEquals(float[],float[])
+    private static final boolean contentEquals(int[],int[])
+    private static final boolean contentEquals(long[],long[])
+    private static final boolean contentEquals(java.lang.Object[],java.lang.Object[])
+    private static final boolean contentEquals(short[],short[])
+    private static final boolean contentEquals(boolean[],boolean[])
+    private static final int contentHashCode(byte[])
+    private static final int contentHashCode(char[])
+    private static final int contentHashCode(double[])
+    private static final int contentHashCode(float[])
+    private static final int contentHashCode(int[])
+    private static final int contentHashCode(long[])
+    private static final int contentHashCode(java.lang.Object[])
+    private static final int contentHashCode(short[])
+    private static final int contentHashCode(boolean[])
+    private static final java.lang.String contentToString(byte[])
+    private static final java.lang.String contentToString(char[])
+    private static final java.lang.String contentToString(double[])
+    private static final java.lang.String contentToString(float[])
+    private static final java.lang.String contentToString(int[])
+    private static final java.lang.String contentToString(long[])
+    private static final java.lang.String contentToString(java.lang.Object[])
+    private static final java.lang.String contentToString(short[])
+    private static final java.lang.String contentToString(boolean[])
     public static final byte[] copyInto(byte[],byte[],int,int,int)
     public static final char[] copyInto(char[],char[],int,int,int)
     public static final double[] copyInto(double[],double[],int,int,int)
@@ -12471,13 +12766,14 @@ kotlin.collections.CollectionsKt__CollectionsJVMKt:
     private static final java.util.List buildListInternal(kotlin.jvm.functions.Function1)
     private static final int checkCountOverflow(int)
     private static final int checkIndexOverflow(int)
-    private static final java.lang.Object[] copyToArrayImpl(java.util.Collection)
-    private static final java.lang.Object[] copyToArrayImpl(java.util.Collection,java.lang.Object[])
+    private static final java.lang.Object[] collectionToArray(java.util.Collection)
+    private static final java.lang.Object[] collectionToArray(java.util.Collection,java.lang.Object[])
     public static final java.lang.Object[] copyToArrayOfAny(java.lang.Object[],boolean)
     public static final java.util.List createListBuilder()
     public static final java.util.List createListBuilder(int)
     public static final java.util.List shuffled(java.lang.Iterable)
     public static final java.util.List shuffled(java.lang.Iterable,java.util.Random)
+    public static final java.lang.Object[] terminateCollectionToArray(int,java.lang.Object[])
     private static final java.util.List toList(java.util.Enumeration)
 kotlin.collections.CollectionsKt__CollectionsKt$binarySearchBy$1
 kotlin.collections.CollectionsKt__CollectionsKt:
@@ -12497,6 +12793,8 @@ kotlin.collections.CollectionsKt__CollectionsKt:
     public static synthetic int binarySearchBy$default(java.util.List,java.lang.Comparable,int,int,kotlin.jvm.functions.Function1,int,java.lang.Object)
     private static final java.util.List buildList(int,kotlin.jvm.functions.Function1)
     private static final java.util.List buildList(kotlin.jvm.functions.Function1)
+    public static final java.lang.Object[] collectionToArrayCommonImpl(java.util.Collection)
+    public static final java.lang.Object[] collectionToArrayCommonImpl(java.util.Collection,java.lang.Object[])
     private static final boolean containsAll(java.util.Collection,java.util.Collection)
     public static final kotlin.ranges.IntRange getIndices(java.util.Collection)
     public static final int getLastIndex(java.util.List)
@@ -12579,10 +12877,12 @@ kotlin.collections.CollectionsKt__MutableCollectionsKt:
 kotlin.collections.CollectionsKt__ReversedViewsKt:
     public void <init>()
     public static final synthetic int access$reverseElementIndex(java.util.List,int)
+    public static final synthetic int access$reverseIteratorIndex(java.util.List,int)
     public static final synthetic int access$reversePositionIndex(java.util.List,int)
     public static final java.util.List asReversed(java.util.List)
     public static final java.util.List asReversedMutable(java.util.List)
     private static final int reverseElementIndex$CollectionsKt__ReversedViewsKt(java.util.List,int)
+    private static final int reverseIteratorIndex$CollectionsKt__ReversedViewsKt(java.util.List,int)
     private static final int reversePositionIndex$CollectionsKt__ReversedViewsKt(java.util.List,int)
 kotlin.collections.CollectionsKt___CollectionsJvmKt:
     public void <init>()
@@ -12894,7 +13194,9 @@ kotlin.collections.MapsKt___MapsKt
 kotlin.collections.MovingSubList
 kotlin.collections.MutableMapWithDefault
 kotlin.collections.MutableMapWithDefaultImpl
+kotlin.collections.ReversedList$listIterator$1
 kotlin.collections.ReversedList
+kotlin.collections.ReversedListReadOnly$listIterator$1
 kotlin.collections.ReversedListReadOnly
 kotlin.collections.RingBuffer$iterator$1
 kotlin.collections.RingBuffer
@@ -12912,6 +13214,9 @@ kotlin.collections.UArraySortingKt
 kotlin.collections.UCollectionsKt
 kotlin.collections.UCollectionsKt___UCollectionsKt
 kotlin.collections.builders.AbstractMapBuilderEntrySet
+kotlin.collections.builders.ListBuilder$BuilderSubList$Itr
+kotlin.collections.builders.ListBuilder$BuilderSubList
+kotlin.collections.builders.ListBuilder$Companion
 kotlin.collections.builders.ListBuilder$Itr
 kotlin.collections.builders.ListBuilder
 kotlin.collections.builders.ListBuilderKt
@@ -12929,6 +13234,7 @@ kotlin.collections.builders.SerializedCollection$Companion
 kotlin.collections.builders.SerializedCollection
 kotlin.collections.builders.SerializedMap$Companion
 kotlin.collections.builders.SerializedMap
+kotlin.collections.builders.SetBuilder$Companion
 kotlin.collections.builders.SetBuilder
 kotlin.collections.jdk8.CollectionsJDK8Kt
 kotlin.collections.unsigned.UArraysKt
@@ -13016,6 +13322,8 @@ kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUninte
 kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnintercepted$$inlined$createCoroutineFromSuspendFunction$IntrinsicsKt__IntrinsicsJvmKt$2
 kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnintercepted$$inlined$createCoroutineFromSuspendFunction$IntrinsicsKt__IntrinsicsJvmKt$3
 kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnintercepted$$inlined$createCoroutineFromSuspendFunction$IntrinsicsKt__IntrinsicsJvmKt$4
+kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createSimpleCoroutineForSuspendFunction$1
+kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createSimpleCoroutineForSuspendFunction$2
 kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsJvmKt
 kotlin.coroutines.intrinsics.IntrinsicsKt__IntrinsicsKt
 kotlin.coroutines.jvm.internal.BaseContinuationImpl
@@ -13035,12 +13343,13 @@ kotlin.coroutines.jvm.internal.RunSuspendKt
 kotlin.coroutines.jvm.internal.SuspendFunction
 kotlin.coroutines.jvm.internal.SuspendLambda
 kotlin.enums.EnumEntries
-kotlin.enums.EnumEntriesKt$enumEntries$1
+kotlin.enums.EnumEntriesJVMKt
 kotlin.enums.EnumEntriesKt
 kotlin.enums.EnumEntriesList
 kotlin.enums.EnumEntriesSerializationProxy$Companion
 kotlin.enums.EnumEntriesSerializationProxy
 kotlin.experimental.BitwiseOperationsKt
+kotlin.experimental.ExperimentalNativeApi
 kotlin.experimental.ExperimentalObjCName
 kotlin.experimental.ExperimentalObjCRefinement
 kotlin.experimental.ExperimentalTypeInference
@@ -13110,6 +13419,7 @@ kotlin.io.TerminateException
 kotlin.io.TextStreamsKt$readLines$1
 kotlin.io.TextStreamsKt
 kotlin.io.encoding.Base64$Default
+kotlin.io.encoding.Base64$PaddingOption
 kotlin.io.encoding.Base64
 kotlin.io.encoding.Base64JVMKt
 kotlin.io.encoding.Base64Kt
@@ -13127,6 +13437,7 @@ kotlin.io.path.ExperimentalPathApi
 kotlin.io.path.FileVisitorBuilder
 kotlin.io.path.FileVisitorBuilderImpl
 kotlin.io.path.FileVisitorImpl
+kotlin.io.path.IllegalFileNameException
 kotlin.io.path.LinkFollowing
 kotlin.io.path.OnErrorResult
 kotlin.io.path.PathNode
@@ -13150,8 +13461,14 @@ kotlin.io.path.PathsKt__PathRecursiveFunctionsKt$copyToRecursively$5$4
 kotlin.io.path.PathsKt__PathRecursiveFunctionsKt$copyToRecursively$5
 kotlin.io.path.PathsKt__PathRecursiveFunctionsKt
 kotlin.io.path.PathsKt__PathUtilsKt
+kotlin.jdk7.AutoCloseableKt$AutoCloseable$1
 kotlin.jdk7.AutoCloseableKt
+kotlin.js.ExperimentalJsCollectionsApi
 kotlin.js.ExperimentalJsExport
+kotlin.js.ExperimentalJsFileName
+kotlin.js.ExperimentalJsReflectionCreateInstance
+kotlin.js.ExperimentalJsStatic
+kotlin.jvm.ImplicitlyActualizedByJvmDeclaration
 kotlin.jvm.JvmClassMappingKt
 kotlin.jvm.JvmDefault
 kotlin.jvm.JvmDefaultWithCompatibility
@@ -13674,10 +13991,13 @@ kotlin.reflect.KDeclarationContainer
 kotlin.reflect.KFunction$DefaultImpls
 kotlin.reflect.KFunction
 kotlin.reflect.KMutableProperty$Setter
+kotlin.reflect.KMutableProperty0$DefaultImpls
 kotlin.reflect.KMutableProperty0$Setter
 kotlin.reflect.KMutableProperty0
+kotlin.reflect.KMutableProperty1$DefaultImpls
 kotlin.reflect.KMutableProperty1$Setter
 kotlin.reflect.KMutableProperty1
+kotlin.reflect.KMutableProperty2$DefaultImpls
 kotlin.reflect.KMutableProperty2$Setter
 kotlin.reflect.KMutableProperty2
 kotlin.reflect.KMutableProperty
@@ -13687,10 +14007,13 @@ kotlin.reflect.KParameter
 kotlin.reflect.KProperty$Accessor
 kotlin.reflect.KProperty$DefaultImpls
 kotlin.reflect.KProperty$Getter
+kotlin.reflect.KProperty0$DefaultImpls
 kotlin.reflect.KProperty0$Getter
 kotlin.reflect.KProperty0
+kotlin.reflect.KProperty1$DefaultImpls
 kotlin.reflect.KProperty1$Getter
 kotlin.reflect.KProperty1
+kotlin.reflect.KProperty2$DefaultImpls
 kotlin.reflect.KProperty2$Getter
 kotlin.reflect.KProperty2
 kotlin.reflect.KProperty
@@ -13723,6 +14046,7 @@ kotlin.sequences.DropWhileSequence
 kotlin.sequences.EmptySequence
 kotlin.sequences.FilteringSequence$iterator$1
 kotlin.sequences.FilteringSequence
+kotlin.sequences.FlatteningSequence$State
 kotlin.sequences.FlatteningSequence$iterator$1
 kotlin.sequences.FlatteningSequence
 kotlin.sequences.GeneratorSequence$iterator$1
@@ -13858,6 +14182,17 @@ kotlin.text.CharsetsKt
 kotlin.text.DelimitedRangesSequence$iterator$1
 kotlin.text.DelimitedRangesSequence
 kotlin.text.FlagEnum
+kotlin.text.HexExtensionsKt
+kotlin.text.HexFormat$Builder
+kotlin.text.HexFormat$BytesHexFormat$Builder
+kotlin.text.HexFormat$BytesHexFormat$Companion
+kotlin.text.HexFormat$BytesHexFormat
+kotlin.text.HexFormat$Companion
+kotlin.text.HexFormat$NumberHexFormat$Builder
+kotlin.text.HexFormat$NumberHexFormat$Companion
+kotlin.text.HexFormat$NumberHexFormat
+kotlin.text.HexFormat
+kotlin.text.HexFormatKt
 kotlin.text.MatchGroup
 kotlin.text.MatchGroupCollection
 kotlin.text.MatchNamedGroupCollection
@@ -13917,6 +14252,8 @@ kotlin.text.StringsKt__RegexExtensionsKt:
     private static final kotlin.text.Regex toRegex(java.lang.String,kotlin.text.RegexOption)
 kotlin.text.StringsKt__StringBuilderJVMKt:
     public void <init>()
+    private static final java.lang.StringBuilder append(java.lang.StringBuilder,byte)
+    private static final java.lang.StringBuilder append(java.lang.StringBuilder,short)
     private static final java.lang.StringBuilder appendLine(java.lang.StringBuilder,byte)
     private static final java.lang.StringBuilder appendLine(java.lang.StringBuilder,double)
     private static final java.lang.StringBuilder appendLine(java.lang.StringBuilder,float)
@@ -13948,6 +14285,8 @@ kotlin.text.StringsKt__StringBuilderJVMKt:
     public static final java.lang.StringBuilder clear(java.lang.StringBuilder)
     private static final java.lang.StringBuilder deleteAt(java.lang.StringBuilder,int)
     private static final java.lang.StringBuilder deleteRange(java.lang.StringBuilder,int,int)
+    private static final java.lang.StringBuilder insert(java.lang.StringBuilder,int,byte)
+    private static final java.lang.StringBuilder insert(java.lang.StringBuilder,int,short)
     private static final java.lang.StringBuilder insertRange(java.lang.StringBuilder,int,java.lang.CharSequence,int,int)
     private static final java.lang.StringBuilder insertRange(java.lang.StringBuilder,int,char[],int,int)
     private static final void set(java.lang.StringBuilder,int,char)
@@ -13980,8 +14319,7 @@ kotlin.text.StringsKt__StringNumberConversionsJVMKt:
     private static final java.math.BigInteger toBigInteger(java.lang.String,int)
     public static final java.math.BigInteger toBigIntegerOrNull(java.lang.String)
     public static final java.math.BigInteger toBigIntegerOrNull(java.lang.String,int)
-    private static final synthetic boolean toBoolean(java.lang.String)
-    private static final boolean toBooleanNullable(java.lang.String)
+    private static final boolean toBoolean(java.lang.String)
     private static final byte toByte(java.lang.String)
     private static final byte toByte(java.lang.String,int)
     private static final double toDouble(java.lang.String)
@@ -14046,15 +14384,12 @@ kotlin.text.StringsKt__StringsJVMKt:
     public static synthetic boolean endsWith$default(java.lang.String,java.lang.String,boolean,int,java.lang.Object)
     public static final boolean equals(java.lang.String,java.lang.String,boolean)
     public static synthetic boolean equals$default(java.lang.String,java.lang.String,boolean,int,java.lang.Object)
-    private static final synthetic varargs java.lang.String format(java.lang.String,java.util.Locale,java.lang.Object[])
+    private static final varargs java.lang.String format(java.lang.String,java.util.Locale,java.lang.Object[])
     private static final varargs java.lang.String format(java.lang.String,java.lang.Object[])
     private static final varargs java.lang.String format(kotlin.jvm.internal.StringCompanionObject,java.lang.String,java.lang.Object[])
-    private static final synthetic varargs java.lang.String format(kotlin.jvm.internal.StringCompanionObject,java.util.Locale,java.lang.String,java.lang.Object[])
-    private static final varargs java.lang.String formatNullable(java.lang.String,java.util.Locale,java.lang.Object[])
-    private static final varargs java.lang.String formatNullable(kotlin.jvm.internal.StringCompanionObject,java.util.Locale,java.lang.String,java.lang.Object[])
+    private static final varargs java.lang.String format(kotlin.jvm.internal.StringCompanionObject,java.util.Locale,java.lang.String,java.lang.Object[])
     public static final java.util.Comparator getCASE_INSENSITIVE_ORDER(kotlin.jvm.internal.StringCompanionObject)
     private static final java.lang.String intern(java.lang.String)
-    public static final boolean isBlank(java.lang.CharSequence)
     private static final java.lang.String lowercase(java.lang.String)
     private static final java.lang.String lowercase(java.lang.String,java.util.Locale)
     private static final int nativeIndexOf(java.lang.String,char,int)
@@ -14134,6 +14469,7 @@ kotlin.text.StringsKt__StringsKt:
     public static final int indexOfAny(java.lang.CharSequence,char[],int,boolean)
     public static synthetic int indexOfAny$default(java.lang.CharSequence,java.util.Collection,int,boolean,int,java.lang.Object)
     public static synthetic int indexOfAny$default(java.lang.CharSequence,char[],int,boolean,int,java.lang.Object)
+    public static final boolean isBlank(java.lang.CharSequence)
     private static final boolean isEmpty(java.lang.CharSequence)
     private static final boolean isNotBlank(java.lang.CharSequence)
     private static final boolean isNotEmpty(java.lang.CharSequence)
@@ -14460,12 +14796,14 @@ kotlin.text.StringsKt___StringsKt:
 kotlin.text.SystemProperties
 kotlin.text.TypeAliasesKt
 kotlin.text.Typography
+kotlin.text.UHexExtensionsKt
 kotlin.text.UStringsKt
 kotlin.text._OneToManyTitlecaseMappingsKt
 kotlin.text.jdk8.RegexExtensionsJDK8Kt
 kotlin.time.AbstractDoubleTimeSource$DoubleTimeMark
 kotlin.time.AbstractDoubleTimeSource
 kotlin.time.AbstractLongTimeSource$LongTimeMark
+kotlin.time.AbstractLongTimeSource$zero$2
 kotlin.time.AbstractLongTimeSource
 kotlin.time.AdjustedTimeMark
 kotlin.time.ComparableTimeMark$DefaultImpls
@@ -14495,6 +14833,13 @@ kotlin.time.TimeSource$WithComparableMarks
 kotlin.time.TimeSource
 kotlin.time.TimedValue
 kotlin.time.jdk8.DurationConversionsJDK8Kt
+kotlin.uuid.ExperimentalUuidApi
+kotlin.uuid.SecureRandomHolder
+kotlin.uuid.Uuid$Companion
+kotlin.uuid.Uuid
+kotlin.uuid.UuidKt
+kotlin.uuid.UuidKt__UuidJVMKt
+kotlin.uuid.UuidKt__UuidKt
 kotlinx.coroutines.AbstractCoroutine
 kotlinx.coroutines.AbstractTimeSource
 kotlinx.coroutines.AbstractTimeSourceKt
@@ -14512,8 +14857,8 @@ kotlinx.coroutines.BuildersKt__BuildersKt
 kotlinx.coroutines.BuildersKt__Builders_commonKt
 kotlinx.coroutines.CancelFutureOnCancel
 kotlinx.coroutines.CancelFutureOnCompletion
+kotlinx.coroutines.CancelHandler$UserSupplied
 kotlinx.coroutines.CancelHandler
-kotlinx.coroutines.CancelHandlerBase
 kotlinx.coroutines.CancellableContinuation$DefaultImpls
 kotlinx.coroutines.CancellableContinuation
 kotlinx.coroutines.CancellableContinuationImpl
@@ -14535,9 +14880,7 @@ kotlinx.coroutines.CompletableJob
 kotlinx.coroutines.CompletedContinuation
 kotlinx.coroutines.CompletedExceptionally
 kotlinx.coroutines.CompletedWithCancellation
-kotlinx.coroutines.CompletionHandlerBase
 kotlinx.coroutines.CompletionHandlerException
-kotlinx.coroutines.CompletionHandlerKt
 kotlinx.coroutines.CompletionHandler_commonKt
 kotlinx.coroutines.CompletionStateKt
 kotlinx.coroutines.CopyableThreadContextElement$DefaultImpls
@@ -14610,10 +14953,11 @@ kotlinx.coroutines.GlobalScope
 kotlinx.coroutines.InactiveNodeList
 kotlinx.coroutines.Incomplete
 kotlinx.coroutines.IncompleteStateBox
+kotlinx.coroutines.InternalCompletionHandler$UserSupplied
+kotlinx.coroutines.InternalCompletionHandler
 kotlinx.coroutines.InternalCoroutinesApi
 kotlinx.coroutines.InterruptibleKt$runInterruptible$2
 kotlinx.coroutines.InterruptibleKt
-kotlinx.coroutines.InvokeOnCancel
 kotlinx.coroutines.InvokeOnCancelling
 kotlinx.coroutines.InvokeOnCompletion
 kotlinx.coroutines.Job$DefaultImpls
@@ -14663,8 +15007,11 @@ kotlinx.coroutines.JobKt:
     public static final void ensureActive(kotlin.coroutines.CoroutineContext)
     public static final void ensureActive(kotlinx.coroutines.Job)
     public static final kotlinx.coroutines.Job getJob(kotlin.coroutines.CoroutineContext)
+    public static final kotlinx.coroutines.DisposableHandle invokeOnCompletion(kotlinx.coroutines.Job,boolean,boolean,kotlinx.coroutines.InternalCompletionHandler)
+    public static synthetic kotlinx.coroutines.DisposableHandle invokeOnCompletion$default(kotlinx.coroutines.Job,boolean,boolean,kotlinx.coroutines.InternalCompletionHandler,int,java.lang.Object)
     public static final boolean isActive(kotlin.coroutines.CoroutineContext)
 kotlinx.coroutines.JobKt__FutureKt
+kotlinx.coroutines.JobKt__JobKt$invokeOnCompletion$1
 kotlinx.coroutines.JobKt__JobKt:
     public static final kotlinx.coroutines.CompletableJob Job(kotlinx.coroutines.Job)
     public static final synthetic kotlinx.coroutines.Job Job(kotlinx.coroutines.Job)
@@ -14690,6 +15037,8 @@ kotlinx.coroutines.JobKt__JobKt:
     public static final void ensureActive(kotlin.coroutines.CoroutineContext)
     public static final void ensureActive(kotlinx.coroutines.Job)
     public static final kotlinx.coroutines.Job getJob(kotlin.coroutines.CoroutineContext)
+    public static final kotlinx.coroutines.DisposableHandle invokeOnCompletion(kotlinx.coroutines.Job,boolean,boolean,kotlinx.coroutines.InternalCompletionHandler)
+    public static synthetic kotlinx.coroutines.DisposableHandle invokeOnCompletion$default(kotlinx.coroutines.Job,boolean,boolean,kotlinx.coroutines.InternalCompletionHandler,int,java.lang.Object)
     public static final boolean isActive(kotlin.coroutines.CoroutineContext)
     private static final java.lang.Throwable orCancellation$JobKt__JobKt(java.lang.Throwable,kotlinx.coroutines.Job)
 kotlinx.coroutines.JobNode
@@ -14807,10 +15156,10 @@ kotlinx.coroutines.channels.ChannelsKt__ChannelsKt$sendBlocking$1
 kotlinx.coroutines.channels.ChannelsKt__ChannelsKt$trySendBlocking$2
 kotlinx.coroutines.channels.ChannelsKt__ChannelsKt
 kotlinx.coroutines.channels.ChannelsKt__Channels_commonKt$consumeEach$1
-kotlinx.coroutines.channels.ChannelsKt__Channels_commonKt$consumeEach$3
 kotlinx.coroutines.channels.ChannelsKt__Channels_commonKt$toList$1
 kotlinx.coroutines.channels.ChannelsKt__Channels_commonKt
 kotlinx.coroutines.channels.ChannelsKt__DeprecatedKt$any$1
+kotlinx.coroutines.channels.ChannelsKt__DeprecatedKt$consumeEach$1
 kotlinx.coroutines.channels.ChannelsKt__DeprecatedKt$consumes$1
 kotlinx.coroutines.channels.ChannelsKt__DeprecatedKt$consumesAll$1
 kotlinx.coroutines.channels.ChannelsKt__DeprecatedKt$count$1
@@ -14894,8 +15243,7 @@ kotlinx.coroutines.debug.internal.DebugCoroutineInfoImpl$yieldFrames$1
 kotlinx.coroutines.debug.internal.DebugCoroutineInfoImpl
 kotlinx.coroutines.debug.internal.DebugCoroutineInfoImplKt
 kotlinx.coroutines.debug.internal.DebugProbesImpl$CoroutineOwner
-kotlinx.coroutines.debug.internal.DebugProbesImpl$Installations$kotlinx$VolatileWrapper
-kotlinx.coroutines.debug.internal.DebugProbesImpl$SequenceNumber$kotlinx$VolatileWrapper
+kotlinx.coroutines.debug.internal.DebugProbesImpl$DebugProbesImpl$VolatileWrapper$atomicfu$private
 kotlinx.coroutines.debug.internal.DebugProbesImpl$dumpCoroutinesInfo$$inlined$dumpCoroutinesInfoImpl$1
 kotlinx.coroutines.debug.internal.DebugProbesImpl$dumpCoroutinesInfoImpl$$inlined$sortedBy$1
 kotlinx.coroutines.debug.internal.DebugProbesImpl$dumpCoroutinesInfoImpl$3
@@ -14977,7 +15325,7 @@ kotlinx.coroutines.flow.FlowKt__DelayKt$debounceInternal$1$values$1$1$emit$1
 kotlinx.coroutines.flow.FlowKt__DelayKt$debounceInternal$1$values$1$1
 kotlinx.coroutines.flow.FlowKt__DelayKt$debounceInternal$1$values$1
 kotlinx.coroutines.flow.FlowKt__DelayKt$debounceInternal$1
-kotlinx.coroutines.flow.FlowKt__DelayKt$fixedPeriodTicker$3
+kotlinx.coroutines.flow.FlowKt__DelayKt$fixedPeriodTicker$1
 kotlinx.coroutines.flow.FlowKt__DelayKt$sample$2$1$1
 kotlinx.coroutines.flow.FlowKt__DelayKt$sample$2$1$2
 kotlinx.coroutines.flow.FlowKt__DelayKt$sample$2$values$1$1$emit$1
@@ -15282,6 +15630,7 @@ kotlinx.coroutines.internal.ClassValueCtorCache
 kotlinx.coroutines.internal.ConcurrentKt
 kotlinx.coroutines.internal.ConcurrentLinkedListKt
 kotlinx.coroutines.internal.ConcurrentLinkedListNode
+kotlinx.coroutines.internal.Concurrent_commonKt
 kotlinx.coroutines.internal.ContextScope
 kotlinx.coroutines.internal.CoroutineExceptionHandlerImplKt
 kotlinx.coroutines.internal.CoroutineExceptionHandlerImpl_commonKt
@@ -15507,6 +15856,10 @@ androidx.activity.OnBackPressedDispatcher$LifecycleOnBackPressedCancellable:
     private final androidx.activity.OnBackPressedCallback onBackPressedCallback
     final synthetic androidx.activity.OnBackPressedDispatcher this$0
 androidx.activity.OnBackPressedDispatcher
+androidx.appcompat.R$styleable:
+    public static int TextAppearance_android_textColor
+    public static int TextAppearance_android_textColorHint
+    public static int TextAppearance_android_textColorLink
 androidx.appcompat.graphics.drawable.AnimatedStateListDrawableCompat:
     private static final java.lang.String LOGTAG
 androidx.appcompat.view.CollapsibleActionView
@@ -15601,6 +15954,8 @@ androidx.core.app.ActivityCompat:
     private static androidx.core.app.ActivityCompat$PermissionCompatDelegate sDelegate
 androidx.core.app.CoreComponentFactory$$InternalSyntheticThrowCCEIfNotNull$9$28d6d52be828bd520f37653069cdb0fd59ddc413967dd43deec606fddf5e864e$0
 androidx.core.app.CoreComponentFactory$CompatWrapped
+androidx.core.graphics.PaintCompat:
+    private static androidx.core.util.Pair obtainEmptyRects()
 androidx.core.graphics.TypefaceCompat:
     private static android.graphics.Typeface getBestFontFromFamily(android.content.Context,android.graphics.Typeface,int)
 androidx.core.graphics.TypefaceCompatApi29Impl:
@@ -15611,15 +15966,21 @@ androidx.core.graphics.TypefaceCompatBaseImpl:
     private androidx.core.content.res.FontResourcesParserCompat$FontFileResourceEntry findBestEntry(androidx.core.content.res.FontResourcesParserCompat$FontFamilyFilesResourceEntry,int)
     androidx.core.content.res.FontResourcesParserCompat$FontFamilyFilesResourceEntry getFontFamily(android.graphics.Typeface)
     private static long getUniqueKey(android.graphics.Typeface)
-androidx.core.graphics.drawable.TintAwareDrawable:
-    public abstract void setTint(int)
-    public abstract void setTintList(android.content.res.ColorStateList)
-    public abstract void setTintMode(android.graphics.PorterDuff$Mode)
+androidx.core.graphics.drawable.DrawableCompat:
+    private static java.lang.reflect.Method sGetLayoutDirectionMethod
+    private static boolean sGetLayoutDirectionMethodFetched
+    private static java.lang.reflect.Method sSetLayoutDirectionMethod
+    private static boolean sSetLayoutDirectionMethodFetched
+androidx.core.graphics.drawable.TintAwareDrawable
+androidx.core.graphics.drawable.WrappedDrawableApi14
+androidx.core.graphics.drawable.WrappedDrawableApi21
+androidx.core.graphics.drawable.WrappedDrawableState
 androidx.core.internal.view.SupportMenuItem:
     public abstract androidx.core.internal.view.SupportMenuItem setSupportActionProvider(androidx.core.view.ActionProvider)
 androidx.core.text.PrecomputedTextCompat:
     public abstract androidx.core.text.PrecomputedTextCompat$Params getParams()
     public abstract android.text.PrecomputedText getPrecomputedText()
+androidx.core.util.Pair
 androidx.core.view.ActionProvider$SubUiVisibilityListener
 androidx.core.view.ActionProvider$VisibilityListener
 androidx.core.view.ActionProvider:
@@ -15637,35 +15998,32 @@ androidx.core.view.MenuItemCompat:
 androidx.core.view.MenuProvider
 androidx.core.view.NestedScrollingChild
 androidx.core.view.NestedScrollingParent
-androidx.core.view.OnApplyWindowInsetsListener:
-    public abstract androidx.core.view.WindowInsetsCompat onApplyWindowInsets(android.view.View,androidx.core.view.WindowInsetsCompat)
 androidx.core.view.TintableBackgroundView
-androidx.core.view.ViewCompat$Api21Impl$1:
-    final synthetic androidx.core.view.OnApplyWindowInsetsListener val$listener
-androidx.core.view.ViewCompat$Api28Impl$$InternalSyntheticLambda$1$cf2e526d9bc7fa04879b38f4727ab0499e9876ab42c0943335485b5322ba2fbb$0:
-    public final synthetic androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat f$0
-androidx.core.view.ViewCompat$OnUnhandledKeyEventListenerCompat:
-    public abstract boolean onUnhandledKeyEvent(android.view.View,android.view.KeyEvent)
+androidx.core.view.ViewCompat$Api21Impl:
+    public static androidx.core.view.WindowInsetsCompat getRootWindowInsets(android.view.View)
 androidx.core.view.ViewCompat:
+    private static boolean sTryHiddenViewTransformMatrixToGlobal
     private static java.util.WeakHashMap sViewPropertyAnimatorMap
 androidx.core.view.ViewPropertyAnimatorCompat
+androidx.core.view.WindowInsetsCompat$Api21ReflectionHolder
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat$$InternalSyntheticThrowCCEIfNotNull$9$51a518e2562bdd83f1a37db6273eca8c40d29d82445ffc5c9314f2450daba410$0
 androidx.core.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityActionCompat:
     protected final androidx.core.view.accessibility.AccessibilityViewCommand mCommand
-androidx.core.view.accessibility.AccessibilityNodeInfoCompat:
-    public int getActions()
 androidx.core.view.accessibility.AccessibilityViewCommand$CommandArguments:
     public abstract void setBundle(android.os.Bundle)
 androidx.core.view.accessibility.AccessibilityViewCommand:
     public abstract boolean perform(android.view.View,androidx.core.view.accessibility.AccessibilityViewCommand$CommandArguments)
-androidx.core.view.autofill.AutofillIdCompat:
-    public abstract android.view.autofill.AutofillId toAutofillId()
-androidx.core.view.contentcapture.ContentCaptureSessionCompat:
-    public abstract android.view.contentcapture.ContentCaptureSession toContentCaptureSession()
 androidx.core.widget.NestedScrollView$OnScrollChangeListener:
     public abstract void onScrollChange(androidx.core.widget.NestedScrollView,int,int,int,int)
 androidx.core.widget.NestedScrollView:
     private androidx.core.widget.NestedScrollView$OnScrollChangeListener mOnScrollChangeListener
+androidx.core.widget.PopupWindowCompat:
+    private static java.lang.reflect.Field sOverlapAnchorField
+    private static boolean sOverlapAnchorFieldAttempted
+    private static java.lang.reflect.Method sSetWindowLayoutTypeMethod
+    private static boolean sSetWindowLayoutTypeMethodAttempted
+androidx.core.widget.TextViewCompat$Api28Impl:
+    static java.lang.CharSequence castToCharSequence(android.text.PrecomputedText)
 androidx.core.widget.TintableImageSourceView
 androidx.emoji2.text.FontRequestEmojiCompatConfig$FontProviderHelper:
     public void registerObserver(android.content.Context,android.net.Uri,android.database.ContentObserver)
@@ -15688,10 +16046,8 @@ androidx.fragment.app.FragmentManager:
     private final java.util.Map mResults
     public abstract void clearFragmentResult(java.lang.String)
 androidx.fragment.app.FragmentResultListener
-androidx.interpolator.view.animation.FastOutLinearInInterpolator
 androidx.interpolator.view.animation.FastOutSlowInInterpolator
 androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-androidx.interpolator.view.animation.LookupTableInterpolator
 androidx.lifecycle.GeneratedAdapter:
     public abstract void callMethods(androidx.lifecycle.LifecycleOwner,androidx.lifecycle.Lifecycle$Event,boolean,androidx.lifecycle.MethodCallsLogger)
 androidx.lifecycle.LegacySavedStateHandleController$OnRecreation$$InternalSyntheticThrowCCEIfNotNull$9$0f3c89a83fc3a7f2135c574cb4d33f732e129cb9e4e380ecad0e72c87d854383$0

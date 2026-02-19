@@ -3,13 +3,14 @@
     <bool name="enableNotification">true</bool>
     <bool name="enableSiteSettingsShortcut">true</bool>
     <color name="backgroundColor">#FFFFFF</color>
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="navigationColor">#FFFFFF</color>
-    <color name="navigationColorDark">#000000</color>
-    <color name="navigationDividerColor">#000000</color>
-    <color name="navigationDividerColorDark">#000000</color>
+    <color name="colorPrimary">#00000000</color>
+    <color name="colorPrimaryDark">#00000000</color>
+    <color name="navigationColor">#00000000</color>
+    <color name="navigationColorDark">#00000000</color>
+    <color name="navigationDividerColor">#00000000</color>
+    <color name="navigationDividerColorDark">#00000000</color>
     <color name="shortcut_background">#F5F5F5</color>
+    <color name="statusBarTransparent">#00000000</color>
     <integer name="splashScreenFadeOutDuration">0</integer>
     <string name="appName" translatable="false">Nandika Jewellers</string>
     <string name="assetStatements">
@@ -30,9 +31,11 @@
     <string name="orientation" translatable="false">default</string>
     <string name="providerAuthority" translatable="false">com.nandikajewellers.twa.fileprovider</string>
     <string name="webManifestUrl" translatable="false">https://nandikajewellers.in/manifest.json</string>
-    <style name="Theme.TWA.Translucent" parent="@android:style/Theme.Translucent.NoTitleBar">
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+    <style name="Theme.TwaFullscreen" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+
+        
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

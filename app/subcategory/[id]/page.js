@@ -69,7 +69,7 @@ export default function SubcategoryPage() {
                             </li>
                             <li>
                                 <Link 
-                                    href={`/collections/${subcategory.category?.slug || ''}`}
+                                    href={`/products?category=${encodeURIComponent(subcategory.category?.name || '')}`}
                                     className="hover:text-[#8B6B4C] transition-colors"
                                 >
                                     {subcategory.category?.name || 'Category'}

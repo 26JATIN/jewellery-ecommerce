@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-23:/values-bg/values-bg.xml",
+            "outputFile": "com.nandikajewellers.twa.app-mergeReleaseResources-25:/values-bg/values-bg.xml",
             "map": [
                 {
-                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/be57bd43967b699c12a0f6b8bd2f21c6/transformed/browser-1.9.0-alpha04/res/values-bg/values-bg.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,166,274,386",
-                        "endColumns": "110,107,111,109",
-                        "endOffsets": "161,269,381,491"
-                    },
-                    "to": {
-                        "startLines": "36,37,38,39",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "3595,3706,3814,3926",
-                        "endColumns": "110,107,111,109",
-                        "endOffsets": "3701,3809,3921,4031"
-                    }
-                },
-                {
-                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/a5429f7b20c607b890f08b5283ad4ec0/transformed/core-1.13.0/res/values-bg/values-bg.xml",
+                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/1cdcdc1afd1ba58bdf96faeeac79f5ae/transformed/core-1.17.0/res/values-bg/values-bg.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -35,6 +18,23 @@
                         "startOffsets": "2854,2951,3061,3163,3264,3371,3476,4120",
                         "endColumns": "96,109,101,100,106,104,118,100",
                         "endOffsets": "2946,3056,3158,3259,3366,3471,3590,4216"
+                    }
+                },
+                {
+                    "source": "/home/jatin/.gradle/caches/8.11.1/transforms/b254143b94e3658fd7ff0429265dc0ad/transformed/browser-1.10.0-alpha02/res/values-bg/values-bg.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,166,274,386",
+                        "endColumns": "110,107,111,109",
+                        "endOffsets": "161,269,381,491"
+                    },
+                    "to": {
+                        "startLines": "36,37,38,39",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "3595,3706,3814,3926",
+                        "endColumns": "110,107,111,109",
+                        "endOffsets": "3701,3809,3921,4031"
                     }
                 },
                 {

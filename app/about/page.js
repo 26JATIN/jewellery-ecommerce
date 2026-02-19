@@ -207,7 +207,7 @@ export default function AboutPage() {
                                 </motion.button>
                             </Link>
 
-                            <Link href="/collections/bridal">
+                            <Link href="/products?category=Bridal">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
