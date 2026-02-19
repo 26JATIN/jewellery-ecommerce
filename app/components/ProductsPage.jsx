@@ -341,6 +341,18 @@ export default function ProductsPage() {
             });
     }, [products, selectedTags, metalTypeFilter]);
 
+    // Compute estimated total from category productsCount (instant, before products API returns)
+    const estimatedTotalProducts = useMemo(() => {
+        if (totalProductsCount > 0) return totalProductsCount; // Use real count once available
+        if (categories.length === 0) return 0;
+        if (selectedCategory !== 'All') {
+            const cat = categories.find(c => c.name === selectedCategory);
+            return cat?.productsCount || 0;
+        }
+        // Sum all category productsCount
+        return categories.reduce((sum, cat) => sum + (cat.productsCount || 0), 0);
+    }, [categories, selectedCategory, totalProductsCount]);
+
     // Use server-side pagination values
     const totalPages = totalPagesFromServer;
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
@@ -773,8 +785,8 @@ export default function ProductsPage() {
                     </div>
                 </motion.div>
 
-                {/* Filter & Sort Bar */}
-                {!loading && totalProductsCount > 0 && (
+                {/* Filter & Sort Bar - Always visible, shows instant count from categories */}
+                {(dataReady || totalProductsCount > 0) && (
                     <motion.div
                         ref={productsGridRef}
                         initial={{ opacity: 0, y: -10 }}
@@ -788,12 +800,24 @@ export default function ProductsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                             <span className="text-xs md:text-sm font-medium text-[#2C2C2C] dark:text-gray-200">
-                                {totalProductsCount} {totalProductsCount === 1 ? 'Product' : 'Products'}
-                                {selectedCategory !== 'All' && <span className="hidden sm:inline"> in {selectedCategory}</span>}
-                                {totalPages > 1 && (
-                                    <span className="text-gray-500 ml-1">
-                                        (Page {currentPage} of {totalPages})
-                                    </span>
+                                {loading && !totalProductsCount ? (
+                                    estimatedTotalProducts > 0 ? (
+                                        <>~{estimatedTotalProducts} Products{selectedCategory !== 'All' && <span className="hidden sm:inline"> in {selectedCategory}</span>}</>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-2">
+                                            <span className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded shimmer inline-block align-middle" /> Products
+                                        </span>
+                                    )
+                                ) : (
+                                    <>
+                                        {totalProductsCount} {totalProductsCount === 1 ? 'Product' : 'Products'}
+                                        {selectedCategory !== 'All' && <span className="hidden sm:inline"> in {selectedCategory}</span>}
+                                        {totalPages > 1 && (
+                                            <span className="text-gray-500 ml-1">
+                                                (Page {currentPage} of {totalPages})
+                                            </span>
+                                        )}
+                                    </>
                                 )}
                             </span>
                         </div>
@@ -850,9 +874,35 @@ export default function ProductsPage() {
 
                 {/* Products Grid/List */}
                 {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
-                    </div>
+                    viewMode === 'grid' ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <div key={i} className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
+                                    <div className="relative aspect-[4/5] bg-gray-200 dark:bg-gray-800 shimmer" />
+                                    <div className="p-3 md:p-4 lg:p-6 space-y-2 md:space-y-3">
+                                        <div className="h-4 md:h-5 bg-gray-200 dark:bg-gray-800 rounded-lg w-3/4 shimmer" />
+                                        <div className="h-3 md:h-4 bg-gray-200 dark:bg-gray-800 rounded-lg w-1/2 shimmer" />
+                                        <div className="h-4 md:h-5 bg-gray-200 dark:bg-gray-800 rounded-lg w-1/3 shimmer" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="bg-white dark:bg-[#0A0A0A] rounded-xl md:rounded-2xl p-3 md:p-4 lg:p-6 shadow-sm border border-transparent dark:border-white/[0.06]">
+                                    <div className="flex gap-3 md:gap-4 lg:gap-6">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-48 xl:h-48 flex-shrink-0 bg-gray-200 dark:bg-gray-800 rounded-lg md:rounded-xl shimmer" />
+                                        <div className="flex-1 flex flex-col justify-center space-y-2 md:space-y-3">
+                                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-20 shimmer" />
+                                            <div className="h-4 md:h-5 bg-gray-200 dark:bg-gray-800 rounded-lg w-3/4 shimmer" />
+                                            <div className="h-4 md:h-5 bg-gray-200 dark:bg-gray-800 rounded-lg w-1/4 shimmer" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
                 ) : filteredProducts.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

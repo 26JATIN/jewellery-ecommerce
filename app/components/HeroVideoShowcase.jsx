@@ -92,8 +92,21 @@ export default function VideoShowcaseSection() {
         return (
             <section className="py-20 bg-gradient-to-b from-[#F8F6F3] to-white dark:from-black dark:to-[#0A0A0A]">
                 <div className="container mx-auto px-4">
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+                    <div className="text-center mb-10">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-32 mx-auto mb-4 shimmer" />
+                        <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded-lg w-64 mx-auto mb-3 shimmer" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-80 mx-auto shimmer" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="rounded-2xl overflow-hidden">
+                                <div className="aspect-video bg-gray-200 dark:bg-gray-800 shimmer" />
+                                <div className="p-4 space-y-2">
+                                    <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-2/3 shimmer" />
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 shimmer" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>

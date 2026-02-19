@@ -83,10 +83,27 @@ function OrdersContent() {
 
     if (isChecking || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#F5F0E8] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#D4AF76] mx-auto mb-3" />
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Loading your orders...</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#F5F0E8] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] py-12 px-4">
+                <div className="max-w-7xl mx-auto space-y-4">
+                    {/* Header skeleton */}
+                    <div className="h-8 w-40 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                    <div className="h-4 w-56 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                    {/* Order cards skeleton */}
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 space-y-3">
+                            <div className="flex justify-between">
+                                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                <div className="h-6 w-20 bg-gray-200 dark:bg-gray-800 rounded-full shimmer"></div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-3 w-1/2 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -377,8 +394,20 @@ export default function OrdersPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#F5F0E8] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] py-12 px-4">
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#D4AF76]" />
+                <div className="max-w-7xl mx-auto space-y-4">
+                    <div className="h-8 w-40 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 space-y-3">
+                            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                            <div className="flex gap-3">
+                                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-3 w-1/2 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         }>

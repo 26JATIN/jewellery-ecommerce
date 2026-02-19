@@ -272,8 +272,22 @@ function AdminHeroVideosPage() {
     if (loading) {
         return (
             <AdminLayout>
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+                <div className="max-w-7xl mx-auto p-6 space-y-6">
+                    <div>
+                        <div className="h-8 w-40 bg-gray-200 rounded shimmer"></div>
+                        <div className="h-4 w-72 bg-gray-100 rounded mt-2 shimmer"></div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="rounded-xl overflow-hidden">
+                                <div className="aspect-[9/16] bg-gray-200 shimmer"></div>
+                                <div className="p-3 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 rounded shimmer"></div>
+                                    <div className="h-3 w-1/2 bg-gray-100 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </AdminLayout>
         );

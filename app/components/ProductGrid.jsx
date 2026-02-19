@@ -31,8 +31,17 @@ export default function ProductGrid({
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+            <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 ${className}`}>
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-[#0A0A0A] rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-white/[0.06] overflow-hidden">
+                        <div className="aspect-square bg-gray-200 dark:bg-gray-800 shimmer" />
+                        <div className="p-3 md:p-6 space-y-2 md:space-y-3">
+                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-16 shimmer" />
+                            <div className="h-4 md:h-5 bg-gray-200 dark:bg-gray-800 rounded-lg w-3/4 shimmer" />
+                            <div className="h-5 md:h-7 bg-gray-200 dark:bg-gray-800 rounded-lg w-1/3 shimmer" />
+                        </div>
+                    </div>
+                ))}
             </div>
         );
     }

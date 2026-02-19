@@ -203,9 +203,15 @@ const CouponManagement = () => {
         {/* Coupons List */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin h-8 w-8 border-4 border-[#8B6B4C] border-t-transparent rounded-full mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading coupons...</p>
+            <div className="divide-y divide-gray-200">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-4 flex items-center gap-4">
+                  <div className="h-5 w-24 bg-gray-200 rounded shimmer"></div>
+                  <div className="h-4 w-16 bg-gray-100 rounded shimmer"></div>
+                  <div className="h-4 w-20 bg-gray-100 rounded shimmer flex-1"></div>
+                  <div className="h-6 w-16 bg-gray-200 rounded-full shimmer"></div>
+                </div>
+              ))}
             </div>
           ) : coupons.length === 0 ? (
             <div className="p-8 text-center">

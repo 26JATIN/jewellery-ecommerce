@@ -36,10 +36,26 @@ export default function BlogPostPage({ params }) {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-[#0A0A0A]">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 dark:border-gray-700 border-t-[#D4AF76] mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400 font-light">Loading article...</p>
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-[#0A0A0A] py-12 px-4">
+                <div className="max-w-3xl mx-auto space-y-6">
+                    {/* Featured image skeleton */}
+                    <div className="aspect-[16/9] bg-gray-200 dark:bg-gray-800 rounded-2xl shimmer"></div>
+                    {/* Title skeleton */}
+                    <div className="space-y-3">
+                        <div className="h-8 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                        <div className="flex gap-3">
+                            <div className="h-4 w-24 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                            <div className="h-4 w-20 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                        </div>
+                    </div>
+                    {/* Content skeleton */}
+                    <div className="space-y-3">
+                        <div className="h-4 w-full bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                        <div className="h-4 w-full bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                        <div className="h-4 w-5/6 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                        <div className="h-4 w-full bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                        <div className="h-4 w-2/3 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                    </div>
                 </div>
             </div>
         );

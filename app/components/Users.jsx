@@ -86,8 +86,17 @@ export default function Users() {
             <h1 className="text-2xl font-semibold mb-6">Users Management</h1>
             
             {loading ? (
-                <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#8B6B4C]"></div>
+                <div className="space-y-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-white p-4 rounded-xl border border-gray-200 flex items-center gap-4">
+                            <div className="h-10 w-10 bg-gray-200 rounded-full shimmer"></div>
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 w-32 bg-gray-200 rounded shimmer"></div>
+                                <div className="h-3 w-48 bg-gray-100 rounded shimmer"></div>
+                            </div>
+                            <div className="h-8 w-16 bg-gray-200 rounded shimmer"></div>
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <>

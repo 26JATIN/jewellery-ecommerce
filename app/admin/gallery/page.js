@@ -393,8 +393,16 @@ function AdminGalleryPage() {
                 {/* Gallery Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
-                        <div className="col-span-full text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF76] mx-auto"></div>
+                        <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                                    <div className="aspect-[4/5] bg-gray-200 shimmer"></div>
+                                    <div className="p-4 space-y-2">
+                                        <div className="h-4 w-3/4 bg-gray-200 rounded shimmer"></div>
+                                        <div className="h-3 w-1/2 bg-gray-100 rounded shimmer"></div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : galleryItems.length === 0 ? (
                         <div className="col-span-full text-center py-12 text-gray-500">

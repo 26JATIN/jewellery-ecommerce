@@ -190,10 +190,31 @@ export default function OrderDetailPage({ params }) {
 
     if (isChecking || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#D4AF76] mx-auto mb-3" />
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Loading order details...</p>
+            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] py-12 px-4">
+                <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Header skeleton */}
+                    <div className="h-6 w-48 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                    {/* Status bar skeleton */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="h-5 w-32 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                            <div className="h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-full shimmer"></div>
+                        </div>
+                        <div className="h-2 w-full bg-gray-200 dark:bg-gray-800 rounded-full shimmer"></div>
+                    </div>
+                    {/* Items skeleton */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 space-y-4">
+                        {[...Array(2)].map((_, i) => (
+                            <div key={i} className="flex gap-4">
+                                <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-3 w-1/3 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-4 w-1/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

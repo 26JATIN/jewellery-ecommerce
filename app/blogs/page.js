@@ -126,9 +126,18 @@ export default function BlogsPage() {
 
                 {/* Blog Grid */}
                 {loading ? (
-                    <div className="text-center py-20">
-                        <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#D4AF76]"></div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-400 font-light">Loading articles...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white dark:bg-[#0A0A0A] rounded-3xl overflow-hidden shadow-sm dark:border dark:border-white/[0.06]">
+                                <div className="aspect-[16/10] bg-gray-200 dark:bg-gray-800 shimmer"></div>
+                                <div className="p-5 space-y-3">
+                                    <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-5 w-full bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-4 w-full bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-4 w-2/3 bg-gray-100 dark:bg-gray-800 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : blogs.length === 0 ? (
                     <div className="text-center py-20 bg-white dark:bg-[#0A0A0A] rounded-3xl shadow-sm dark:shadow-none dark:border dark:border-white/[0.06]">

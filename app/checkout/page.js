@@ -361,8 +361,39 @@ export default function CheckoutPage() {
 
     if (isChecking || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#D4AF76]" />
+            <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#FFF8F0] dark:from-black dark:via-[#050505] dark:to-[#0A0A0A] py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded mb-8 shimmer"></div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Form skeleton */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 space-y-4">
+                                <div className="h-5 w-40 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                <div className="h-12 w-full bg-gray-100 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                <div className="h-12 w-full bg-gray-100 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                    <div className="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl shimmer"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Summary skeleton */}
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 space-y-4 h-fit">
+                            <div className="h-5 w-32 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                            {[...Array(2)].map((_, i) => (
+                                <div key={i} className="flex gap-3">
+                                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-lg shimmer"></div>
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                        <div className="h-4 w-1/3 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="h-px bg-gray-200 dark:bg-gray-700"></div>
+                            <div className="h-12 w-full bg-gray-200 dark:bg-gray-800 rounded-xl shimmer"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

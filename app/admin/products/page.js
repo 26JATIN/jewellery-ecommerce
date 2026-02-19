@@ -268,13 +268,18 @@ function AdminProductsPage() {
                             <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
                             <p className="text-gray-600 mt-1">Manage your inventory and product catalog</p>
                         </div>
-                        <div className="animate-pulse bg-gray-200 h-12 w-32 rounded-lg"></div>
+                        <div className="bg-gray-200 h-12 w-32 rounded-lg shimmer"></div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
-                        <div className="flex flex-col items-center justify-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C] mb-4"></div>
-                            <p className="text-gray-600 font-medium">Initializing...</p>
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="aspect-square bg-gray-200 shimmer"></div>
+                                <div className="p-4 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 rounded shimmer"></div>
+                                    <div className="h-4 w-1/2 bg-gray-100 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </AdminLayout>
@@ -300,12 +305,16 @@ function AdminProductsPage() {
                             <span>Add Product</span>
                         </button>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
-                        <div className="flex flex-col items-center justify-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C] mb-4"></div>
-                            <p className="text-gray-600 font-medium">Loading products...</p>
-                            <p className="text-gray-400 text-sm mt-1">Please wait while we fetch your inventory</p>
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="aspect-square bg-gray-200 shimmer"></div>
+                                <div className="p-4 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 rounded shimmer"></div>
+                                    <div className="h-4 w-1/2 bg-gray-100 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </AdminLayout>

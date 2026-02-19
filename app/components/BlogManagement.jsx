@@ -754,9 +754,23 @@ export default function BlogManagement() {
 
             {/* Blog List */}
             {loading ? (
-                <div className="text-center py-20">
-                    <div className="w-16 h-16 border-4 border-[#D4AF76] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-gray-500 font-light mt-4">Loading articles...</p>
+                <div className="space-y-4 sm:space-y-6">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden p-4 sm:p-6 lg:p-8">
+                            <div className="flex gap-4">
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-xl shimmer flex-shrink-0"></div>
+                                <div className="flex-1 space-y-3">
+                                    <div className="h-5 w-3/4 bg-gray-200 rounded shimmer"></div>
+                                    <div className="h-4 w-full bg-gray-100 rounded shimmer"></div>
+                                    <div className="h-4 w-1/2 bg-gray-100 rounded shimmer"></div>
+                                    <div className="flex gap-2 mt-2">
+                                        <div className="h-6 w-16 bg-gray-200 rounded-full shimmer"></div>
+                                        <div className="h-6 w-20 bg-gray-200 rounded-full shimmer"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : blogs.length === 0 ? (
                 <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-100">

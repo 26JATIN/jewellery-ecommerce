@@ -963,8 +963,17 @@ function CategoriesAdmin() {
 
         {activeTab === "categories" &&
           (loading && !showForm ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+            <div className="space-y-3 py-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg p-4 border border-gray-200 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg shimmer"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/3 bg-gray-200 rounded shimmer"></div>
+                    <div className="h-3 w-1/2 bg-gray-100 rounded shimmer"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-gray-200 rounded shimmer"></div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -1168,8 +1177,17 @@ function CategoriesAdmin() {
         {/* Subcategories List */}
         {activeTab === "subcategories" &&
           (loading && !showSubcategoryForm ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6B4C]"></div>
+            <div className="space-y-3 py-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg p-4 border border-gray-200 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg shimmer"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/3 bg-gray-200 rounded shimmer"></div>
+                    <div className="h-3 w-1/2 bg-gray-100 rounded shimmer"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-gray-200 rounded shimmer"></div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">

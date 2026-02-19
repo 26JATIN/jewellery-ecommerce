@@ -55,11 +55,10 @@ export default function withAdminAuth(WrappedComponent) {
                 >
                     <div className="text-center">
                         <div className="relative mb-8">
-                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#D4AF76]/20 mx-auto"></div>
-                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-[#D4AF76] absolute top-0 left-1/2 -translate-x-1/2"></div>
+                            <div className="h-16 w-16 bg-gradient-to-br from-[#D4AF76]/20 to-[#D4AF76]/10 rounded-full mx-auto shimmer"></div>
                         </div>
-                        <h3 className="text-xl font-light text-[#2C2C2C] mb-2">Secure Access</h3>
-                        <p className="text-gray-600 font-light">{authMessage}</p>
+                        <div className="h-6 w-32 bg-gray-200 rounded mx-auto mb-3 shimmer"></div>
+                        <div className="h-4 w-48 bg-gray-100 rounded mx-auto shimmer"></div>
                         
                         {/* Security indicator */}
                         <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">

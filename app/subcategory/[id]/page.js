@@ -101,8 +101,16 @@ export default function SubcategoryPage() {
 
                 {/* Loading State */}
                 {loading && (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#8B6B4C]"></div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="rounded-2xl overflow-hidden">
+                                <div className="aspect-[4/5] bg-gray-200 dark:bg-gray-800 shimmer"></div>
+                                <div className="p-3 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                    <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-800 rounded shimmer"></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 
