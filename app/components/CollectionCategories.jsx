@@ -96,7 +96,7 @@ export default function CollectionCategories() {
                         viewport={{ once: true }}
                         className="text-2xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] tracking-tight mb-3 md:mb-4"
                     >
-                        Collections
+                        Shop by Category
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -105,7 +105,7 @@ export default function CollectionCategories() {
                         viewport={{ once: true }}
                         className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto px-4"
                     >
-                        Discover our curated jewelry collections, each crafted with precision and passion
+                        Discover our curated jewellery categories, each crafted with precision and passion
                     </motion.p>
                 </div>
 
@@ -154,7 +154,7 @@ export default function CollectionCategories() {
 
                                         {/* Explore Button */}
                                         <div className="inline-flex items-center text-white bg-white/10 backdrop-blur-sm px-4 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-light group-hover:bg-[#D4AF76] group-hover:text-white transition-all duration-300">
-                                            <span>Explore Collection</span>
+                                            <span>Explore Collections</span>
                                             <svg className="w-3 h-3 md:w-4 md:h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                             </svg>
@@ -178,7 +178,7 @@ export default function CollectionCategories() {
                         onClick={handleViewAll}
                         className="inline-flex items-center px-6 md:px-8 py-3 md:py-3.5 bg-[#2C2C2C] text-white rounded-full hover:bg-[#D4AF76] transition-all duration-300 text-sm md:text-base font-light shadow-md hover:shadow-xl group"
                     >
-                        <span>View All Collections</span>
+                        <span>View All Products</span>
                         <svg className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>

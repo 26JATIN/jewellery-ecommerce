@@ -517,7 +517,7 @@ export default function CategoryShowcase() {
               <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6 lg:mb-8 hover:text-[#D4AF76] transition-all duration-300 cursor-default hover:scale-105 transform">
                 Explore
                 <br />
-                Collections
+                Categories
               </h2>
             </div>
 
@@ -631,12 +631,12 @@ export default function CategoryShowcase() {
             >
               <div>
                 <h3 className="text-lg font-semibold text-foreground">
-                  {selectedCategory === 'ALL' ? 'All Collections' : selectedCategory}
+                  {selectedCategory === 'ALL' ? 'All Subcategories' : selectedCategory}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {filteredSubcategories.length <= MAX_DISPLAYED
-                    ? `Showing all ${filteredSubcategories.length} collections`
-                    : `Showing ${displayedSubcategories.length} of ${filteredSubcategories.length} collections`
+                    ? `Showing all ${filteredSubcategories.length} subcategories`
+                    : `Showing ${displayedSubcategories.length} of ${filteredSubcategories.length} subcategories`
                   }
                 </p>
               </div>
@@ -689,7 +689,7 @@ export default function CategoryShowcase() {
                       className="group relative px-8 py-4 bg-gradient-to-r from-[#D4AF76] to-[#8B6B4C] text-white rounded-full hover:shadow-xl transition-all duration-300 font-medium tracking-wide overflow-hidden"
                     >
                       <span className="relative z-10 flex items-center gap-3">
-                        Explore All {filteredSubcategories.length} Collections
+                        Explore All {filteredSubcategories.length} Subcategories
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
@@ -704,8 +704,8 @@ export default function CategoryShowcase() {
                 <div className="text-gray-300 mb-4">
                   <Sparkles className="w-16 h-16 mx-auto opacity-40" />
                 </div>
-                <h3 className="text-xl font-light text-gray-600 dark:text-gray-400 mb-2">No collections available</h3>
-                <p className="text-gray-500 dark:text-gray-600">Check back soon for our jewelry collections</p>
+                <h3 className="text-xl font-light text-gray-600 dark:text-gray-400 mb-2">No subcategories available</h3>
+                <p className="text-gray-500 dark:text-gray-600">Check back soon for new jewellery categories</p>
               </div>
             )}
           </div>

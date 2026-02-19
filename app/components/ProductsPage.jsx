@@ -421,12 +421,14 @@ export default function ProductsPage() {
                         {searchTerm ? 'Search Results' : 'Shop by Category'}
                     </p>
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2C2C2C] dark:text-gray-100 tracking-tight mb-3 md:mb-4">
-                        {searchTerm ? 'Product Search' : 'Explore Collections'}
+                        {searchTerm ? 'Product Search' : 'Our Jewellery'}
                     </h1>
                     <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
                         {searchTerm
-                            ? `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`
-                            : 'Discover our curated selection of jewelry collections, each crafted with precision and passion'
+                            ? (loading
+                                ? 'Searching for matching products...'
+                                : `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'} matching your search`)
+                            : 'Discover our curated selection of fine jewellery, each piece crafted with precision and passion'
                         }
                     </p>
 
@@ -546,7 +548,7 @@ export default function ProductsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                                 </svg>
                                 <h3 className="text-base md:text-lg font-medium text-[#2C2C2C] dark:text-gray-100">
-                                    Explore Collections
+                                    Browse Subcategories
                                     {selectedCategory !== 'All' && (
                                         <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">in {selectedCategory}</span>
                                     )}
@@ -567,7 +569,7 @@ export default function ProductsPage() {
 
                         {/* Story-style Scrollable Badges */}
                         <div ref={subcategoryScrollRef} className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide py-2 px-1">
-                            {/* All Collections Badge */}
+                            {/* All Subcategories Badge */}
                             <motion.button
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -617,7 +619,7 @@ export default function ProductsPage() {
                                         : 'text-[#2C2C2C] dark:text-gray-100 group-hover:text-[#D4AF76]'
                                     }
                                 `}>
-                                    All Collections
+                                    All
                                 </span>
                             </motion.button>
 
