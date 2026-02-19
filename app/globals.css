@@ -154,6 +154,7 @@ body {
 
   main {
     min-height: calc(100vh - var(--mobile-top-navbar-height) - var(--mobile-navbar-height));
+    min-height: calc(100dvh - var(--mobile-top-navbar-height) - var(--mobile-navbar-height));
   }
 }
 
@@ -174,6 +175,7 @@ html {
   -webkit-overflow-scrolling: touch;
   /* Edge-to-edge PWA: extend page behind gesture pill / nav bar */
   height: 100%;
+  height: 100dvh; /* Dynamic viewport height for iOS Chrome/Safari */
   background-color: var(--background);
 }
 

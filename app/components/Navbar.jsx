@@ -25,6 +25,7 @@ export default function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [visible, setVisible] = useState(false);
+    const [bottomOffset, setBottomOffset] = useState(0);
     
     const ref = useRef(null);
     const { scrollY } = useScroll();
@@ -37,6 +38,27 @@ export default function Navbar() {
             setVisible(false);
         }
     });
+
+    // Fix iOS Chrome: bottom bar doesn't reposition when browser chrome hides/shows
+    useEffect(() => {
+        if (typeof window === 'undefined' || !window.visualViewport) return;
+
+        const handleViewportResize = () => {
+            // On iOS Chrome, when the URL bar hides, visualViewport.height grows
+            // but the fixed element stays at the old bottom. Calculate the offset.
+            const offset = window.innerHeight - window.visualViewport.height;
+            setBottomOffset(Math.max(0, offset));
+        };
+
+        window.visualViewport.addEventListener('resize', handleViewportResize);
+        window.visualViewport.addEventListener('scroll', handleViewportResize);
+        handleViewportResize();
+
+        return () => {
+            window.visualViewport.removeEventListener('resize', handleViewportResize);
+            window.visualViewport.removeEventListener('scroll', handleViewportResize);
+        };
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -359,13 +381,17 @@ export default function Navbar() {
 
             {/* Mobile Bottom Navigation - Enhanced Apple Liquid Glass Effect */}
             <motion.div 
-                className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-[var(--navbar-border)]"
+                className="lg:hidden fixed left-0 right-0 z-[100] backdrop-blur-[24px] backdrop-saturate-[200%] border-t border-[var(--navbar-border)]"
                 style={{
+                    bottom: bottomOffset,
                     backgroundColor: "var(--navbar-bg)",
                     WebkitBackdropFilter: "blur(24px) saturate(200%)",
                     backdropFilter: "blur(24px) saturate(200%)",
                     boxShadow: "var(--navbar-shadow)",
-                    paddingBottom: "env(safe-area-inset-bottom, 0px)"
+                    paddingBottom: "env(safe-area-inset-bottom, 0px)",
+                    /* Force GPU layer so iOS Chrome repositions on viewport resize */
+                    transform: "translateZ(0)",
+                    WebkitTransform: "translateZ(0)",
                 }}
                 initial={{ y: 100 }}
                 animate={{ 
