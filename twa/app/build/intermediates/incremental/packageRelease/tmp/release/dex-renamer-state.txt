@@ -1,4 +1,0 @@
-#Thu Feb 19 06:21:49 IST 2026
-base.0=/home/jatin/Documents/jewellery-ecommerce/twa/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-path.0=classes.dex
-renamed.0=classes.dex
